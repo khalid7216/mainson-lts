@@ -1,5 +1,5 @@
 // frontend/src/services/api.js
-const API_URL =  "https://mainson-frontend.vercel.app/";
+const API_URL =  "https://mainson-frontend.vercel.app/api";
 /* ── Helper: make API request with credentials ───── */
 const request = async (endpoint, options = {}) => {
   const config = {
