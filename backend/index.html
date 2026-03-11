@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Maison Elite — API Server</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -74,8 +79,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
     }
 
     /* ── Response Panel ──────────── */
@@ -88,7 +100,9 @@
       display: none;
     }
 
-    .response-panel.active { display: block; }
+    .response-panel.active {
+      display: block;
+    }
 
     .response-header {
       display: flex;
@@ -112,8 +126,15 @@
       border-radius: 2px;
     }
 
-    .response-status.ok  { background: #1b3a1b; color: #81c784; }
-    .response-status.err { background: #3a1b1b; color: #ef9a9a; }
+    .response-status.ok {
+      background: #1b3a1b;
+      color: #81c784;
+    }
+
+    .response-status.err {
+      background: #3a1b1b;
+      color: #ef9a9a;
+    }
 
     .response-body {
       padding: 1rem 1.25rem;
@@ -136,7 +157,10 @@
       letter-spacing: 1px;
     }
 
-    .response-close:hover { color: #fff; border-color: #666; }
+    .response-close:hover {
+      color: #fff;
+      border-color: #666;
+    }
 
     /* ── Section ─────────────────── */
     .section {
@@ -169,11 +193,23 @@
       transition: background 0.2s;
     }
 
-    .endpoint:hover { background: #141414; }
+    .endpoint:hover {
+      background: #141414;
+    }
 
-    .endpoint.clickable { cursor: pointer; }
-    .endpoint.clickable:hover { background: #181818; }
-    .endpoint.clickable .path { text-decoration: underline; text-decoration-color: #333; text-underline-offset: 3px; }
+    .endpoint.clickable {
+      cursor: pointer;
+    }
+
+    .endpoint.clickable:hover {
+      background: #181818;
+    }
+
+    .endpoint.clickable .path {
+      text-decoration: underline;
+      text-decoration-color: #333;
+      text-underline-offset: 3px;
+    }
 
     .endpoint .method {
       font-size: 0.6rem;
@@ -185,10 +221,25 @@
       border-radius: 2px;
     }
 
-    .method.get    { color: #64b5f6; background: rgba(100,181,246,0.08); }
-    .method.post   { color: #81c784; background: rgba(129,199,132,0.08); }
-    .method.put    { color: #ffb74d; background: rgba(255,183,77,0.08); }
-    .method.delete { color: #ef9a9a; background: rgba(239,154,154,0.08); }
+    .method.get {
+      color: #64b5f6;
+      background: rgba(100, 181, 246, 0.08);
+    }
+
+    .method.post {
+      color: #81c784;
+      background: rgba(129, 199, 132, 0.08);
+    }
+
+    .method.put {
+      color: #ffb74d;
+      background: rgba(255, 183, 77, 0.08);
+    }
+
+    .method.delete {
+      color: #ef9a9a;
+      background: rgba(239, 154, 154, 0.08);
+    }
 
     .endpoint .path {
       font-size: 0.78rem;
@@ -214,9 +265,20 @@
       vertical-align: middle;
     }
 
-    .badge.auth   { background: #2a1f00; color: #ffb74d; }
-    .badge.admin  { background: #2a0020; color: #ce93d8; }
-    .badge.public { background: #002a1a; color: #81c784; }
+    .badge.auth {
+      background: #2a1f00;
+      color: #ffb74d;
+    }
+
+    .badge.admin {
+      background: #2a0020;
+      color: #ce93d8;
+    }
+
+    .badge.public {
+      background: #002a1a;
+      color: #81c784;
+    }
 
     .footer {
       text-align: center;
@@ -227,16 +289,27 @@
       margin-top: 3rem;
     }
 
-    .footer span { color: #c9a96e; }
+    .footer span {
+      color: #c9a96e;
+    }
 
-    .loading { color: #555; }
+    .loading {
+      color: #555;
+    }
 
     @media (max-width: 600px) {
-      .title { font-size: 1.8rem; letter-spacing: 3px; }
-      .endpoints { grid-template-columns: 1fr; }
+      .title {
+        font-size: 1.8rem;
+        letter-spacing: 3px;
+      }
+
+      .endpoints {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
 
@@ -605,21 +678,21 @@
   </div>
 
   <script>
-    const panel     = document.getElementById('responsePanel');
-    const urlEl     = document.getElementById('responseUrl');
-    const statusEl  = document.getElementById('responseStatus');
-    const bodyEl    = document.getElementById('responseBody');
+    const panel = document.getElementById('responsePanel');
+    const urlEl = document.getElementById('responseUrl');
+    const statusEl = document.getElementById('responseStatus');
+    const bodyEl = document.getElementById('responseBody');
 
     async function testApi(path) {
-      urlEl.textContent  = 'GET ' + path;
+      urlEl.textContent = 'GET ' + path;
       statusEl.textContent = '...';
-      statusEl.className   = 'response-status';
-      bodyEl.textContent   = 'Loading...';
+      statusEl.className = 'response-status';
+      bodyEl.textContent = 'Loading...';
       panel.classList.add('active');
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       try {
-        const res  = await fetch(path, { credentials: 'include' });
+        const res = await fetch(path, { credentials: 'include' });
         const data = await res.json();
 
         statusEl.textContent = res.status + ' ' + res.statusText;
