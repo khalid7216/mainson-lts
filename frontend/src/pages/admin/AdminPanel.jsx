@@ -1,0 +1,191 @@
+// frontend/src/pages/admin/AdminPanel.jsx
+
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { Avatar, Btn, Tag } from "../../components/UI";
+import {
+  AdminDashboard,
+  AdminProducts,
+  AdminOrders,
+  AdminCustomers,
+  AdminAnalytics,
+  AdminSettings,
+} from "./AdminSections";
+import { PRODUCTS, ORDERS, CUSTOMERS } from "../../data/mockData";
+
+const NAV_ITEMS = [
+  { id: "dashboard", icon: "▣", label: "Dashboard" },
+  { id: "products",  icon: "◈", label: "Products",  badge: PRODUCTS.length },
+  { id: "orders",    icon: "◉", label: "Orders",    badge: ORDERS.length },
+  { id: "customers", icon: "◎", label: "Customers", badge: CUSTOMERS.length },
+  { id: "analytics", icon: "△", label: "Analytics" },
+  { id: "settings",  icon: "◆", label: "Settings" },
+];
+
+const AdminPanel = ({ navigate }) => {
+  const { user } = useAuth();
+  const toast = useToast();
+  const [section, setSection] = useState("dashboard");
+
+  /* Access guard */
+  if (!user?.isAdmin) {
+    return (
+      <div
+        style={{
+          height: "80vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 20,
+        }}
+      >
+        <span style={{ fontSize: 56 }}>🔒</span>
+        <h2
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontWeight: 300,
+            fontSize: 32,
+          }}
+        >
+          Access Restricted
+        </h2>
+        <p style={{ color: "var(--muted)" }}>Admin credentials required</p>
+        <Btn v="primary" onClick={() => navigate("/login")}>
+          Sign In as Admin
+        </Btn>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        height: "calc(100vh - 73px)",
+        overflow: "hidden",
+      }}
+    >
+      {/* ── Sidebar ────────────────────────────────── */}
+      <aside
+        style={{
+          width: 240,
+          background: "var(--surface)",
+          borderRight: "1px solid var(--border)",
+          display: "flex",
+          flexDirection: "column",
+          flexShrink: 0,
+        }}
+      >
+        {/* User header */}
+        <div
+          style={{
+            padding: "24px 22px 20px",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 10,
+              letterSpacing: ".3em",
+              textTransform: "uppercase",
+              color: "var(--gold)",
+              marginBottom: 14,
+            }}
+          >
+            Admin Console
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Avatar name={user.name} size={34} />
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 500 }}>{user.name}</p>
+              <Tag color="gold">Admin</Tag>
+            </div>
+          </div>
+        </div>
+
+        {/* Nav items */}
+        <nav style={{ padding: "16px 0", flex: 1 }}>
+          {NAV_ITEMS.map((n) => (
+            <button
+              key={n.id}
+              className={`side-btn${section === n.id ? " active" : ""}`}
+              onClick={() => setSection(n.id)}
+            >
+              <span style={{ fontSize: 14, width: 18, textAlign: "center" }}>
+                {n.icon}
+              </span>
+              <span style={{ flex: 1 }}>{n.label}</span>
+              {n.badge !== undefined && (
+                <span
+                  style={{
+                    fontSize: 10,
+                    background: "rgba(201,168,76,.2)",
+                    color: "var(--gold)",
+                    padding: "2px 7px",
+                    borderRadius: 10,
+                  }}
+                >
+                  {n.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Back to store */}
+        <div
+          style={{ padding: "16px 18px", borderTop: "1px solid var(--border)" }}
+        >
+          <button
+            onClick={() => navigate("/")}
+            style={{
+              width: "100%",
+              padding: "10px 14px",
+              border: "1px solid var(--border2)",
+              borderRadius: 6,
+              background: "none",
+              color: "var(--muted)",
+              cursor: "pointer",
+              fontSize: 11,
+              letterSpacing: ".1em",
+              textTransform: "uppercase",
+              fontFamily: "'Jost', sans-serif",
+              transition: "all .2s",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = "var(--gold)";
+              e.target.style.color = "var(--gold)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = "var(--border2)";
+              e.target.style.color = "var(--muted)";
+            }}
+          >
+            ← Back to Store
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Main content ─────────────────────────── */}
+      <main
+        style={{
+          flex: 1,
+          overflow: "auto",
+          background: "var(--void)",
+          padding: 36,
+        }}
+      >
+        {section === "dashboard" && <AdminDashboard />}
+        {section === "products" && <AdminProducts />}
+        {section === "orders" && <AdminOrders />}
+        {section === "customers" && <AdminCustomers />}
+        {section === "analytics" && <AdminAnalytics />}
+        {section === "settings" && <AdminSettings toast={toast} />}
+      </main>
+    </div>
+  );
+};
+
+export default AdminPanel;
