@@ -13,12 +13,12 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 /* ── CORS ───────────────────────────────────────── */
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
 
-    // Allow all maison-lite vercel deployments + localhost
+    // Allow all mainson-frontend vercel deployments + localhost
     if (
       origin.includes("mainson-frontend") ||
       origin.includes("localhost") ||
@@ -32,10 +32,12 @@ app.use(cors({
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}));
+};
 
-// Preflight requests handle karo
-app.options("*", cors());
+app.use(cors(corsOptions));
+
+// Preflight requests
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
