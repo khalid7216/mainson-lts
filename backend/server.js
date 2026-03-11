@@ -12,32 +12,32 @@ const PORT = process.env.PORT || 5000;
 /* ── Connect DB ─────────────────────────────────── */
 connectDB();
 
-/* ── CORS ───────────────────────────────────────── */
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
+/* ── CORS (manual – works on Vercel serverless) ── */
+const allowedOrigins = [
+  "https://mainson-frontend.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+];
 
-    // Allow all mainson-frontend vercel deployments + localhost
-    if (
-      origin.includes("mainson-frontend") ||
-      origin.includes("localhost") ||
-      origin.includes("127.0.0.1")
-    ) {
-      return callback(null, true);
-    }
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+  if (!origin || allowedOrigins.includes(origin) || (origin && origin.includes("mainson-frontend"))) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  }
 
-app.use(cors(corsOptions));
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
-// Preflight requests
-app.options("*", cors(corsOptions));
+  // Respond to preflight immediately
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
