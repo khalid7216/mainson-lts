@@ -1,5 +1,5 @@
 // frontend/src/services/api.js
-const API_URL =  "https://maison-lite-twos.vercel.app/api";
+const API_URL =  "https://mainson-frontend.vercel.app/";
 /* ── Helper: make API request with credentials ───── */
 const request = async (endpoint, options = {}) => {
   const config = {
