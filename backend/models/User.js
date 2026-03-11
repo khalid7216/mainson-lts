@@ -35,6 +35,16 @@ const userSchema = new mongoose.Schema(
       type:    String,
       default: null,
     },
+    phone: {
+      type:    String,
+      default: "",
+      trim:    true,
+    },
+    defaultAddress: {
+      type:    mongoose.Schema.Types.ObjectId,
+      ref:     "Address",
+      default: null,
+    },
     isVerified: {
       type:    Boolean,
       default: false,

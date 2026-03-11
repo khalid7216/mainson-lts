@@ -9,29 +9,32 @@
 
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #0f0f0f;
+      background: #0a0a0a;
       color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       min-height: 100vh;
+      padding: 3rem 1.5rem;
     }
 
     .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .header {
       text-align: center;
-      padding: 2rem;
+      margin-bottom: 3rem;
     }
 
     .logo {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       letter-spacing: 8px;
       text-transform: uppercase;
       color: #c9a96e;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .title {
-      font-size: 3.5rem;
+      font-size: 2.8rem;
       font-weight: 300;
       letter-spacing: 6px;
       text-transform: uppercase;
@@ -45,22 +48,21 @@
       width: 80px;
       height: 1px;
       background: linear-gradient(to right, transparent, #c9a96e, transparent);
-      margin: 2rem auto;
+      margin: 1.5rem auto;
     }
 
     .status {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
+      background: #111;
+      border: 1px solid #222;
       padding: 0.5rem 1.5rem;
       border-radius: 2px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       letter-spacing: 2px;
-      color: #aaa;
+      color: #888;
       text-transform: uppercase;
-      margin-bottom: 3rem;
     }
 
     .dot {
@@ -76,134 +78,563 @@
       50% { opacity: 0.3; }
     }
 
+    /* ── Response Panel ──────────── */
+    .response-panel {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 4px;
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+      display: none;
+    }
+
+    .response-panel.active { display: block; }
+
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      background: #141414;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .response-url {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #64b5f6;
+    }
+
+    .response-status {
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      padding: 0.25rem 0.75rem;
+      border-radius: 2px;
+    }
+
+    .response-status.ok  { background: #1b3a1b; color: #81c784; }
+    .response-status.err { background: #3a1b1b; color: #ef9a9a; }
+
+    .response-body {
+      padding: 1rem 1.25rem;
+      max-height: 400px;
+      overflow: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #ccc;
+    }
+
+    .response-close {
+      background: none;
+      border: 1px solid #333;
+      color: #666;
+      padding: 0.2rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+    }
+
+    .response-close:hover { color: #fff; border-color: #666; }
+
+    /* ── Section ─────────────────── */
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 0.65rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #c9a96e;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
     .endpoints {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1px;
-      background: #2a2a2a;
-      border: 1px solid #2a2a2a;
-      max-width: 700px;
-      margin: 0 auto 3rem;
-      text-align: left;
+      background: #1e1e1e;
+      border: 1px solid #1e1e1e;
+      border-radius: 3px;
     }
 
     .endpoint {
       background: #0f0f0f;
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1.25rem;
+      cursor: default;
+      transition: background 0.2s;
     }
+
+    .endpoint:hover { background: #141414; }
+
+    .endpoint.clickable { cursor: pointer; }
+    .endpoint.clickable:hover { background: #181818; }
+    .endpoint.clickable .path { text-decoration: underline; text-decoration-color: #333; text-underline-offset: 3px; }
 
     .endpoint .method {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       letter-spacing: 2px;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
     }
 
-    .method.get  { color: #64b5f6; }
-    .method.post { color: #81c784; }
-    .method.put  { color: #ffb74d; }
+    .method.get    { color: #64b5f6; background: rgba(100,181,246,0.08); }
+    .method.post   { color: #81c784; background: rgba(129,199,132,0.08); }
+    .method.put    { color: #ffb74d; background: rgba(255,183,77,0.08); }
+    .method.delete { color: #ef9a9a; background: rgba(239,154,154,0.08); }
 
     .endpoint .path {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #ddd;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       font-family: 'Courier New', monospace;
     }
 
     .endpoint .desc {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: #555;
-      margin-top: 0.3rem;
+      margin-top: 0.25rem;
       letter-spacing: 1px;
     }
 
+    .endpoint .badge {
+      display: inline-block;
+      font-size: 0.55rem;
+      letter-spacing: 1px;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .badge.auth   { background: #2a1f00; color: #ffb74d; }
+    .badge.admin  { background: #2a0020; color: #ce93d8; }
+    .badge.public { background: #002a1a; color: #81c784; }
+
     .footer {
-      font-size: 0.7rem;
+      text-align: center;
+      font-size: 0.65rem;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: #333;
+      margin-top: 3rem;
     }
 
-    .footer span {
-      color: #c9a96e;
+    .footer span { color: #c9a96e; }
+
+    .loading { color: #555; }
+
+    @media (max-width: 600px) {
+      .title { font-size: 1.8rem; letter-spacing: 3px; }
+      .endpoints { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <div class="logo">Maison Elite</div>
-    <div class="title">API Server</div>
-
-    <div class="divider"></div>
-
-    <div class="status">
-      <div class="dot"></div>
-      Server Operational
+    <div class="header">
+      <div class="logo">Maison Élite</div>
+      <div class="title">API Server</div>
+      <div class="divider"></div>
+      <div class="status">
+        <div class="dot"></div>
+        Server Operational
+      </div>
     </div>
 
-    <div class="endpoints">
-
-      <div class="endpoint">
-        <div class="method post">POST</div>
-        <div class="path">/api/auth/signup</div>
-        <div class="desc">Register new user</div>
+    <!-- Response Panel -->
+    <div class="response-panel" id="responsePanel">
+      <div class="response-header">
+        <span class="response-url" id="responseUrl"></span>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <span class="response-status" id="responseStatus"></span>
+          <button class="response-close" onclick="closePanel()">CLOSE</button>
+        </div>
       </div>
+      <pre class="response-body" id="responseBody"></pre>
+    </div>
 
-      <div class="endpoint">
-        <div class="method post">POST</div>
-        <div class="path">/api/auth/login</div>
-        <div class="desc">Authenticate user</div>
+    <!-- ── Auth ────────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Authentication</div>
+      <div class="endpoints">
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <div class="path">/api/auth/signup</div>
+          <div class="desc">Register new user</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <div class="path">/api/auth/login</div>
+          <div class="desc">Authenticate user</div>
+        </div>
+        <div class="endpoint clickable" onclick="testApi('/api/auth/logout')">
+          <span class="method get">GET</span>
+          <div class="path">/api/auth/logout</div>
+          <div class="desc">End session</div>
+        </div>
+        <div class="endpoint clickable" onclick="testApi('/api/auth/me')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/auth/me</div>
+          <div class="desc">Get current user</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <div class="path">/api/auth/forgot-password</div>
+          <div class="desc">Send reset email</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span>
+          <div class="path">/api/auth/reset-password/:token</div>
+          <div class="desc">Reset password</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/auth/update-profile</div>
+          <div class="desc">Update profile</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/auth/change-password</div>
+          <div class="desc">Change password</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method get">GET</div>
-        <div class="path">/api/auth/logout</div>
-        <div class="desc">End session</div>
+    <!-- ── Products ────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Products</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/products')">
+          <span class="method get">GET</span> <span class="badge public">PUBLIC</span>
+          <div class="path">/api/products</div>
+          <div class="desc">List all products (paginated)</div>
+        </div>
+        <div class="endpoint clickable" onclick="testApi('/api/products?sort=price_asc')">
+          <span class="method get">GET</span> <span class="badge public">PUBLIC</span>
+          <div class="path">/api/products?sort=price_asc</div>
+          <div class="desc">Products sorted by price</div>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span> <span class="badge public">PUBLIC</span>
+          <div class="path">/api/products/:slug</div>
+          <div class="desc">Get product by slug</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/products</div>
+          <div class="desc">Create product</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/products/:id</div>
+          <div class="desc">Update product</div>
+        </div>
+        <div class="endpoint">
+          <span class="method delete">DELETE</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/products/:id</div>
+          <div class="desc">Soft-delete product</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method get">GET</div>
-        <div class="path">/api/auth/me</div>
-        <div class="desc">Get current user</div>
+    <!-- ── Categories ──────────── -->
+    <div class="section">
+      <div class="section-title">✦ Categories</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/categories')">
+          <span class="method get">GET</span> <span class="badge public">PUBLIC</span>
+          <div class="path">/api/categories</div>
+          <div class="desc">List all categories</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/categories</div>
+          <div class="desc">Create category</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/categories/:id</div>
+          <div class="desc">Update category</div>
+        </div>
+        <div class="endpoint">
+          <span class="method delete">DELETE</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/categories/:id</div>
+          <div class="desc">Delete category</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method post">POST</div>
-        <div class="path">/api/auth/forgot-password</div>
-        <div class="desc">Send reset email</div>
+    <!-- ── Cart ────────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Cart</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/cart')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/cart</div>
+          <div class="desc">Get user cart</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/cart/add</div>
+          <div class="desc">Add item to cart</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/cart/item/:itemId</div>
+          <div class="desc">Update item quantity</div>
+        </div>
+        <div class="endpoint">
+          <span class="method delete">DELETE</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/cart/item/:itemId</div>
+          <div class="desc">Remove item from cart</div>
+        </div>
+        <div class="endpoint">
+          <span class="method delete">DELETE</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/cart</div>
+          <div class="desc">Clear entire cart</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method put">PUT</div>
-        <div class="path">/api/auth/reset-password/:token</div>
-        <div class="desc">Reset password</div>
+    <!-- ── Wishlist ────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Wishlist</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/wishlist')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/wishlist</div>
+          <div class="desc">Get user wishlist</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/wishlist/toggle</div>
+          <div class="desc">Add / remove from wishlist</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method put">PUT</div>
-        <div class="path">/api/auth/update-profile</div>
-        <div class="desc">Update profile</div>
+    <!-- ── Orders ──────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Orders</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/orders')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/orders</div>
+          <div class="desc">Get my orders</div>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/orders/:id</div>
+          <div class="desc">Get order details</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/orders</div>
+          <div class="desc">Create order</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/orders/:id/cancel</div>
+          <div class="desc">Cancel order</div>
+        </div>
+        <div class="endpoint clickable" onclick="testApi('/api/orders/admin/all')">
+          <span class="method get">GET</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/orders/admin/all</div>
+          <div class="desc">All orders (admin)</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/orders/admin/:id/status</div>
+          <div class="desc">Update order status</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method put">PUT</div>
-        <div class="path">/api/auth/change-password</div>
-        <div class="desc">Change password</div>
+    <!-- ── Payments ────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Payments</div>
+      <div class="endpoints">
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/payments/create-intent</div>
+          <div class="desc">Create Stripe PaymentIntent</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <div class="path">/api/payments/webhook</div>
+          <div class="desc">Stripe webhook listener</div>
+        </div>
       </div>
+    </div>
 
-      <div class="endpoint">
-        <div class="method get">GET</div>
-        <div class="path">/api/health</div>
-        <div class="desc">Health check</div>
+    <!-- ── Addresses ───────────── -->
+    <div class="section">
+      <div class="section-title">✦ Addresses</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/addresses')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/addresses</div>
+          <div class="desc">Get user addresses</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/addresses</div>
+          <div class="desc">Add new address</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/addresses/:id</div>
+          <div class="desc">Update address</div>
+        </div>
+        <div class="endpoint">
+          <span class="method delete">DELETE</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/addresses/:id</div>
+          <div class="desc">Delete address</div>
+        </div>
       </div>
+    </div>
 
+    <!-- ── Ratings ─────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Ratings &amp; Reviews</div>
+      <div class="endpoints">
+        <div class="endpoint">
+          <span class="method get">GET</span> <span class="badge public">PUBLIC</span>
+          <div class="path">/api/ratings/product/:productId</div>
+          <div class="desc">Get product reviews</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/ratings</div>
+          <div class="desc">Submit review</div>
+        </div>
+        <div class="endpoint">
+          <span class="method delete">DELETE</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/ratings/:id</div>
+          <div class="desc">Delete review</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Settings ────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Settings</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/settings')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/settings</div>
+          <div class="desc">Get user settings</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/settings</div>
+          <div class="desc">Update settings</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Shipping ────────────── -->
+    <div class="section">
+      <div class="section-title">✦ Shipping</div>
+      <div class="endpoints">
+        <div class="endpoint">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/shipping/order/:orderId</div>
+          <div class="desc">Get tracking info</div>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/shipping</div>
+          <div class="desc">Create shipment</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge admin">ADMIN</span>
+          <div class="path">/api/shipping/:id/status</div>
+          <div class="desc">Update shipping status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Notifications ───────── -->
+    <div class="section">
+      <div class="section-title">✦ Notifications</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/notifications')">
+          <span class="method get">GET</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/notifications</div>
+          <div class="desc">Get notifications + unread count</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/notifications/:id/read</div>
+          <div class="desc">Mark as read</div>
+        </div>
+        <div class="endpoint">
+          <span class="method put">PUT</span> <span class="badge auth">AUTH</span>
+          <div class="path">/api/notifications/read-all</div>
+          <div class="desc">Mark all as read</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── System ──────────────── -->
+    <div class="section">
+      <div class="section-title">✦ System</div>
+      <div class="endpoints">
+        <div class="endpoint clickable" onclick="testApi('/api/health')">
+          <span class="method get">GET</span> <span class="badge public">PUBLIC</span>
+          <div class="path">/api/health</div>
+          <div class="desc">Health check</div>
+        </div>
+      </div>
     </div>
 
     <div class="footer">
-      Powered by <span>Maison Elite</span> &nbsp;·&nbsp; Node.js + Express
+      Powered by <span>Maison Élite</span> &nbsp;·&nbsp; Node.js + Express + MongoDB
     </div>
 
   </div>
+
+  <script>
+    const panel     = document.getElementById('responsePanel');
+    const urlEl     = document.getElementById('responseUrl');
+    const statusEl  = document.getElementById('responseStatus');
+    const bodyEl    = document.getElementById('responseBody');
+
+    async function testApi(path) {
+      urlEl.textContent  = 'GET ' + path;
+      statusEl.textContent = '...';
+      statusEl.className   = 'response-status';
+      bodyEl.textContent   = 'Loading...';
+      panel.classList.add('active');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      try {
+        const res  = await fetch(path, { credentials: 'include' });
+        const data = await res.json();
+
+        statusEl.textContent = res.status + ' ' + res.statusText;
+        statusEl.classList.add(res.ok ? 'ok' : 'err');
+        bodyEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        statusEl.textContent = 'NETWORK ERROR';
+        statusEl.classList.add('err');
+        bodyEl.textContent = err.message;
+      }
+    }
+
+    function closePanel() {
+      panel.classList.remove('active');
+    }
+  </script>
 </body>
 </html>

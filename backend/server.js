@@ -4,7 +4,18 @@ const cors         = require("cors");
 const cookieParser = require("cookie-parser");
 const path         = require("path");
 const connectDB    = require("./config/db");
-const authRoutes   = require("./routes/authRoutes");
+const authRoutes         = require("./routes/authRoutes");
+const productRoutes      = require("./routes/productRoutes");
+const categoryRoutes     = require("./routes/categoryRoutes");
+const cartRoutes         = require("./routes/cartRoutes");
+const wishlistRoutes     = require("./routes/wishlistRoutes");
+const orderRoutes        = require("./routes/orderRoutes");
+const paymentRoutes      = require("./routes/paymentRoutes");
+const addressRoutes      = require("./routes/addressRoutes");
+const ratingRoutes       = require("./routes/ratingRoutes");
+const settingsRoutes     = require("./routes/settingsRoutes");
+const shippingRoutes     = require("./routes/shippingRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -39,11 +50,25 @@ app.use((req, res, next) => {
   next();
 });
 
+/* ── Stripe webhook needs raw body (before JSON parser) ── */
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
+
 app.use(express.json());
 app.use(cookieParser());
 
 /* ── API Routes ─────────────────────────────────── */
-app.use("/api/auth", authRoutes);
+app.use("/api/auth",          authRoutes);
+app.use("/api/products",      productRoutes);
+app.use("/api/categories",    categoryRoutes);
+app.use("/api/cart",           cartRoutes);
+app.use("/api/wishlist",       wishlistRoutes);
+app.use("/api/orders",         orderRoutes);
+app.use("/api/payments",       paymentRoutes);
+app.use("/api/addresses",      addressRoutes);
+app.use("/api/ratings",        ratingRoutes);
+app.use("/api/settings",       settingsRoutes);
+app.use("/api/shipping",       shippingRoutes);
+app.use("/api/notifications",  notificationRoutes);
 
 app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date() }));
 
