@@ -20,7 +20,7 @@ app.use(cors({
 
     // Allow all maison-lite vercel deployments + localhost
     if (
-      origin.includes("maison-lite") ||
+      origin.includes("mainson-frontend") ||
       origin.includes("localhost") ||
       origin.includes("127.0.0.1")
     ) {
