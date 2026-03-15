@@ -22,6 +22,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
   }, []);
 
   return (
+    <>
     <nav
       className="navbar"
       style={{
@@ -338,57 +339,59 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
         </button>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="mobile-only mobile-bottom-nav">
-        <button 
-          className={`mobile-nav-item ${location.pathname === "/" ? "active" : ""}`}
-          onClick={() => navigate("/")}
-        >
-          <IoHomeOutline size={22} />
-          <span>Home</span>
-        </button>
-        
-        <button 
-          className={`mobile-nav-item ${location.pathname === "/cart" || location.pathname === "/checkout" ? "active" : ""}`}
-          onClick={() => navigate("/cart")}
-          style={{ position: "relative" }}
-        >
-          <IoBagOutline size={22} />
-          <span>Cart</span>
-          {cartCount > 0 && (
-            <span style={{ position: "absolute", top: 4, right: 18, background: "var(--gold)", color: "#0a0908", width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600 }}>
-              {cartCount}
-            </span>
-          )}
-        </button>
-
-        <button 
-          className={`mobile-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
-          onClick={() => navigate(user ? "/profile" : "/login")}
-        >
-          <IoPersonOutline size={22} />
-          <span>Profile</span>
-        </button>
-
-        {user ? (
-          <button 
-            className={`mobile-nav-item ${location.pathname === "/settings" ? "active" : ""}`}
-            onClick={() => navigate("/settings")}
-          >
-            <IoSettingsOutline size={22} />
-            <span>Settings</span>
-          </button>
-        ) : (
-          <button 
-            className={`mobile-nav-item ${location.pathname === "/login" ? "active" : ""}`}
-            onClick={() => navigate("/login")}
-          >
-            <IoLogOutOutline size={22} style={{ transform: "rotate(180deg)" }}/>
-            <span>Sign In</span>
-          </button>
-        )}
-      </div>
     </nav>
+
+    {/* Mobile Bottom Navigation - Moved Outside to fix scroll positioning */}
+    <div className="mobile-only mobile-bottom-nav">
+      <button 
+        className={`mobile-nav-item ${location.pathname === "/" ? "active" : ""}`}
+        onClick={() => navigate("/")}
+      >
+        <IoHomeOutline size={22} />
+        <span>Home</span>
+      </button>
+      
+      <button 
+        className={`mobile-nav-item ${location.pathname === "/cart" || location.pathname === "/checkout" ? "active" : ""}`}
+        onClick={() => navigate("/cart")}
+        style={{ position: "relative" }}
+      >
+        <IoBagOutline size={22} />
+        <span>Cart</span>
+        {cartCount > 0 && (
+          <span style={{ position: "absolute", top: 4, right: 18, background: "var(--gold)", color: "#0a0908", width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600 }}>
+            {cartCount}
+          </span>
+        )}
+      </button>
+
+      <button 
+        className={`mobile-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
+        onClick={() => navigate(user ? "/profile" : "/login")}
+      >
+        <IoPersonOutline size={22} />
+        <span>Profile</span>
+      </button>
+
+      {user ? (
+        <button 
+          className={`mobile-nav-item ${location.pathname === "/settings" ? "active" : ""}`}
+          onClick={() => navigate("/settings")}
+        >
+          <IoSettingsOutline size={22} />
+          <span>Settings</span>
+        </button>
+      ) : (
+        <button 
+          className={`mobile-nav-item ${location.pathname === "/login" ? "active" : ""}`}
+          onClick={() => navigate("/login")}
+        >
+          <IoLogOutOutline size={22} style={{ transform: "rotate(180deg)" }}/>
+          <span>Sign In</span>
+        </button>
+      )}
+    </div>
+    </>
   );
 };
 

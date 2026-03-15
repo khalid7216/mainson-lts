@@ -31,6 +31,14 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
   const [errorMsg, setErrorMsg]   = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card"); // card | cod
 
+  // Shipping State
+  const [address, setAddress] = useState({
+    name: user?.name || "",
+    street: "",
+    city: "",
+    zip: "",
+  });
+
   const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const tax          = Math.round(subtotal * 0.08 * 100) / 100;
   const shippingCost = subtotal > 200 ? 0 : 15;
@@ -75,6 +83,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
 
       const { order } = await orderAPI.createOrder({
          cartItems,
+         shippingAddress: address, // Send the collected address
          notes: paymentMethod === 'cod' ? 'Cash on Delivery' : ''
       });
 
@@ -160,7 +169,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
 
   /* ── Checkout Form ───────────────────────────────── */
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 32px 80px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "clamp(80px, 12vh, 120px) 32px 80px" }}>
       {/* Back */}
       <button
         onClick={() => navigate("/cart")}
@@ -181,13 +190,56 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
       </h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 48 }} className="grid-1-mobile">
-        {/* Left — Payment Form */}
+        {/* Left — Shipping & Payment Form */}
         <div>
           <form onSubmit={handleCheckout}>
-            {/* Payment Method Selector */}
+            {/* 1. Shipping Address */}
             <div style={{
               background: "var(--card)", border: "1px solid var(--border)",
-              borderRadius: 12, padding: 32, marginBottom: 24,
+              borderRadius: 12, padding: "clamp(24px, 5vw, 32px)", marginBottom: 24,
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 500, marginBottom: 24 }}>
+                Shipping Address
+              </h3>
+              
+              <div style={{ display: "grid", gap: 20 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>Full Name</label>
+                  <input 
+                    type="text" required className="inp" placeholder="Jane Doe"
+                    value={address.name} onChange={e => setAddress({...address, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>Street Address</label>
+                  <input 
+                    type="text" required className="inp" placeholder="123 Maison St"
+                    value={address.street} onChange={e => setAddress({...address, street: e.target.value})}
+                  />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: 16 }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>City</label>
+                    <input 
+                      type="text" required className="inp" placeholder="New York"
+                      value={address.city} onChange={e => setAddress({...address, city: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>Postal Code</label>
+                    <input 
+                      type="text" required className="inp" placeholder="10001"
+                      value={address.zip} onChange={e => setAddress({...address, zip: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Payment Method Selector */}
+            <div style={{
+              background: "var(--card)", border: "1px solid var(--border)",
+              borderRadius: 12, padding: "clamp(24px, 5vw, 32px)", marginBottom: 24,
             }}>
               <h3 style={{ fontSize: 16, fontWeight: 500, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
                 <IoWalletOutline size={18} color="var(--text)" /> Payment Method
