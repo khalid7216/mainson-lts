@@ -368,7 +368,7 @@ const CartPage = ({ cart, setCart, navigate }) => {
               </div>
 
               {/* Checkout button */}
-              <Btn v="primary" full size="lg" style={{ marginBottom: 12 }}>
+              <Btn v="primary" full size="lg" style={{ marginBottom: 12 }} onClick={() => navigate("/checkout")}>
                 Proceed to Checkout
               </Btn>
 

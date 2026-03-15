@@ -2,18 +2,24 @@
 
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import GlobalStyles from "./styles/GlobalStyles";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import AdminPanel from "./pages/admin/AdminPanel";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import { LoginPage, SignupPage, ForgotPage } from "./pages/AuthPages";
+
+/* ── Stripe setup ──────────────────────────────── */
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 /* ── App Content (inside Router) ────────────────── */
 const AppContent = () => {
@@ -108,6 +114,20 @@ const AppContent = () => {
                   }
                 />
                 <Route
+                  path="/checkout"
+                  element={
+                    user ? (
+                      <CheckoutPage
+                        cart={cart}
+                        setCart={setCart}
+                        navigate={navigate}
+                      />
+                    ) : (
+                      <Navigate to="/login" replace />
+                    )
+                  }
+                />
+                <Route
                   path="/product/:slug"
                   element={
                     <ProductDetailPage
@@ -168,7 +188,9 @@ const App = () => {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <AppContent />
+          <Elements stripe={stripePromise}>
+            <AppContent />
+          </Elements>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -4,6 +4,7 @@
 // ═════════════════════════════════════════════════════════════
 
 const User = require("../models/User");
+const ActivityLog = require("../models/ActivityLog");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
@@ -43,6 +44,15 @@ exports.signup = async (req, res) => {
     }
 
     const user = await User.create({ name, email, password });
+
+    await ActivityLog.create({
+      user:      user._id,
+      action:    "signup",
+      resource:  "User",
+      resourceId: user._id.toString(),
+      ip:        req.ip,
+      userAgent: req.headers["user-agent"] || "",
+    });
 
     res.status(201).json({
       success: true,
@@ -86,6 +96,15 @@ exports.login = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
+    await ActivityLog.create({
+      user:      user._id,
+      action:    "login",
+      resource:  "User",
+      resourceId: user._id.toString(),
+      ip:        req.ip,
+      userAgent: req.headers["user-agent"] || "",
+    });
+
     sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -115,7 +134,20 @@ exports.getMe = async (req, res) => {
 /* ══════════════════════════════════════════════════
    POST /api/auth/logout
 ══════════════════════════════════════════════════ */
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
+  try {
+    if (req.user) {
+      await ActivityLog.create({
+        user:      req.user.id,
+        action:    "logout",
+        resource:  "User",
+        resourceId: req.user.id,
+        ip:        req.ip,
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
+  } catch (_) { /* don't block logout if logging fails */ }
+
   res.cookie("token", "none", {
     expires: new Date(Date.now()),
     httpOnly: true,
@@ -199,6 +231,16 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
+    await ActivityLog.create({
+      user:      user._id,
+      action:    "password_changed",
+      resource:  "User",
+      resourceId: user._id.toString(),
+      ip:        req.ip,
+      userAgent: req.headers["user-agent"] || "",
+      details:   { method: "reset_token" },
+    });
+
     sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -231,6 +273,16 @@ exports.updateProfile = async (req, res) => {
     user.name = name || user.name;
     user.email = email || user.email;
     await user.save();
+
+    await ActivityLog.create({
+      user:      user._id,
+      action:    "profile_updated",
+      resource:  "User",
+      resourceId: user._id.toString(),
+      ip:        req.ip,
+      userAgent: req.headers["user-agent"] || "",
+      details:   { fieldsUpdated: [name ? "name" : null, email ? "email" : null].filter(Boolean) },
+    });
 
     res.status(200).json({
       success: true,
@@ -277,6 +329,16 @@ exports.changePassword = async (req, res) => {
 
     user.password = newPassword;
     await user.save();
+
+    await ActivityLog.create({
+      user:      user._id,
+      action:    "password_changed",
+      resource:  "User",
+      resourceId: user._id.toString(),
+      ip:        req.ip,
+      userAgent: req.headers["user-agent"] || "",
+      details:   { method: "change_password" },
+    });
 
     res.status(200).json({
       success: true,

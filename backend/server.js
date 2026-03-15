@@ -15,7 +15,8 @@ const addressRoutes      = require("./routes/addressRoutes");
 const ratingRoutes       = require("./routes/ratingRoutes");
 const settingsRoutes     = require("./routes/settingsRoutes");
 const shippingRoutes     = require("./routes/shippingRoutes");
-const notificationRoutes = require("./routes/notificationRoutes");
+const notificationRoutes   = require("./routes/notificationRoutes");
+const activityLogRoutes    = require("./routes/activityLogRoutes");
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -69,6 +70,7 @@ app.use("/api/ratings",        ratingRoutes);
 app.use("/api/settings",       settingsRoutes);
 app.use("/api/shipping",       shippingRoutes);
 app.use("/api/notifications",  notificationRoutes);
+app.use("/api/activity-logs",  activityLogRoutes);
 
 app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date() }));
 

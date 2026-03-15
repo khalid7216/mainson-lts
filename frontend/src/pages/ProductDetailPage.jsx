@@ -41,6 +41,65 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
   // Mock images (use same image multiple times for demo)
   const images = [product.image, product.image, product.image];
 
+  /* ── SEO: Inject JSON-LD structured data ──────── */
+  useEffect(() => {
+    // Product schema
+    const productLD = {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      name: product.name,
+      image: product.image,
+      description: `Crafted from the finest materials, ${product.name} embodies timeless elegance.`,
+      brand: { "@type": "Brand", name: "Maison Élite" },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "USD",
+        price: product.price.toFixed(2),
+        availability: "https://schema.org/InStock",
+      },
+      ...(product.rating && {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: String(product.rating),
+          reviewCount: String(product.reviews || 0),
+        },
+      }),
+    };
+
+    // Breadcrumb schema
+    const breadcrumbLD = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: window.location.origin + "/" },
+        { "@type": "ListItem", position: 2, name: product.cat || "Collection", item: window.location.origin + "/category/" + (product.cat || "all").toLowerCase() },
+        { "@type": "ListItem", position: 3, name: product.name },
+      ],
+    };
+
+    const scriptProduct = document.createElement("script");
+    scriptProduct.type = "application/ld+json";
+    scriptProduct.id   = "ld-product";
+    scriptProduct.textContent = JSON.stringify(productLD);
+
+    const scriptBreadcrumb = document.createElement("script");
+    scriptBreadcrumb.type = "application/ld+json";
+    scriptBreadcrumb.id   = "ld-breadcrumb";
+    scriptBreadcrumb.textContent = JSON.stringify(breadcrumbLD);
+
+    // Remove old if re-render
+    document.getElementById("ld-product")?.remove();
+    document.getElementById("ld-breadcrumb")?.remove();
+
+    document.head.appendChild(scriptProduct);
+    document.head.appendChild(scriptBreadcrumb);
+
+    return () => {
+      document.getElementById("ld-product")?.remove();
+      document.getElementById("ld-breadcrumb")?.remove();
+    };
+  }, [product]);
+
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast("Please select a size", "err");

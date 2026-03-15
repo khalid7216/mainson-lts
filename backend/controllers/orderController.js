@@ -1,6 +1,7 @@
 // backend/controllers/orderController.js
 const Order        = require("../models/Order");
 const Cart         = require("../models/Cart");
+const Product      = require("../models/Product");
 const Notification = require("../models/Notification");
 const ActivityLog  = require("../models/ActivityLog");
 
@@ -30,22 +31,69 @@ exports.getOrder = async (req, res) => {
   }
 };
 
-/* ── POST /api/orders ───────────────────────────── */
+/* ══════════════════════════════════════════════════
+   POST /api/orders
+   ────────────────────────────────────────────────
+   SECURE: Server fetches real prices from DB.
+   Client only sends [{ productId, qty }].
+   Price manipulation is IMPOSSIBLE.
+══════════════════════════════════════════════════ */
 exports.createOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, notes } = req.body;
-    if (!items || items.length === 0) {
+    const { cartItems, shippingAddress, notes } = req.body;
+
+    // cartItems = [{ productId, qty }]
+    if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ message: "No items in order" });
     }
 
-    const subtotal     = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+    /* ── 1. Fetch REAL prices from DB ──────────── */
+    const productIds = cartItems.map((i) => i.productId);
+    const products   = await Product.find({ _id: { $in: productIds }, isActive: true });
+
+    if (products.length !== productIds.length) {
+      return res.status(400).json({ message: "One or more products are unavailable" });
+    }
+
+    const productMap = {};
+    products.forEach((p) => (productMap[p._id.toString()] = p));
+
+    /* ── 2. Validate stock & build order items ─── */
+    const orderItems = [];
+    const stockUpdates = []; // track what to deduct
+
+    for (const ci of cartItems) {
+      const product = productMap[ci.productId];
+      if (!product) {
+        return res.status(400).json({ message: `Product ${ci.productId} not found` });
+      }
+      if (product.stock < ci.qty) {
+        return res.status(400).json({
+          message: `Insufficient stock for "${product.name}". Available: ${product.stock}, requested: ${ci.qty}`,
+        });
+      }
+
+      orderItems.push({
+        product: product._id,
+        name:    product.name,
+        price:   product.price,   // ← SERVER price, not client
+        qty:     ci.qty,
+        image:   product.images?.[0] || null,
+      });
+
+      stockUpdates.push({ id: product._id, deduct: ci.qty });
+    }
+
+    /* ── 3. Calculate totals SERVER-SIDE ────────── */
+    const subtotal     = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
     const tax          = Math.round(subtotal * 0.08 * 100) / 100; // 8% tax
     const shippingCost = subtotal > 200 ? 0 : 15;
-    const totalAmount  = subtotal + tax + shippingCost;
+    const totalAmount  = Math.round((subtotal + tax + shippingCost) * 100) / 100;
 
+    /* ── 4. Create order ───────────────────────── */
     const order = await Order.create({
       user: req.user.id,
-      items,
+      items: orderItems,
       subtotal,
       tax,
       shippingCost,
@@ -54,10 +102,15 @@ exports.createOrder = async (req, res) => {
       notes,
     });
 
-    // Clear cart after order
+    /* ── 5. Deduct stock ───────────────────────── */
+    for (const su of stockUpdates) {
+      await Product.findByIdAndUpdate(su.id, { $inc: { stock: -su.deduct } });
+    }
+
+    /* ── 6. Clear cart ─────────────────────────── */
     await Cart.findOneAndDelete({ user: req.user.id });
 
-    // Create notification
+    /* ── 7. Notification + ActivityLog ──────────── */
     await Notification.create({
       user:    req.user.id,
       type:    "order_update",
@@ -66,7 +119,6 @@ exports.createOrder = async (req, res) => {
       link:    `/profile`,
     });
 
-    // Activity log
     await ActivityLog.create({
       user:       req.user.id,
       action:     "order_placed",
@@ -82,7 +134,12 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-/* ── PUT /api/orders/:id/cancel ─────────────────── */
+/* ══════════════════════════════════════════════════
+   PUT /api/orders/:id/cancel
+   ────────────────────────────────────────────────
+   Cancels order + restores stock.
+   Refund is handled by /api/payments/refund.
+══════════════════════════════════════════════════ */
 exports.cancelOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -90,12 +147,17 @@ exports.cancelOrder = async (req, res) => {
     if (order.user.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
     }
-    if (["shipped", "delivered"].includes(order.status)) {
-      return res.status(400).json({ message: "Cannot cancel a shipped/delivered order" });
+    if (["shipped", "delivered", "cancelled"].includes(order.status)) {
+      return res.status(400).json({ message: `Cannot cancel a ${order.status} order` });
     }
 
     order.status = "cancelled";
     await order.save();
+
+    /* ── Restore stock ─────────────────────────── */
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } });
+    }
 
     await Notification.create({
       user:    req.user.id,

@@ -77,3 +77,52 @@ export const authAPI = {
     });
   },
 };
+
+/* ══════════════════════════════════════════════════
+   ORDER APIS
+══════════════════════════════════════════════════ */
+export const orderAPI = {
+  /* Create order — sends [{ productId, qty }], server fetches real prices */
+  createOrder: async (cartItems, shippingAddress, notes = "") => {
+    return await request("/orders", {
+      method: "POST",
+      body:   JSON.stringify({ cartItems, shippingAddress, notes }),
+    });
+  },
+
+  /* Get my orders */
+  getMyOrders: async () => {
+    return await request("/orders");
+  },
+
+  /* Get single order */
+  getOrder: async (id) => {
+    return await request(`/orders/${id}`);
+  },
+
+  /* Cancel order */
+  cancelOrder: async (id) => {
+    return await request(`/orders/${id}/cancel`, { method: "PUT" });
+  },
+};
+
+/* ══════════════════════════════════════════════════
+   PAYMENT APIS
+══════════════════════════════════════════════════ */
+export const paymentAPI = {
+  /* Create payment intent */
+  createIntent: async (orderId) => {
+    return await request("/payments/create-intent", {
+      method: "POST",
+      body:   JSON.stringify({ orderId }),
+    });
+  },
+
+  /* Refund payment */
+  refund: async (orderId, reason = "") => {
+    return await request("/payments/refund", {
+      method: "POST",
+      body:   JSON.stringify({ orderId, reason }),
+    });
+  },
+};
