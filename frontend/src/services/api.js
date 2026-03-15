@@ -1,5 +1,6 @@
 // frontend/src/services/api.js
-const API_URL =  "https://mainson-backend.vercel.app/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://mainson-frontend.vercel.app/api";
+// const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 /* ── Helper: make API request with credentials ───── */
 const request = async (endpoint, options = {}) => {
   const config = {

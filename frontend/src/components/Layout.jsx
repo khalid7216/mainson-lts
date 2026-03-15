@@ -5,23 +5,27 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Add this import
+import { IoSparklesOutline } from "react-icons/io5";
 
 /* ── Announcement ticker ────────────────────────────── */
 export const Ticker = () => {
   const items = [
-    "✦ Free Shipping on Orders Over $200",
-    "✦ New SS26 Collection Now Live",
-    "✦ Complimentary Returns Within 30 Days",
-    "✦ Exclusive Members: Early Access to Sales",
-    "✦ Ethically Sourced · Sustainably Made",
+    <><IoSparklesOutline style={{ marginRight: 6 }} /> Free Shipping on Orders Over $200</>,
+    <><IoSparklesOutline style={{ marginRight: 6 }} /> New SS26 Collection Now Live</>,
+    <><IoSparklesOutline style={{ marginRight: 6 }} /> Complimentary Returns Within 30 Days</>,
+    <><IoSparklesOutline style={{ marginRight: 6 }} /> Exclusive Members: Early Access to Sales</>,
+    <><IoSparklesOutline style={{ marginRight: 6 }} /> Ethically Sourced · Sustainably Made</>,
   ];
+  
+  // Since we are using JSX elements now instead of strings, 
+  // we'll render them directly inside the span with spacing.
   const line = items.join("    ") + "    ";
 
   return (
     <div
       style={{
         position: "fixed", // ✅ CHANGED: Fixed position
-        top: 72, // ✅ CHANGED: Below navbar (navbar height = 72px)
+        top: "var(--nav-height, 72px)", // Dynamic top based on navbar height
         left: 0,
         right: 0,
         zIndex: 999, // ✅ CHANGED: Below navbar (navbar = 1000)
@@ -32,21 +36,26 @@ export const Ticker = () => {
     >
       <div className="marquee-wrap">
         <div className="marquee-inner">
-          {[line, line].map((l, i) => (
-            <span
-              key={i}
-              style={{
-                fontSize: 10,
-                letterSpacing: ".18em",
-                textTransform: "uppercase",
-                color: "#0d0b0a",
-                fontWeight: 500,
-                paddingRight: 40,
-              }}
-            >
-              {l}
-            </span>
-          ))}
+          <div style={{ display: 'flex' }}>
+              {[...items, ...items].map((l, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: 10,
+                    letterSpacing: ".18em",
+                    textTransform: "uppercase",
+                    color: "#0d0b0a",
+                    fontWeight: 500,
+                    paddingRight: 40,
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                >
+                  {l}
+                </span>
+              ))}
+          </div>
         </div>
       </div>
     </div>

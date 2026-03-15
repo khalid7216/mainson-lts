@@ -9,6 +9,7 @@ import { useToast } from "../context/ToastContext";
 import { AuthWrap } from "../components/Layout";
 import { Btn, Inp, Spinner } from "../components/UI";
 import { authAPI } from "../services/api";
+import { IoTimeOutline, IoCheckmarkOutline, IoLockClosedOutline } from "react-icons/io5";
 
 const ResetPasswordPage = () => {
   const { token } = useParams();
@@ -89,13 +90,14 @@ const ResetPasswordPage = () => {
               border: "1px solid rgba(192,57,43,.3)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 24px",
-              fontSize: 32,
-            }}
-          >
-            ⏰
-          </div>
+            justifyContent: "center",
+            margin: "0 auto 24px",
+            fontSize: 32,
+            color: "var(--rose)",
+          }}
+        >
+          <IoTimeOutline />
+        </div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 300, fontSize: 28, marginBottom: 12 }}>
             Reset Link Expired
           </h2>
@@ -138,13 +140,14 @@ const ResetPasswordPage = () => {
               border: "1px solid rgba(26,122,74,.3)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 24px",
-              fontSize: 32,
-            }}
-          >
-            ✓
-          </div>
+            justifyContent: "center",
+            margin: "0 auto 24px",
+            fontSize: 40,
+            color: "var(--emerald)",
+          }}
+        >
+          <IoCheckmarkOutline />
+        </div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: "var(--emerald)", marginBottom: 32 }}>
             Password Updated!
           </h2>
@@ -158,16 +161,16 @@ const ResetPasswordPage = () => {
     <AuthWrap title="Reset Password" subtitle="Enter your new password">
       <div className="fu">
         <div style={{ padding: "18px 20px", background: "rgba(201,168,76,.05)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 8, marginBottom: 28 }}>
-          <p style={{ fontSize: 13, color: "var(--muted)" }}>
-            🔒 At least 8 characters
-            <br />⏰ Link expires in 30 minutes
+          <p style={{ fontSize: 13, color: "var(--muted)", display: "flex", flexDirection: "column", gap: 8 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoLockClosedOutline /> At least 8 characters</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoTimeOutline /> Link expires in 30 minutes</span>
           </p>
         </div>
 
         <div className="inp-wrap">
           <label className="inp-label">New Password</label>
           <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--dim)" }}>🔒</span>
+            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--dim)" }}><IoLockClosedOutline size={18} /></span>
             <input
               type="password"
               value={form.password}
@@ -192,7 +195,7 @@ const ResetPasswordPage = () => {
         <Inp
           label="Confirm Password"
           type="password"
-          icon="🔒"
+          icon={<IoLockClosedOutline />}
           value={form.confirm}
           onChange={(e) => setForm((p) => ({ ...p, confirm: e.target.value }))}
           placeholder="Repeat password"

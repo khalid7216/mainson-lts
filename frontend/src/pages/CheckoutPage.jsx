@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { orderAPI, paymentAPI } from "../services/api";
 import { Btn } from "../components/UI";
-import { IoArrowBack, IoLockClosed, IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5";
+import { IoArrowBack, IoLockClosed, IoCheckmarkCircle, IoCloseCircle, IoWalletOutline } from "react-icons/io5";
 
 const CARD_STYLE = {
   style: {
@@ -29,6 +29,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
   const [step, setStep]           = useState("form"); // form | success | error
   const [orderResult, setOrderResult] = useState(null);
   const [errorMsg, setErrorMsg]   = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("card"); // card | cod
 
   const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const tax          = Math.round(subtotal * 0.08 * 100) / 100;
@@ -60,7 +61,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (paymentMethod === "card" && (!stripe || !elements)) return;
 
     setLoading(true);
     setErrorMsg("");
@@ -68,33 +69,42 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
     try {
       /* ── 1. Create order (server fetches real prices) ── */
       const cartItems = cart.map((item) => ({
-        productId: item.id,
+        productId: item._id || item.id, // Fallback to id for older formats
         qty:       item.qty,
       }));
 
-      const { order } = await orderAPI.createOrder(cartItems);
-
-      /* ── 2. Create payment intent ──────────────────── */
-      const { clientSecret } = await paymentAPI.createIntent(order._id);
-
-      /* ── 3. Confirm card payment with Stripe ───────── */
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: { name: user.name, email: user.email },
-        },
+      const { order } = await orderAPI.createOrder({
+         cartItems,
+         notes: paymentMethod === 'cod' ? 'Cash on Delivery' : ''
       });
 
-      if (error) {
-        setErrorMsg(error.message);
-        setStep("error");
-        setOrderResult(order);
-        toast(error.message, "err");
-      } else if (paymentIntent.status === "succeeded") {
-        setOrderResult(order);
-        setStep("success");
-        setCart([]); // Clear cart
-        toast("Payment successful! 🎉", "ok");
+      /* ── 2. Handle Payment Method ──────────────────── */
+      if (paymentMethod === "card") {
+         const { clientSecret } = await paymentAPI.createIntent(order._id);
+         const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+           payment_method: {
+             card: elements.getElement(CardElement),
+             billing_details: { name: user.name, email: user.email },
+           },
+         });
+
+         if (error) {
+           setErrorMsg(error.message);
+           setStep("error");
+           setOrderResult(order);
+           toast(error.message, "err");
+         } else if (paymentIntent.status === "succeeded") {
+           setOrderResult(order);
+           setStep("success");
+           setCart([]); // Clear cart
+           toast("Payment successful! 🎉", "ok");
+         }
+      } else {
+         // Cash on Delivery - Order is already pending
+         setOrderResult(order);
+         setStep("success");
+         setCart([]); // Clear cart
+         toast("Order placed successfully! (Cash on Delivery)", "ok");
       }
     } catch (err) {
       setErrorMsg(err.message);
@@ -111,13 +121,15 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
       <div style={{ padding: "140px 32px", textAlign: "center", maxWidth: 560, margin: "0 auto" }}>
         <IoCheckmarkCircle size={72} color="var(--emerald)" style={{ marginBottom: 24 }} />
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 300, marginBottom: 12 }}>
-          Payment Successful
+          Order Confirmed
         </h2>
         <p style={{ color: "var(--muted)", fontSize: 15, marginBottom: 8 }}>
-          Order <strong style={{ color: "var(--gold2)" }}>{orderResult?.orderId}</strong> has been confirmed.
+          Order <strong style={{ color: "var(--gold2)" }}>{orderResult?.orderId || `#ME-${orderResult?._id?.slice(-6).toUpperCase()}`}</strong> has been placed.
         </p>
         <p style={{ color: "var(--dim)", fontSize: 13, marginBottom: 40 }}>
-          You'll receive an email confirmation shortly.
+          {paymentMethod === 'cod' 
+            ? "You will pay in cash when your order is delivered."
+            : "You'll receive an email confirmation shortly."}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
           <Btn v="primary" onClick={() => navigate("/profile")}>View Orders</Btn>
@@ -172,39 +184,87 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
         {/* Left — Payment Form */}
         <div>
           <form onSubmit={handleCheckout}>
-            {/* Card Section */}
+            {/* Payment Method Selector */}
             <div style={{
               background: "var(--card)", border: "1px solid var(--border)",
               borderRadius: 12, padding: 32, marginBottom: 24,
             }}>
               <h3 style={{ fontSize: 16, fontWeight: 500, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
-                <IoLockClosed size={16} color="var(--gold)" /> Payment Details
+                <IoWalletOutline size={18} color="var(--text)" /> Payment Method
               </h3>
 
-              <div style={{
-                padding: "16px 14px", borderRadius: 8,
-                border: "1px solid var(--border2)", background: "var(--lift)",
-              }}>
-                <CardElement options={CARD_STYLE} />
+              <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("card")}
+                  style={{
+                    flex: 1, padding: "14px", borderRadius: 8,
+                    border: `1px solid ${paymentMethod === "card" ? "var(--gold)" : "var(--border2)"}`,
+                    background: paymentMethod === "card" ? "rgba(201,168,76,.08)" : "var(--lift)",
+                    color: paymentMethod === "card" ? "var(--text)" : "var(--muted)",
+                    fontWeight: paymentMethod === "card" ? 500 : 400,
+                    cursor: "pointer", transition: "all .2s"
+                  }}
+                >
+                  Credit / Debit Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("cod")}
+                  style={{
+                    flex: 1, padding: "14px", borderRadius: 8,
+                    border: `1px solid ${paymentMethod === "cod" ? "var(--gold)" : "var(--border2)"}`,
+                    background: paymentMethod === "cod" ? "rgba(201,168,76,.08)" : "var(--lift)",
+                    color: paymentMethod === "cod" ? "var(--text)" : "var(--muted)",
+                    fontWeight: paymentMethod === "cod" ? 500 : 400,
+                    cursor: "pointer", transition: "all .2s"
+                  }}
+                >
+                  Cash on Delivery
+                </button>
               </div>
 
-              <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 12 }}>
-                Your card info is secured by Stripe. We never store your card details.
-              </p>
+              {/* Card Form */}
+              {paymentMethod === "card" && (
+                <>
+                  <div style={{
+                    padding: "16px 14px", borderRadius: 8,
+                    border: "1px solid var(--border2)", background: "var(--lift)",
+                  }}>
+                    <CardElement options={CARD_STYLE} />
+                  </div>
+                  <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 12 }}>
+                    Your card info is secured by Stripe. We never store your card details.
+                  </p>
+                  
+                  {/* Test hint */}
+                  <div style={{
+                    padding: "14px 18px", borderRadius: 8,
+                    background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)",
+                    marginTop: 24,
+                  }}>
+                    <p style={{ fontSize: 12, color: "var(--gold2)", lineHeight: 1.6 }}>
+                      🧪 <strong>Test mode</strong> — Use card <code style={{ background: "var(--lift)", padding: "2px 6px", borderRadius: 4 }}>4242 4242 4242 4242</code>, any future date, any CVC.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {/* COD Info */}
+              {paymentMethod === "cod" && (
+                <div style={{
+                  padding: "16px 20px", borderRadius: 8,
+                  background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)",
+                }}>
+                  <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
+                    You will pay in cash when the order is delivered to your shipping address. 
+                    Please ensure you have the exact amount ready.
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Test hint */}
-            <div style={{
-              padding: "14px 18px", borderRadius: 8,
-              background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)",
-              marginBottom: 24,
-            }}>
-              <p style={{ fontSize: 12, color: "var(--gold2)", lineHeight: 1.6 }}>
-                🧪 <strong>Test mode</strong> — Use card <code style={{ background: "var(--lift)", padding: "2px 6px", borderRadius: 4 }}>4242 4242 4242 4242</code>, any future date, any CVC.
-              </p>
-            </div>
-
-            <Btn v="primary" full size="lg" type="submit" disabled={!stripe || loading}>
+            <Btn v="primary" full size="lg" type="submit" disabled={loading || (paymentMethod === "card" && !stripe)}>
               {loading ? (
                 <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{
@@ -215,7 +275,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
                   Processing...
                 </span>
               ) : (
-                `Pay $${total.toFixed(2)}`
+                paymentMethod === 'cod' ? `Confirm Order $${total.toFixed(2)}` : `Pay $${total.toFixed(2)}`
               )}
             </Btn>
           </form>
@@ -232,26 +292,28 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
             </h3>
 
             {/* Items */}
-            {cart.map((item) => (
-              <div key={item.id} style={{
-                display: "flex", gap: 12, marginBottom: 16, paddingBottom: 16,
-                borderBottom: "1px solid var(--border)",
-              }}>
-                <div style={{
-                  width: 56, height: 68, borderRadius: 6, overflow: "hidden",
-                  background: "var(--lift)", flexShrink: 0,
+            <div style={{ maxHeight: 300, overflowY: "auto", paddingRight: 8, marginBottom: 16 }}>
+              {cart.map((item) => (
+                <div key={item.id} style={{
+                  display: "flex", gap: 12, marginBottom: 16, paddingBottom: 16,
+                  borderBottom: "1px solid var(--border)",
                 }}>
-                  <img src={item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <div style={{
+                    width: 56, height: 68, borderRadius: 6, overflow: "hidden",
+                    background: "var(--lift)", flexShrink: 0,
+                  }}>
+                    <img src={item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{item.name}</p>
+                    <p style={{ fontSize: 11, color: "var(--dim)" }}>Qty: {item.qty}</p>
+                  </div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--gold2)" }}>
+                    ${(item.price * item.qty).toFixed(2)}
+                  </p>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{item.name}</p>
-                  <p style={{ fontSize: 11, color: "var(--dim)" }}>Qty: {item.qty}</p>
-                </div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--gold2)" }}>
-                  ${(item.price * item.qty).toFixed(2)}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
 
             {/* Totals */}
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>

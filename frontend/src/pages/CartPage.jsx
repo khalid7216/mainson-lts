@@ -29,7 +29,7 @@ const CartPage = ({ cart, setCart, navigate }) => {
       style={{
         maxWidth: 1200,
         margin: "0 auto",
-        padding: "120px 32px 80px",
+        padding: "clamp(80px, 12vh, 120px) clamp(16px, 5vw, 32px) 80px",
       }}
     >
       {/* Header */}

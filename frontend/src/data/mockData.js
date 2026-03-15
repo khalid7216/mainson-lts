@@ -5,7 +5,7 @@
 
 export const PRODUCTS = [
   { 
-    id: 1,
+    id: "65f010000000000000000001",
     name: "Obsidian Slip Dress",
     slug: "obsidian-slip-dress",  // ✅ ADDED
     price: 289,
@@ -17,7 +17,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80"
   },
   { 
-    id: 2,
+    id: "65f010000000000000000002",
     name: "Midnight Tailored Blazer",
     slug: "midnight-tailored-blazer",  // ✅ ADDED
     price: 445,
@@ -29,7 +29,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&q=80"
   },
   { 
-    id: 3,
+    id: "65f010000000000000000003",
     name: "Cashmere Veil Turtleneck",
     slug: "cashmere-veil-turtleneck",  // ✅ ADDED
     price: 198,
@@ -41,7 +41,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500&q=80"
   },
   { 
-    id: 4,
+    id: "65f010000000000000000004",
     name: "Palazzo Wide-Leg Trousers",
     slug: "palazzo-wide-leg-trousers",  // ✅ ADDED
     price: 262,
@@ -53,7 +53,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1594633313593-bab3825d0caf?w=500&q=80"
   },
   { 
-    id: 5,
+    id: "65f010000000000000000005",
     name: "Linen Atelier Dress",
     slug: "linen-atelier-dress",  // ✅ ADDED
     price: 225,
@@ -65,7 +65,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&q=80"
   },
   { 
-    id: 6,
+    id: "65f010000000000000000006",
     name: "Onyx Kitten Mules",
     slug: "onyx-kitten-mules",  // ✅ ADDED
     price: 178,
@@ -77,7 +77,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&q=80"
   },
   { 
-    id: 7,
+    id: "65f010000000000000000007",
     name: "Graphite Merino Coat",
     slug: "graphite-merino-coat",  // ✅ ADDED
     price: 680,
@@ -89,7 +89,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=500&q=80"
   },
   { 
-    id: 8,
+    id: "65f010000000000000000008",
     name: "18K Gold Sculptured Cuff",
     slug: "18k-gold-sculptured-cuff",  // ✅ ADDED
     price: 295,
@@ -101,7 +101,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80"
   },
   { 
-    id: 9,
+    id: "65f010000000000000000009",
     name: "Satin Bias-Cut Skirt",
     slug: "satin-bias-cut-skirt",  // ✅ ADDED
     price: 195,
@@ -113,7 +113,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&q=80"
   },
   { 
-    id: 10,
+    id: "65f010000000000000000010",
     name: "Ivory Silk Blouse",
     slug: "ivory-silk-blouse",  // ✅ ADDED
     price: 165,
@@ -125,7 +125,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1624206112918-f140f087f9b5?w=500&q=80"
   },
   { 
-    id: 11,
+    id: "65f010000000000000000011",
     name: "Pointed Leather Boots",
     slug: "pointed-leather-boots",  // ✅ ADDED
     price: 420,
@@ -137,7 +137,7 @@ export const PRODUCTS = [
     image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&q=80"
   },
   { 
-    id: 12,
+    id: "65f010000000000000000012",
     name: "Baroque Silk Scarf",
     slug: "baroque-silk-scarf",  // ✅ ADDED
     price: 145,

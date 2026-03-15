@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { useToast } from "../context/ToastContext";
 import { Btn, StatusTag } from "./UI";
+import { IoCloseOutline, IoStar, IoHeartOutline, IoHeart, IoCheckmarkCircleOutline, IoCarOutline, IoSyncOutline } from "react-icons/io5";
 
 /* ── Quick-View Modal ───────────────────────────────── */
 export const QuickView = ({ product: p, onClose, addToCart }) => {
@@ -16,7 +17,7 @@ export const QuickView = ({ product: p, onClose, addToCart }) => {
 
   const handleAdd = () => {
     for (let i = 0; i < qty; i++) addToCart(p);
-    toast(`${p.name} added to bag ✦`, "ok");
+    toast(`${p.name} added to bag`, "ok");
     onClose();
   };
 
@@ -82,7 +83,7 @@ export const QuickView = ({ product: p, onClose, addToCart }) => {
               onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
               onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
             >
-              ×
+              <IoCloseOutline size={28} />
             </button>
 
             <p
@@ -126,7 +127,7 @@ export const QuickView = ({ product: p, onClose, addToCart }) => {
                         s <= Math.floor(p.rating) ? "var(--gold)" : "var(--dim)",
                     }}
                   >
-                    ★
+                    <IoStar size={12} />
                   </span>
                 ))}
               </div>
@@ -310,7 +311,7 @@ export const QuickView = ({ product: p, onClose, addToCart }) => {
                   e.target.style.color = "var(--muted)";
                 }}
               >
-                ♡
+                <IoHeartOutline size={20} />
               </button>
             </div>
 
@@ -324,9 +325,13 @@ export const QuickView = ({ product: p, onClose, addToCart }) => {
                 borderTop: "1px solid var(--border)",
               }}
             >
-              {["🚚 Free Delivery", "↩ Free Returns", "✓ Authentic"].map((t) => (
-                <span key={t} style={{ fontSize: 11, color: "var(--muted)" }}>
-                  {t}
+              {[
+                { icon: <IoCarOutline size={14} style={{ marginRight: 4, verticalAlign: "middle" }} />, text: "Free Delivery" },
+                { icon: <IoSyncOutline size={14} style={{ marginRight: 4, verticalAlign: "middle" }} />, text: "Free Returns" },
+                { icon: <IoCheckmarkCircleOutline size={14} style={{ marginRight: 4, verticalAlign: "middle" }} />, text: "Authentic" }
+              ].map((t) => (
+                <span key={t.text} style={{ fontSize: 11, color: "var(--muted)", display: "flex", alignItems: "center" }}>
+                  {t.icon} {t.text}
                 </span>
               ))}
             </div>
@@ -419,11 +424,11 @@ const ProductCard = ({
             cursor: "pointer",
           }}
         >
-          {isWished ? "♥" : "♡"}
+          {isWished ? <IoHeart size={18} /> : <IoHeartOutline size={18} />}
         </button>
 
-        {/* Hover overlay */}
-        <div className="prod-overlay">
+        {/* Hover overlay (Desktop only) */}
+        <div className="prod-overlay hide-mobile">
           <div style={{ display: "flex", gap: 8 }}>
             <button
               onClick={(e) => {
@@ -532,6 +537,21 @@ const ProductCard = ({
             )}
           </div>
         </div>
+        
+        {/* Mobile quick action */}
+        <div className="mobile-only" style={{ marginTop: 12 }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(p);
+              toast(`${p.name} added!`, "ok");
+            }}
+            style={{ width: "100%", padding: "8px 0", background: "var(--gold)", border: "none", borderRadius: 4, color: "#0d0b0a", fontSize: 10, textTransform: "uppercase", fontWeight: 600, letterSpacing: ".1em" }}
+          >
+            Add to Bag
+          </button>
+        </div>
+
         <div
           style={{
             display: "flex",
@@ -540,8 +560,10 @@ const ProductCard = ({
             marginTop: 8,
           }}
         >
-          <span style={{ color: "var(--gold)", fontSize: 11, letterSpacing: 2 }}>
-            {"★".repeat(Math.floor(p.rating))}
+          <span style={{ color: "var(--gold)", fontSize: 11, display: "flex", gap: 2 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <IoStar key={i} size={11} color={i < Math.floor(p.rating) ? "var(--gold)" : "var(--dim)"} />
+            ))}
           </span>
           <span style={{ fontSize: 11, color: "var(--dim)" }}>
             ({p.reviews})

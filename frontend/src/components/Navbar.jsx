@@ -4,11 +4,14 @@
 // ═════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Avatar } from "./UI";
+import { IoHomeOutline, IoBagOutline, IoPersonOutline, IoSettingsOutline, IoFlashOutline, IoLogOutOutline } from "react-icons/io5";
 
 const Navbar = ({ navigate, cartCount = 0 }) => {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [dropdown, setDropdown] = useState(false);
 
@@ -34,6 +37,13 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
         transition: "all .3s",
       }}
     >
+      {/* Desktop Navigation */}
+      <div
+        className="desktop-only"
+        style={{
+          height: "100%",
+        }}
+      >
       <div
         style={{
           maxWidth: 1400,
@@ -88,7 +98,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
             onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
             onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
           >
-            🛍 Cart
+            <IoBagOutline size={16} /> Cart
             {cartCount > 0 && (
               <span
                 style={{
@@ -186,7 +196,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                         (e.target.style.background = "none")
                       }
                     >
-                      👤 Profile
+                      <IoPersonOutline size={16} style={{ marginRight: 8 }} /> Profile
                     </button>
 
                     <button
@@ -213,7 +223,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                         (e.target.style.background = "none")
                       }
                     >
-                      ⚙️ Settings
+                      <IoSettingsOutline size={16} style={{ marginRight: 8 }} /> Settings
                     </button>
 
                     {user.isAdmin && (
@@ -241,7 +251,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                           (e.target.style.background = "none")
                         }
                       >
-                        ⚡ Admin Panel
+                        <IoFlashOutline size={16} style={{ marginRight: 8 }} /> Admin Panel
                       </button>
                     )}
 
@@ -278,7 +288,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                         (e.target.style.background = "none")
                       }
                     >
-                      🚪 Sign Out
+                      <IoLogOutOutline size={16} style={{ marginRight: 8 }} /> Sign Out
                     </button>
                   </div>
                 </>
@@ -313,6 +323,70 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
             </button>
           )}
         </div>
+      </div>
+      </div>
+
+      {/* Mobile Top Logo (Centered) */}
+      <div className="mobile-only" style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <button
+          onClick={() => navigate("/")}
+          style={{ background: "none", border: "none", padding: 0 }}
+        >
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 300, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--text)", margin: 0 }}>
+            Maison·Élite
+          </h1>
+        </button>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-only mobile-bottom-nav">
+        <button 
+          className={`mobile-nav-item ${location.pathname === "/" ? "active" : ""}`}
+          onClick={() => navigate("/")}
+        >
+          <IoHomeOutline size={22} />
+          <span>Home</span>
+        </button>
+        
+        <button 
+          className={`mobile-nav-item ${location.pathname === "/cart" || location.pathname === "/checkout" ? "active" : ""}`}
+          onClick={() => navigate("/cart")}
+          style={{ position: "relative" }}
+        >
+          <IoBagOutline size={22} />
+          <span>Cart</span>
+          {cartCount > 0 && (
+            <span style={{ position: "absolute", top: 4, right: 18, background: "var(--gold)", color: "#0a0908", width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600 }}>
+              {cartCount}
+            </span>
+          )}
+        </button>
+
+        <button 
+          className={`mobile-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
+          onClick={() => navigate(user ? "/profile" : "/login")}
+        >
+          <IoPersonOutline size={22} />
+          <span>Profile</span>
+        </button>
+
+        {user ? (
+          <button 
+            className={`mobile-nav-item ${location.pathname === "/settings" ? "active" : ""}`}
+            onClick={() => navigate("/settings")}
+          >
+            <IoSettingsOutline size={22} />
+            <span>Settings</span>
+          </button>
+        ) : (
+          <button 
+            className={`mobile-nav-item ${location.pathname === "/login" ? "active" : ""}`}
+            onClick={() => navigate("/login")}
+          >
+            <IoLogOutOutline size={22} style={{ transform: "rotate(180deg)" }}/>
+            <span>Sign In</span>
+          </button>
+        )}
       </div>
     </nav>
   );

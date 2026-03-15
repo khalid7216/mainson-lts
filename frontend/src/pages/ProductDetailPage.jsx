@@ -110,8 +110,8 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
   };
 
   return (
-    <div style={{ padding: "100px 0 80px" }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 32px" }}>
+    <div style={{ padding: "clamp(80px, 12vh, 100px) 0 80px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 clamp(16px, 5vw, 32px)" }}>
         {/* Back button */}
         <button
           onClick={() => navigate("/")}

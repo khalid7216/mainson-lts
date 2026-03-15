@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Btn, Inp, Spinner } from "../components/UI";
 import { authAPI } from "../services/api";
+import { IoPersonOutline, IoLockClosedOutline, IoKeyOutline } from "react-icons/io5";
 
 const SettingsPage = ({ navigate }) => {
   const { user, updateUser, logout } = useAuth();
@@ -123,8 +124,8 @@ const SettingsPage = ({ navigate }) => {
   };
 
   const TABS = [
-    { id: "profile", label: "Profile", icon: "👤" },
-    { id: "password", label: "Password", icon: "🔒" },
+    { id: "profile", label: "Profile", icon: <IoPersonOutline size={18} /> },
+    { id: "password", label: "Password", icon: <IoLockClosedOutline size={18} /> },
   ];
 
   return (
@@ -185,7 +186,7 @@ const SettingsPage = ({ navigate }) => {
               gap: 8,
             }}
           >
-            <span style={{ fontSize: 16 }}>{t.icon}</span>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 24, height: 24 }}>{t.icon}</span>
             {t.label}
           </button>
         ))}
@@ -291,7 +292,7 @@ const SettingsPage = ({ navigate }) => {
               <Inp
                 label="Current Password"
                 type="password"
-                icon="🔒"
+                icon={<IoLockClosedOutline />}
                 value={passForm.current}
                 onChange={(e) =>
                   setPassForm((p) => ({ ...p, current: e.target.value }))
@@ -303,7 +304,7 @@ const SettingsPage = ({ navigate }) => {
               <Inp
                 label="New Password"
                 type="password"
-                icon="🔑"
+                icon={<IoKeyOutline />}
                 value={passForm.new}
                 onChange={(e) =>
                   setPassForm((p) => ({ ...p, new: e.target.value }))
@@ -315,7 +316,7 @@ const SettingsPage = ({ navigate }) => {
               <Inp
                 label="Confirm New Password"
                 type="password"
-                icon="🔑"
+                icon={<IoKeyOutline />}
                 value={passForm.confirm}
                 onChange={(e) =>
                   setPassForm((p) => ({ ...p, confirm: e.target.value }))

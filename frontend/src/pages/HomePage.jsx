@@ -118,10 +118,11 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
 
         {/* Hero text */}
         <div
+          className="hero-text-wrap"
           style={{
             maxWidth: 1320,
             margin: "0 auto",
-            padding: "0 60px",
+            padding: "0 clamp(20px, 6vw, 60px)",
             position: "relative",
             zIndex: 1,
             width: "100%",
@@ -277,7 +278,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       </section>
 
       {/* ── Filters ──────────────────────────────────── */}
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "48px 32px 0" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "48px clamp(20px, 5vw, 32px) 0" }}>
         <div
           style={{
             display: "flex",
@@ -287,18 +288,20 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
             gap: 16,
           }}
         >
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="hide-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, width: "100%", WebkitOverflowScrolling: "touch" }}>
             {NAV_CATEGORIES.map((c) => (
               <button
                 key={c}
                 className={`chip${cat === c ? " active" : ""}`}
                 onClick={() => changeFilter(c)}
+                style={{ flexShrink: 0 }}
               >
                 {c}
               </button>
             ))}
           </div>
-          <select
+          <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
+            <select
             value={sort}
             onChange={(e) => {
               setSort(e.target.value);
@@ -319,6 +322,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
             ))}
           </select>
         </div>
+        </div>
         <p
           style={{
             fontSize: 12,
@@ -336,10 +340,11 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         style={{
           maxWidth: 1320,
           margin: "0 auto",
-          padding: "24px 32px 80px",
+          padding: "24px clamp(16px, 5vw, 32px) 80px",
         }}
       >
         <div
+          className="prod-grid-mobile"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(275px, 1fr))",
@@ -367,7 +372,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           background: "var(--card)",
           borderTop: "1px solid var(--border)",
           borderBottom: "1px solid var(--border)",
-          padding: "80px 60px",
+          padding: "80px clamp(24px, 8vw, 60px)",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
@@ -421,10 +426,11 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
 
       {/* ── Footer ───────────────────────────────────── */}
       <footer
+        className="app-footer"
         style={{
           background: "var(--void)",
           borderTop: "1px solid var(--border)",
-          padding: "64px 60px 32px",
+          padding: "64px clamp(24px, 8vw, 60px) 32px",
         }}
       >
         <div style={{ maxWidth: 1320, margin: "0 auto" }}>
