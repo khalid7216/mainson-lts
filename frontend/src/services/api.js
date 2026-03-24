@@ -84,7 +84,7 @@ export const authAPI = {
 ══════════════════════════════════════════════════ */
 export const orderAPI = {
   /* Create order — sends [{ productId, qty }], server fetches real prices */
-  createOrder: async (cartItems, shippingAddress, notes = "") => {
+  createOrder: async ({ cartItems, shippingAddress, notes = "" }) => {
     return await request("/orders", {
       method: "POST",
       body:   JSON.stringify({ cartItems, shippingAddress, notes }),

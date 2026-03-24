@@ -9,7 +9,6 @@ const ActivityLog  = require("../models/ActivityLog");
 exports.getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id })
-      .populate("shippingAddress")
       .sort("-createdAt");
     res.json({ orders });
   } catch (err) {
@@ -20,7 +19,7 @@ exports.getMyOrders = async (req, res) => {
 /* ── GET /api/orders/:id ────────────────────────── */
 exports.getOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate("shippingAddress");
+    const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
     if (order.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized" });
@@ -192,7 +191,6 @@ exports.getAllOrders = async (req, res) => {
     const total = await Order.countDocuments(filter);
     const orders = await Order.find(filter)
       .populate("user", "name email")
-      .populate("shippingAddress")
       .sort("-createdAt")
       .skip(skip)
       .limit(Number(limit));

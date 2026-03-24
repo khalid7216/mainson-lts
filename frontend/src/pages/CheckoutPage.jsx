@@ -33,10 +33,11 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
 
   // Shipping State
   const [address, setAddress] = useState({
-    name: user?.name || "",
-    street: "",
-    city: "",
-    zip: "",
+    fullName:   user?.name || "",
+    line1:      "",
+    city:       "",
+    postalCode: "",
+    country:    "Pakistan", // Default country
   });
 
   const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -207,14 +208,14 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
                   <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>Full Name</label>
                   <input 
                     type="text" required className="inp" placeholder="Jane Doe"
-                    value={address.name} onChange={e => setAddress({...address, name: e.target.value})}
+                    value={address.fullName} onChange={e => setAddress({...address, fullName: e.target.value})}
                   />
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>Street Address</label>
                   <input 
                     type="text" required className="inp" placeholder="123 Maison St"
-                    value={address.street} onChange={e => setAddress({...address, street: e.target.value})}
+                    value={address.line1} onChange={e => setAddress({...address, line1: e.target.value})}
                   />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: 16 }}>
@@ -229,7 +230,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
                     <label style={{ display: "block", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>Postal Code</label>
                     <input 
                       type="text" required className="inp" placeholder="10001"
-                      value={address.zip} onChange={e => setAddress({...address, zip: e.target.value})}
+                      value={address.postalCode} onChange={e => setAddress({...address, postalCode: e.target.value})}
                     />
                   </div>
                 </div>

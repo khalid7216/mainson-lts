@@ -16,6 +16,20 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const shippingAddressSchema = new mongoose.Schema(
+  {
+    fullName:   { type: String, required: true },
+    line1:      { type: String, required: true },
+    line2:      { type: String, default: "" },
+    city:       { type: String, required: true },
+    state:      { type: String, default: "" },
+    postalCode: { type: String, required: true },
+    country:    { type: String, required: true, default: "Pakistan" },
+    phone:      { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderId: {
@@ -58,8 +72,8 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     shippingAddress: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref:  "Address",
+      type:     shippingAddressSchema,
+      required: true,
     },
     notes: {
       type:    String,
