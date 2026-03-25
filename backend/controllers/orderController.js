@@ -4,6 +4,7 @@ const Cart         = require("../models/Cart");
 const Product      = require("../models/Product");
 const Notification = require("../models/Notification");
 const ActivityLog  = require("../models/ActivityLog");
+const Payment      = require("../models/Payment");
 
 /* ── GET /api/orders (user's orders) ────────────── */
 exports.getMyOrders = async (req, res) => {
@@ -220,6 +221,68 @@ exports.updateOrderStatus = async (req, res) => {
     });
 
     res.json({ order });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ══════════════════════════════════════════════════
+   POST /api/orders/:id/rollback
+   ────────────────────────────────────────────────
+   Called via navigator.sendBeacon when user
+   leaves/refreshes checkout page mid-payment.
+   - Only cancels pending/processing orders
+   - Restores product stock
+   - Marks linked Payment record as cancelled
+   - Idempotent: already cancelled → 200 silently
+══════════════════════════════════════════════════ */
+exports.rollbackOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Only the owner can rollback
+    if (order.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // If already cancelled / shipped / delivered → skip silently
+    if (["cancelled", "shipped", "delivered", "paid"].includes(order.status)) {
+      return res.json({ message: "No rollback needed", status: order.status });
+    }
+
+    // Only rollback pending or processing orders
+    if (!["pending", "processing"].includes(order.status)) {
+      return res.status(400).json({ message: `Cannot rollback order with status: ${order.status}` });
+    }
+
+    // Cancel the order
+    order.status = "cancelled";
+    await order.save();
+
+    // Restore stock for each item
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } });
+    }
+
+    // Cancel linked payment record if it exists and is still pending
+    const payment = await Payment.findOne({ order: order._id });
+    if (payment && payment.status === "pending") {
+      payment.status = "cancelled";
+      await payment.save();
+    }
+
+    await ActivityLog.create({
+      user:       req.user.id,
+      action:     "order_rolled_back",
+      resource:   "Order",
+      resourceId: order._id.toString(),
+      ip:         req.ip,
+      userAgent:  req.headers["user-agent"],
+      details:    { reason: "User left checkout page" },
+    });
+
+    res.json({ message: "Order rolled back successfully", orderId: order._id });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

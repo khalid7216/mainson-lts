@@ -250,3 +250,70 @@ exports.stripeWebhook = async (req, res) => {
 
   res.json({ received: true });
 };
+
+/* ══════════════════════════════════════════════════
+   GET /api/payments/verify/:orderId
+   ────────────────────────────────────────────────
+   Verifies payment from DB. If Payment is still
+   "pending" (webhook not fired yet in local dev),
+   directly calls Stripe to get the real status and
+   updates DB accordingly.
+══════════════════════════════════════════════════ */
+exports.verifyPayment = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (order.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const payment = await Payment.findOne({ order: order._id });
+
+    // No Payment record = COD order — verified if not cancelled
+    if (!payment) {
+      return res.json({
+        verified:    order.status !== "cancelled",
+        status:      order.status,
+        orderStatus: order.status,
+      });
+    }
+
+    // Already conclusive in DB
+    if (["succeeded", "failed", "cancelled", "refunded"].includes(payment.status)) {
+      return res.json({
+        verified:    payment.status === "succeeded",
+        status:      payment.status,
+        orderStatus: order.status,
+      });
+    }
+
+    // Payment is still "pending" — ask Stripe directly (works without webhook)
+    if (stripe && payment.stripePaymentIntentId) {
+      const pi = await stripe.paymentIntents.retrieve(payment.stripePaymentIntentId);
+
+      if (pi.status === "succeeded") {
+        // Update DB to reflect real status
+        payment.status = "succeeded";
+        payment.method = pi.payment_method_types?.[0] || "card";
+        await payment.save();
+
+        order.status = "paid";
+        await order.save();
+
+        return res.json({ verified: true, status: "succeeded", orderStatus: "paid" });
+      }
+
+      if (pi.status === "canceled" || pi.status === "payment_failed") {
+        payment.status = "failed";
+        await payment.save();
+        return res.json({ verified: false, status: "failed", orderStatus: order.status });
+      }
+    }
+
+    // Still pending (unlikely after client-side confirm)
+    res.json({ verified: false, status: payment.status, orderStatus: order.status });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

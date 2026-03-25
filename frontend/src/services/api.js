@@ -105,6 +105,11 @@ export const orderAPI = {
   cancelOrder: async (id) => {
     return await request(`/orders/${id}/cancel`, { method: "PUT" });
   },
+
+  /* Rollback order — cancel pending/processing order + restore stock */
+  rollbackOrder: async (orderId) => {
+    return await request(`/orders/${orderId}/rollback`, { method: "POST" });
+  },
 };
 
 /* ══════════════════════════════════════════════════
@@ -125,5 +130,10 @@ export const paymentAPI = {
       method: "POST",
       body:   JSON.stringify({ orderId, reason }),
     });
+  },
+
+  /* Verify payment from DB — authoritative success/failure check */
+  verifyPayment: async (orderId) => {
+    return await request(`/payments/verify/${orderId}`);
   },
 };

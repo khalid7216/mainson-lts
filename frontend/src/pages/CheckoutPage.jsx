@@ -1,11 +1,11 @@
 // frontend/src/pages/CheckoutPage.jsx
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { orderAPI, paymentAPI } from "../services/api";
 import { Btn } from "../components/UI";
-import { IoArrowBack, IoLockClosed, IoCheckmarkCircle, IoCloseCircle, IoWalletOutline } from "react-icons/io5";
+import { IoArrowBack, IoCheckmarkCircle, IoCloseCircle, IoWalletOutline } from "react-icons/io5";
 
 const CARD_STYLE = {
   style: {
@@ -30,6 +30,41 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
   const [orderResult, setOrderResult] = useState(null);
   const [errorMsg, setErrorMsg]   = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card"); // card | cod
+
+  // Ref to track a pending order so we can rollback if user leaves
+  const pendingOrderId = useRef(null);
+  const API_URL = import.meta.env.VITE_API_URL || "https://mainson-frontend.vercel.app/api";
+
+  /* ── Rollback on page refresh / tab close ──────── */
+  useEffect(() => {
+    const sendRollback = () => {
+      if (!pendingOrderId.current) return;
+      const token  = localStorage.getItem("token");
+      const orderId = pendingOrderId.current;
+      pendingOrderId.current = null; // prevent double-fire
+
+      // fetch with keepalive:true survives page unload AND can set Auth headers
+      fetch(`${API_URL}/orders/${orderId}/rollback`, {
+        method:    "POST",
+        keepalive: true,                   // ← key: outlives the page
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: "{}",
+      }).catch(() => {}); // silently ignore network errors
+    };
+
+    // beforeunload  → refresh, close tab, navigate away
+    // pagehide      → back/forward cache, mobile browser suspend
+    window.addEventListener("beforeunload", sendRollback);
+    window.addEventListener("pagehide",     sendRollback);
+
+    return () => {
+      window.removeEventListener("beforeunload", sendRollback);
+      window.removeEventListener("pagehide",     sendRollback);
+    };
+  }, [API_URL]);
 
   // Shipping State
   const [address, setAddress] = useState({
@@ -78,45 +113,67 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
     try {
       /* ── 1. Create order (server fetches real prices) ── */
       const cartItems = cart.map((item) => ({
-        productId: item._id || item.id, // Fallback to id for older formats
+        productId: item._id || item.id,
         qty:       item.qty,
       }));
 
       const { order } = await orderAPI.createOrder({
-         cartItems,
-         shippingAddress: address, // Send the collected address
-         notes: paymentMethod === 'cod' ? 'Cash on Delivery' : ''
+        cartItems,
+        shippingAddress: address,
+        notes: paymentMethod === "cod" ? "Cash on Delivery" : "",
       });
+
+      // Track pending order — rollback fires if user leaves now
+      pendingOrderId.current = order._id;
 
       /* ── 2. Handle Payment Method ──────────────────── */
       if (paymentMethod === "card") {
-         const { clientSecret } = await paymentAPI.createIntent(order._id);
-         const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-           payment_method: {
-             card: elements.getElement(CardElement),
-             billing_details: { name: user.name, email: user.email },
-           },
-         });
+        const { clientSecret } = await paymentAPI.createIntent(order._id);
 
-         if (error) {
-           setErrorMsg(error.message);
-           setStep("error");
-           setOrderResult(order);
-           toast(error.message, "err");
-         } else if (paymentIntent.status === "succeeded") {
-           setOrderResult(order);
-           setStep("success");
-           setCart([]); // Clear cart
-           toast("Payment successful! 🎉", "ok");
-         }
+        const { error } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement),
+            billing_details: { name: user.name, email: user.email },
+          },
+        });
+
+        if (error) {
+          // Stripe returned an error — clear pending so rollback doesn't double-fire
+          pendingOrderId.current = null;
+          setErrorMsg(error.message);
+          setStep("error");
+          setOrderResult(order);
+          toast(error.message, "err");
+          return;
+        }
+
+        /* ── 3. Verify payment from DB (authoritative) ── */
+        const verification = await paymentAPI.verifyPayment(order._id);
+
+        // Payment confirmed by DB — clear pending ref so rollback won't fire
+        pendingOrderId.current = null;
+
+        if (verification.verified) {
+          setOrderResult(order);
+          setStep("success");
+          setCart([]);
+          toast("Payment successful! 🎉", "ok");
+        } else {
+          setErrorMsg(`Payment could not be verified (status: ${verification.status}). Please contact support.`);
+          setStep("error");
+          setOrderResult(order);
+          toast("Payment verification failed", "err");
+        }
       } else {
-         // Cash on Delivery - Order is already pending
-         setOrderResult(order);
-         setStep("success");
-         setCart([]); // Clear cart
-         toast("Order placed successfully! (Cash on Delivery)", "ok");
+        // Cash on Delivery — clear pending ref immediately
+        pendingOrderId.current = null;
+        setOrderResult(order);
+        setStep("success");
+        setCart([]);
+        toast("Order placed successfully! (Cash on Delivery)", "ok");
       }
     } catch (err) {
+      pendingOrderId.current = null;
       setErrorMsg(err.message);
       setStep("error");
       toast(err.message, "err");
