@@ -8,7 +8,7 @@ exports.getActivityLogs = async (req, res) => {
     const { user, action, page = 1, limit = 25 } = req.query;
 
     const filter = {};
-    if (user)   filter.user   = user;
+    if (user) filter.user = user;
     if (action) filter.action = action;
 
     const logs = await ActivityLog.find(filter)

@@ -1,5 +1,5 @@
 // frontend/src/services/api.js
-const API_URL = import.meta.env.VITE_API_URL || "https://mainson-frontend.vercel.app/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://mainson-backend.vercel.app/api";
 // const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 /* ── Helper: make API request with credentials ───── */
 const request = async (endpoint, options = {}) => {
@@ -18,7 +18,7 @@ const request = async (endpoint, options = {}) => {
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
-  const data     = await response.json();
+  const data = await response.json();
 
   if (!response.ok) {
     throw new Error(data.message || "Something went wrong");
@@ -35,7 +35,7 @@ export const authAPI = {
   signup: async (name, email, password) => {
     const data = await request("/auth/signup", {
       method: "POST",
-      body:   JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password }),
     });
     if (data.token) localStorage.setItem("token", data.token);
     return data;
@@ -45,7 +45,7 @@ export const authAPI = {
   login: async (email, password) => {
     const data = await request("/auth/login", {
       method: "POST",
-      body:   JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password }),
     });
     if (data.token) localStorage.setItem("token", data.token);
     return data;
@@ -66,7 +66,7 @@ export const authAPI = {
   forgotPassword: async (email) => {
     return await request("/auth/forgot-password", {
       method: "POST",
-      body:   JSON.stringify({ email }),
+      body: JSON.stringify({ email }),
     });
   },
 
@@ -74,7 +74,7 @@ export const authAPI = {
   resetPassword: async (token, password) => {
     return await request(`/auth/reset-password/${token}`, {
       method: "PUT",
-      body:   JSON.stringify({ password }),
+      body: JSON.stringify({ password }),
     });
   },
 };
@@ -87,7 +87,7 @@ export const orderAPI = {
   createOrder: async ({ cartItems, shippingAddress, notes = "" }) => {
     return await request("/orders", {
       method: "POST",
-      body:   JSON.stringify({ cartItems, shippingAddress, notes }),
+      body: JSON.stringify({ cartItems, shippingAddress, notes }),
     });
   },
 
@@ -120,7 +120,7 @@ export const paymentAPI = {
   createIntent: async (orderId) => {
     return await request("/payments/create-intent", {
       method: "POST",
-      body:   JSON.stringify({ orderId }),
+      body: JSON.stringify({ orderId }),
     });
   },
 
@@ -128,7 +128,7 @@ export const paymentAPI = {
   refund: async (orderId, reason = "") => {
     return await request("/payments/refund", {
       method: "POST",
-      body:   JSON.stringify({ orderId, reason }),
+      body: JSON.stringify({ orderId, reason }),
     });
   },
 
