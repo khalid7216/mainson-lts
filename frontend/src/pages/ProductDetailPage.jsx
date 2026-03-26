@@ -56,33 +56,10 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
     window.scrollTo(0, 0);
   }, [slug]);  // ✅ CHANGED: id → slug
 
-  if (loading) {
-    return (
-      <div style={{ padding: "120px 32px", textAlign: "center" }}>
-        <h2>Loading product...</h2>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div style={{ padding: "120px 32px", textAlign: "center" }}>
-        <h2>Product not found</h2>
-        <Btn v="primary" onClick={() => navigate("/")}>
-          Back to Home
-        </Btn>
-      </div>
-    );
-  }
-
-  const isWished = wishlist?.includes(product.id);
-  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["XS", "S", "M", "L", "XL"];
-  
-  // Use images from response or mock fallback
-  const images = product.images.length >= 3 ? product.images : [product.image, product.image, product.image];
-
   /* ── SEO: Inject JSON-LD structured data ──────── */
   useEffect(() => {
+    if (!product) return;
+    
     // Product schema
     const productLD = {
       "@context": "https://schema.org/",
@@ -94,7 +71,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
       offers: {
         "@type": "Offer",
         priceCurrency: "USD",
-        price: product.price.toFixed(2),
+        price: product.price ? product.price.toFixed(2) : "0.00",
         availability: "https://schema.org/InStock",
       },
       ...(product.rating && {
@@ -139,6 +116,33 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
       document.getElementById("ld-breadcrumb")?.remove();
     };
   }, [product]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: "120px 32px", textAlign: "center" }}>
+        <h2>Loading product...</h2>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div style={{ padding: "120px 32px", textAlign: "center" }}>
+        <h2>Product not found</h2>
+        <Btn v="primary" onClick={() => navigate("/")}>
+          Back to Home
+        </Btn>
+      </div>
+    );
+  }
+
+  const isWished = wishlist?.includes(product.id);
+  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["XS", "S", "M", "L", "XL"];
+  
+  // Use images from response or mock fallback
+  const images = product.images.length >= 3 ? product.images : [product.image, product.image, product.image];
+
+
 
   const handleAddToCart = () => {
     if (!selectedSize) {
