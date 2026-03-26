@@ -33,7 +33,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
 
   // Ref to track a pending order so we can rollback if user leaves
   const pendingOrderId = useRef(null);
-  const API_URL = import.meta.env.VITE_API_URL || "https://mainson-backend.vercel.app/api";
+  const API_URL = import.meta.env.VITE_API_URL || "https://maison-backend.vercel.app/api";
 
   /* ── Rollback on page refresh / tab close ──────── */
   useEffect(() => {

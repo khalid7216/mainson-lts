@@ -55,101 +55,104 @@ export const LoginPage = () => {
       title="Welcome Back"
       subtitle="Sign in to your Maison Élite account"
     >
-      <Inp
-        label="Email Address"
-        type="email"
-        icon="✉"
-        value={form.email}
-        onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-        placeholder="your@email.com"
-        error={errors.email}
-      />
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <Inp
+          label="Email Address"
+          type="email"
+          icon="✉"
+          value={form.email}
+          onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+          placeholder="your@email.com"
+          error={errors.email}
+        />
 
-      <div className="inp-wrap">
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: 8,
-        }}>
-          <label className="inp-label">Password</label>
-          <button
-            onClick={() => navigate("/forgot-password")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--gold)",
-              fontSize: 11,
-              cursor: "pointer",
-            }}
-          >
-            Forgot?
-          </button>
-        </div>
-        <div style={{ position: "relative" }}>
-          <span style={{
-            position: "absolute",
-            left: 14,
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "var(--dim)",
-            fontSize: 15,
+        <div className="inp-wrap">
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            marginBottom: 8,
           }}>
-            🔒
-          </span>
-          <input
-            type={showPass ? "text" : "password"}
-            value={form.pass}
-            onChange={(e) => setForm((p) => ({ ...p, pass: e.target.value }))}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            placeholder="••••••••"
-            className="inp inp-icon"
-            style={{ borderColor: errors.pass ? "var(--rose)" : "", paddingRight: 52 }}
-          />
-          <button
-            onClick={() => setShowPass((p) => !p)}
-            style={{
+            <label className="inp-label">Password</label>
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--gold)",
+                fontSize: 11,
+                cursor: "pointer",
+              }}
+            >
+              Forgot?
+            </button>
+          </div>
+          <div style={{ position: "relative" }}>
+            <span style={{
               position: "absolute",
-              right: 14,
+              left: 14,
               top: "50%",
               transform: "translateY(-50%)",
-              background: "none",
-              border: "none",
               color: "var(--dim)",
-              cursor: "pointer",
-              fontSize: 11,
-              letterSpacing: ".08em",
-              transition: "color .2s",
-            }}
-            onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
-            onMouseLeave={(e) => (e.target.style.color = "var(--dim)")}
-          >
-            {showPass ? "Hide" : "Show"}
-          </button>
+              fontSize: 15,
+            }}>
+              🔒
+            </span>
+            <input
+              type={showPass ? "text" : "password"}
+              value={form.pass}
+              onChange={(e) => setForm((p) => ({ ...p, pass: e.target.value }))}
+              placeholder="••••••••"
+              className="inp inp-icon"
+              style={{ borderColor: errors.pass ? "var(--rose)" : "", paddingRight: 52 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass((p) => !p)}
+              style={{
+                position: "absolute",
+                right: 14,
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                color: "var(--dim)",
+                cursor: "pointer",
+                fontSize: 11,
+                letterSpacing: ".08em",
+                transition: "color .2s",
+              }}
+              onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
+              onMouseLeave={(e) => (e.target.style.color = "var(--dim)")}
+            >
+              {showPass ? "Hide" : "Show"}
+            </button>
+          </div>
+          {errors.pass && (
+            <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 5 }}>
+              {errors.pass}
+            </p>
+          )}
         </div>
-        {errors.pass && (
-          <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 5 }}>
-            {errors.pass}
-          </p>
-        )}
-      </div>
 
-      <Btn
-        v="primary"
-        full
-        size="lg"
-        onClick={handleSubmit}
-        disabled={loading}
-        style={{ marginBottom: 20 }}
-      >
-        {loading ? (
-          <>
-            <Spinner /> Signing In...
-          </>
-        ) : (
-          "Sign In"
-        )}
-      </Btn>
+        <Btn
+          v="primary"
+          full
+          size="lg"
+          type="submit"
+          disabled={loading}
+          style={{ marginBottom: 20 }}
+        >
+          {loading ? (
+            <>
+              <Spinner /> Signing In...
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Btn>
+      </form>
 
       <div style={{
         display: "flex",
@@ -332,7 +335,7 @@ export const SignupPage = () => {
 
       {/* Step 1 — Personal */}
       {step === 1 && (
-        <div className="fu">
+        <form className="fu" onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
           <div
             style={{
               display: "grid",
@@ -361,15 +364,15 @@ export const SignupPage = () => {
             />
           </div>
 
-          <Btn v="primary" full size="lg" onClick={handleNext}>
+          <Btn v="primary" full size="lg" type="submit">
             Continue →
           </Btn>
-        </div>
+        </form>
       )}
 
       {/* Step 2 — Account */}
       {step === 2 && (
-        <div className="fu">
+        <form className="fu" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <Inp
             label="Email Address"
             type="email"
@@ -520,6 +523,7 @@ export const SignupPage = () => {
 
           <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
             <Btn
+              type="button"
               v="ghost"
               onClick={() => {
                 setStep(1);
@@ -532,7 +536,7 @@ export const SignupPage = () => {
               v="primary"
               full
               size="lg"
-              onClick={handleSubmit}
+              type="submit"
               disabled={loading}
             >
               {loading ? (
@@ -544,7 +548,7 @@ export const SignupPage = () => {
               )}
             </Btn>
           </div>
-        </div>
+        </form>
       )}
 
       <p
@@ -616,7 +620,7 @@ export const ForgotPage = () => {
       }
     >
       {!sent ? (
-        <div className="fu">
+        <form className="fu" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div
             style={{
               padding: "18px 20px",
@@ -646,7 +650,7 @@ export const ForgotPage = () => {
             v="primary"
             full
             size="lg"
-            onClick={handleSubmit}
+            type="submit"
             disabled={loading}
             style={{ marginBottom: 20 }}
           >
@@ -660,6 +664,7 @@ export const ForgotPage = () => {
           </Btn>
 
           <button
+            type="button"
             onClick={() => navigate("/login")}
             style={{
               background: "none",
@@ -682,7 +687,7 @@ export const ForgotPage = () => {
           >
             ← Back to Sign In
           </button>
-        </div>
+        </form>
       ) : (
         <div className="fu" style={{ textAlign: "center" }}>
           <div
