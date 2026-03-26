@@ -137,3 +137,60 @@ export const paymentAPI = {
     return await request(`/payments/verify/${orderId}`);
   },
 };
+
+/* ══════════════════════════════════════════════════
+   PRODUCT APIS
+   ────────────────────────────────────────────────
+   Admin endpoints are protected by adminOnly on server.
+══════════════════════════════════════════════════ */
+export const productAPI = {
+  /* Get all products (supports search/filter) */
+  getProducts: async (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return await request(`/products?${qs}`);
+  },
+
+  /* Get single product */
+  getProduct: async (slug) => {
+    return await request(`/products/${slug}`);
+  },
+
+  /* Create product (Admin) */
+  create: async (body) => {
+    return await request("/products", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+
+  /* Update product (Admin) */
+  update: async (id, body) => {
+    return await request(`/products/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  },
+
+  /* Delete/Deactivate product (Admin) */
+  delete: async (id) => {
+    return await request(`/products/${id}`, { method: "DELETE" });
+  },
+};
+
+/* ══════════════════════════════════════════════════
+   CATEGORY APIS
+══════════════════════════════════════════════════ */
+export const categoryAPI = {
+  /* Get all categories */
+  getCategories: async () => {
+    return await request("/categories");
+  },
+
+  /* Create category (Admin) */
+  create: async (body) => {
+    return await request("/categories", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+};

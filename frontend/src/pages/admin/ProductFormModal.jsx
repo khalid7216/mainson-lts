@@ -289,7 +289,7 @@ const ColorPicker = ({ selected, onChange, error }) => (
 /* ══════════════════════════════════════════════════════
    MAIN PRODUCT FORM MODAL
 ══════════════════════════════════════════════════════ */
-const ProductFormModal = ({ product = null, onClose, onSave }) => {
+const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) => {
   /* If product is passed → Edit mode, else → Add mode */
   const isEdit = Boolean(product);
 
@@ -298,21 +298,22 @@ const ProductFormModal = ({ product = null, onClose, onSave }) => {
       ? {
           ...product,
           price:          String(product.price),
-          compareAtPrice: String(product.orig ?? ""),
-          category:       product.cat,
+          compareAtPrice: String(product.compareAtPrice ?? ""),
+          category:       product.category?._id || product.category || "",
           badge:          product.badge || "",
-          status:         "active",
-          description:    "Crafted in our atelier from the finest materials.",
-          shortDescription: "",
-          subCategory:    "",
-          materials:      "100% Silk",
-          careInstructions: "Dry clean only",
-          madeIn:         "Italy",
-          tags:           product.cat?.toLowerCase() ?? "",
-          isFeatured:     false,
+          status:         product.isActive ? "active" : "draft",
+          description:    product.description || "",
+          shortDescription: product.shortDescription || "",
+          subCategory:    product.subCategory || "",
+          materials:      product.materials || "",
+          careInstructions: product.careInstructions || "",
+          madeIn:         product.madeIn || "",
+          tags:           Array.isArray(product.tags) ? product.tags.join(", ") : (product.tags || ""),
+          isFeatured:     product.isFeatured || false,
           isNewArrival:   product.badge === "New",
-          sizes: (SIZE_OPTIONS[product.cat] || []).slice(0, 3).map((s) => ({ size: s, stock: 10 })),
-          colors: ["Black"],
+          sizes:          product.sizes || [],
+          colors:         product.colors || [],
+          image:          product.images?.[0] || product.image || "",
         }
       : { ...EMPTY_PRODUCT }
   );
@@ -331,10 +332,14 @@ const ProductFormModal = ({ product = null, onClose, onSave }) => {
     setErrors(errs);
     if (Object.keys(errs).length) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    onSave?.({ ...form, id: product?.id ?? Date.now() });
-    onClose();
+    try {
+      onSave?.(form);
+      onClose();
+    } catch (err) {
+      console.error("Modal save failed:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const TABS = [
@@ -507,7 +512,7 @@ const ProductFormModal = ({ product = null, onClose, onSave }) => {
                       error={errors.category}
                     >
                       <option value="">— Select category —</option>
-                      {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
                     </Select>
                   </Field>
 

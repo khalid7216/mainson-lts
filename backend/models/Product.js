@@ -19,6 +19,14 @@ const productSchema = new mongoose.Schema(
       type:    String,
       default: "",
     },
+    shortDescription: {
+      type:    String,
+      default: "",
+    },
+    subCategory: {
+      type:    String,
+      default: "",
+    },
     price: {
       type:     Number,
       required: [true, "Price is required"],
@@ -34,7 +42,7 @@ const productSchema = new mongoose.Schema(
     },
     badge: {
       type: String,
-      enum: ["New", "Sale", "Bestseller", ""],
+      enum: ["New", "Sale", "Bestseller", "Limited", "Exclusive", ""],
       default: "",
     },
     images: {
@@ -44,7 +52,36 @@ const productSchema = new mongoose.Schema(
     stock: {
       type:    Number,
       default: 0,
-      min:     [0, "Stock cannot be negative"],
+    },
+    sizes: [
+      {
+        size:  String,
+        stock: Number,
+      }
+    ],
+    colors: {
+      type:    [String],
+      default: [],
+    },
+    materials: {
+      type:    String,
+      default: "",
+    },
+    careInstructions: {
+      type:    String,
+      default: "",
+    },
+    madeIn: {
+      type:    String,
+      default: "",
+    },
+    tags: {
+      type:    [String],
+      default: [],
+    },
+    isFeatured: {
+      type:    Boolean,
+      default: false,
     },
     isActive: {
       type:    Boolean,

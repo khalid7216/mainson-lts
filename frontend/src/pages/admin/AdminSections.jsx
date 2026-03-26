@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, Btn, StatusTag } from "../../components/UI";
-import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
+import { ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
+import { productAPI, categoryAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
 
 /* ── Reusable Stat card ─────────────────────────────── */
@@ -105,16 +106,67 @@ export const AdminDashboard = () => (
 export const AdminProducts = () => {
   const [query,   setQuery]   = useState("");
   const [modal,   setModal]   = useState(null); // null | "add" | product object (edit)
-  const [allProds, setAllProds] = useState(PRODUCTS);
+  const [allProds, setAllProds] = useState([]);
+  const [cats,     setCats]     = useState([]);
+  const [loading,  setLoading]  = useState(true);
+
+  const fetchProducts = async () => {
+    try {
+      const data = await productAPI.getProducts({ limit: 100 });
+      setAllProds(data.products || []);
+    } catch (err) {
+      console.error("Fetch products failed:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const data = await categoryAPI.getCategories();
+      setCats(data.categories || []);
+    } catch (err) {
+      console.error("Fetch categories failed:", err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
 
   const items = allProds.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
 
-  const handleSave = (saved) => {
-    setAllProds((prev) => {
-      const exists = prev.find((p) => p.id === saved.id);
-      return exists ? prev.map((p) => p.id === saved.id ? { ...p, ...saved, cat: saved.category } : p)
-                    : [...prev, { ...saved, cat: saved.category }];
-    });
+  const handleSave = async (saved) => {
+    try {
+      const payload = {
+        ...saved,
+        images: saved.image ? [saved.image] : [],
+        tags: typeof saved.tags === "string" ? saved.tags.split(",").map((t) => t.trim()).filter(Boolean) : (saved.tags || []),
+        stock: saved.sizes?.reduce((sum, s) => sum + (Number(s.stock) || 0), 0) || 0,
+      };
+
+      if (saved._id) {
+        // Update
+        await productAPI.update(saved._id, payload);
+      } else {
+        // Create
+        await productAPI.create(payload);
+      }
+      fetchProducts(); // Refresh list
+    } catch (err) {
+      alert("Save failed: " + err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to deactivate this product?")) return;
+    try {
+      await productAPI.delete(id);
+      fetchProducts();
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+    }
   };
 
   return (
@@ -122,6 +174,7 @@ export const AdminProducts = () => {
       {modal && (
         <ProductFormModal
           product={modal === "add" ? null : modal}
+          categories={cats}
           onClose={() => setModal(null)}
           onSave={handleSave}
         />
@@ -158,11 +211,11 @@ export const AdminProducts = () => {
               <tr key={p.id}>
                 <td style={{ width: 60, padding: "10px" }}>
                   <div style={{ width: 50, height: 50, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)" }}>
-                    <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={p.images?.[0] || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                 </td>
                 <td style={{ fontWeight: 500 }}>{p.name}</td>
-                <td style={{ color: "var(--muted)" }}>{p.cat}</td>
+                <td style={{ color: "var(--muted)" }}>{p.category?.name || "Uncategorized"}</td>
                 <td>
                   <span style={{ color: "var(--gold2)", fontWeight: 600 }}>${p.price}</span>
                   {p.orig && (
@@ -188,7 +241,7 @@ export const AdminProducts = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => setAllProds((prev) => prev.filter((x) => x.id !== p.id))}
+                      onClick={() => handleDelete(p._id)}
                       style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif" }}>
                       Del
                     </button>
