@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { Btn, StatusTag } from "../components/UI";
-import { PRODUCTS } from "../data/mockData";
+import { productAPI } from "../services/api";
 import { HiStar, HiHeart, HiShoppingBag, HiCheck } from "react-icons/hi";
 import { IoArrowBack } from "react-icons/io5";
 
@@ -15,14 +15,54 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
   const { slug } = useParams();  // ✅ CHANGED: id → slug
   const toast = useToast();
   
-  const product = PRODUCTS.find((p) => p.slug === slug);  // ✅ CHANGED: p.id === parseInt(id) → p.slug === slug
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await productAPI.getProduct(slug);
+        const p = data.product;
+        setProduct({
+          id: p._id,
+          name: p.name,
+          slug: p.slug,
+          description: p.description || "Crafted from the finest materials, this piece embodies timeless elegance.",
+          price: p.price,
+          orig: p.compareAtPrice,
+          cat: p.category?.name || "Uncategorized",
+          badge: p.badge,
+          rating: data.avgRating || 4.5,
+          reviews: data.numReviews || 0,
+          image: p.images?.[0] || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
+          images: p.images?.length ? p.images : ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80"],
+          sizes: p.sizes?.map(s => s.size) || ["XS", "S", "M", "L", "XL"],
+          materials: p.materials || "100% Premium Material",
+          care: p.careInstructions || "Follow label instructions",
+          madeIn: p.madeIn || "Unknown",
+          sku: `ME-${p._id.substring(p._id.length - 4)}`
+        });
+      } catch (err) {
+        console.error("Failed to fetch product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
     window.scrollTo(0, 0);
   }, [slug]);  // ✅ CHANGED: id → slug
+
+  if (loading) {
+    return (
+      <div style={{ padding: "120px 32px", textAlign: "center" }}>
+        <h2>Loading product...</h2>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -36,10 +76,10 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
   }
 
   const isWished = wishlist?.includes(product.id);
-  const sizes = ["XS", "S", "M", "L", "XL"];
+  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["XS", "S", "M", "L", "XL"];
   
-  // Mock images (use same image multiple times for demo)
-  const images = [product.image, product.image, product.image];
+  // Use images from response or mock fallback
+  const images = product.images.length >= 3 ? product.images : [product.image, product.image, product.image];
 
   /* ── SEO: Inject JSON-LD structured data ──────── */
   useEffect(() => {
@@ -286,10 +326,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                 marginBottom: 32,
               }}
             >
-              Crafted from the finest materials, this piece embodies timeless
-              elegance. The sophisticated design features clean lines and
-              impeccable tailoring, making it a versatile addition to your
-              wardrobe. Perfect for both casual and formal occasions.
+              {product.description}
             </p>
 
             {/* Size selector */}
@@ -480,7 +517,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
             </div>
 
             {/* Product Details */}
-            <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 40 }}>
               <h3
                 style={{
                   fontSize: 18,
@@ -495,18 +532,16 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
               <div style={{ fontSize: 13, lineHeight: 2, color: "var(--muted)" }}>
                 <p>
                   <strong style={{ color: "var(--text)" }}>Material:</strong>{" "}
-                  100% Premium Cotton
+                  {product.materials}
                 </p>
                 <p>
-                  <strong style={{ color: "var(--text)" }}>Care:</strong> Machine
-                  wash cold, tumble dry low
+                  <strong style={{ color: "var(--text)" }}>Care:</strong> {product.care}
                 </p>
                 <p>
-                  <strong style={{ color: "var(--text)" }}>Made In:</strong> Italy
+                  <strong style={{ color: "var(--text)" }}>Made In:</strong> {product.madeIn}
                 </p>
                 <p>
-                  <strong style={{ color: "var(--text)" }}>SKU:</strong> ME-
-                  {product.id}-001
+                  <strong style={{ color: "var(--text)" }}>SKU:</strong> {product.sku}
                 </p>
               </div>
             </div>

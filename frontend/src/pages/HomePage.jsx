@@ -3,19 +3,49 @@
 //  FIXED: Pass navigate to ProductCard
 // ═════════════════════════════════════════════════════════════
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard, { QuickView } from "../components/ProductCard";
 import { Ticker } from "../components/Layout";
 import { Btn } from "../components/UI";
-import { PRODUCTS, NAV_CATEGORIES } from "../data/mockData";
+import { NAV_CATEGORIES } from "../data/mockData";
+import { productAPI } from "../services/api";
 
 const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const [cat, setCat] = useState("All");
   const [sort, setSort] = useState("Featured");
   const [qv, setQv] = useState(null);
   const [key, setKey] = useState(0);
+  const [apiProducts, setApiProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = PRODUCTS.filter((p) => cat === "All" || p.cat === cat).sort(
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await productAPI.getProducts({ limit: 100 });
+        const formattedProducts = data.products.map((p) => ({
+          id: p._id,
+          name: p.name,
+          slug: p.slug,
+          price: p.price,
+          orig: p.compareAtPrice,
+          cat: p.category?.name || "Uncategorized",
+          badge: p.badge,
+          rating: p.ratings?.length ? p.ratings : 4.5, // Dummy default if not available
+          reviews: 0,
+          image: p.images?.[0] || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
+        }));
+        setApiProducts(formattedProducts);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const products = apiProducts.filter((p) => cat === "All" || p.cat === cat).sort(
     (a, b) =>
       sort === "Price Low"
         ? a.price - b.price
