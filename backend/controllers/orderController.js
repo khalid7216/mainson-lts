@@ -1,4 +1,5 @@
 // backend/controllers/orderController.js
+const mongoose     = require("mongoose");
 const Order        = require("../models/Order");
 const Cart         = require("../models/Cart");
 const Product      = require("../models/Product");
@@ -35,24 +36,29 @@ exports.getOrder = async (req, res) => {
    POST /api/orders
    ────────────────────────────────────────────────
    SECURE: Server fetches real prices from DB.
-   Client only sends [{ productId, qty }].
-   Price manipulation is IMPOSSIBLE.
+   Uses ATOMIC TRANSACTIONS for stock/cart/order.
 ══════════════════════════════════════════════════ */
 exports.createOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { cartItems, shippingAddress, notes } = req.body;
 
-    // cartItems = [{ productId, qty }]
     if (!cartItems || cartItems.length === 0) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "No items in order" });
     }
 
-    /* ── 1. Fetch REAL prices from DB ──────────── */
+    /* ── 1. Fetch REAL prices from DB (within session) ── */
     const productIds = cartItems.map((i) => i.productId);
-    const products   = await Product.find({ _id: { $in: productIds }, isActive: true });
+    const products   = await Product.find({ _id: { $in: productIds }, isActive: true }).session(session);
 
     if (products.length !== productIds.length) {
-      return res.status(400).json({ message: "One or more products are unavailable" });
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "One or more products are unavailable or inactive" });
     }
 
     const productMap = {};
@@ -60,14 +66,16 @@ exports.createOrder = async (req, res) => {
 
     /* ── 2. Validate stock & build order items ─── */
     const orderItems = [];
-    const stockUpdates = []; // track what to deduct
+    const stockUpdates = [];
 
     for (const ci of cartItems) {
       const product = productMap[ci.productId];
       if (!product) {
-        return res.status(400).json({ message: `Product ${ci.productId} not found` });
+        throw new Error(`Product ${ci.productId} not found during transaction`);
       }
       if (product.stock < ci.qty) {
+        await session.abortTransaction();
+        session.endSession();
         return res.status(400).json({
           message: `Insufficient stock for "${product.name}". Available: ${product.stock}, requested: ${ci.qty}`,
         });
@@ -76,7 +84,7 @@ exports.createOrder = async (req, res) => {
       orderItems.push({
         product: product._id,
         name:    product.name,
-        price:   product.price,   // ← SERVER price, not client
+        price:   product.price,
         qty:     ci.qty,
         image:   product.images?.[0] || null,
       });
@@ -84,14 +92,14 @@ exports.createOrder = async (req, res) => {
       stockUpdates.push({ id: product._id, deduct: ci.qty });
     }
 
-    /* ── 3. Calculate totals SERVER-SIDE ────────── */
+    /* ── 3. Calculate totals ───────────────────── */
     const subtotal     = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const tax          = Math.round(subtotal * 0.08 * 100) / 100; // 8% tax
+    const tax          = Math.round(subtotal * 0.08 * 100) / 100;
     const shippingCost = subtotal > 200 ? 0 : 15;
     const totalAmount  = Math.round((subtotal + tax + shippingCost) * 100) / 100;
 
-    /* ── 4. Create order ───────────────────────── */
-    const order = await Order.create({
+    /* ── 4. Create order (within session) ──────── */
+    const [order] = await Order.create([{
       user: req.user.id,
       items: orderItems,
       subtotal,
@@ -100,36 +108,57 @@ exports.createOrder = async (req, res) => {
       totalAmount,
       shippingAddress,
       notes,
-    });
+      status: "pending"
+    }], { session });
 
-    /* ── 5. Deduct stock ───────────────────────── */
+    /* ── 5. Deduct stock (within session) ──────── */
     for (const su of stockUpdates) {
-      await Product.findByIdAndUpdate(su.id, { $inc: { stock: -su.deduct } });
+      const updatedProduct = await Product.findOneAndUpdate(
+        { _id: su.id, stock: { $gte: su.deduct } },
+        { $inc: { stock: -su.deduct } },
+        { session, new: true }
+      );
+      if (!updatedProduct) {
+        throw new Error("Concurrency error: Product stock changed during checkout. Please try again.");
+      }
     }
 
-    /* ── 6. Clear cart ─────────────────────────── */
-    await Cart.findOneAndDelete({ user: req.user.id });
+    /* ── 6. Clear cart (within session) ────────── */
+    await Cart.findOneAndDelete({ user: req.user.id }, { session });
 
-    /* ── 7. Notification + ActivityLog ──────────── */
-    await Notification.create({
-      user:    req.user.id,
-      type:    "order_update",
-      title:   "Order Placed",
-      message: `Your order ${order.orderId} has been placed successfully.`,
-      link:    `/profile`,
-    });
+    // Commit all changes
+    await session.commitTransaction();
+    session.endSession();
 
-    await ActivityLog.create({
-      user:       req.user.id,
-      action:     "order_placed",
-      resource:   "Order",
-      resourceId: order._id.toString(),
-      ip:         req.ip,
-      userAgent:  req.headers["user-agent"],
-    });
+    /* ── 7. Notification + ActivityLog (Outside Transaction) ── */
+    // Note: We do these AFTER commit so they don't block the transaction
+    try {
+      await Notification.create({
+        user:    req.user.id,
+        type:    "order_update",
+        title:   "Order Started",
+        message: `Your order ${order.orderId} is being processed. Please complete payment.`,
+        link:    `/profile`,
+      });
+
+      await ActivityLog.create({
+        user:       req.user.id,
+        action:     "order_created",
+        resource:   "Order",
+        resourceId: order._id.toString(),
+        ip:         req.ip,
+        userAgent:  req.headers["user-agent"],
+      });
+    } catch (logErr) {
+      console.warn("Log/Notification failed, but order was created:", logErr.message);
+    }
 
     res.status(201).json({ order });
   } catch (err) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    session.endSession();
     res.status(500).json({ message: err.message });
   }
 };
@@ -137,46 +166,58 @@ exports.createOrder = async (req, res) => {
 /* ══════════════════════════════════════════════════
    PUT /api/orders/:id/cancel
    ────────────────────────────────────────────────
-   Cancels order + restores stock.
-   Refund is handled by /api/payments/refund.
+   Manual Cancellation by user/admin.
 ══════════════════════════════════════════════════ */
 exports.cancelOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
-    if (order.user.toString() !== req.user.id) {
+    const order = await Order.findById(req.params.id).session(session);
+    if (!order) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    if (order.user.toString() !== req.user.id && req.user.role !== "admin") {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({ message: "Not authorized" });
     }
+    
     if (["shipped", "delivered", "cancelled"].includes(order.status)) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: `Cannot cancel a ${order.status} order` });
     }
 
     order.status = "cancelled";
-    await order.save();
+    await order.save({ session });
 
     /* ── Restore stock ─────────────────────────── */
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } });
+      await Product.findByIdAndUpdate(
+        item.product, 
+        { $inc: { stock: item.qty } },
+        { session }
+      );
     }
 
+    await session.commitTransaction();
+    session.endSession();
+
+    // Async tasks
     await Notification.create({
-      user:    req.user.id,
+      user:    order.user,
       type:    "order_update",
       title:   "Order Cancelled",
       message: `Order ${order.orderId} has been cancelled.`,
-    });
-
-    await ActivityLog.create({
-      user:       req.user.id,
-      action:     "order_cancelled",
-      resource:   "Order",
-      resourceId: order._id.toString(),
-      ip:         req.ip,
-      userAgent:  req.headers["user-agent"],
-    });
+    }).catch(() => {});
 
     res.json({ order });
   } catch (err) {
+    if (session.inTransaction()) await session.abortTransaction();
+    session.endSession();
     res.status(500).json({ message: err.message });
   }
 };
@@ -218,7 +259,7 @@ exports.updateOrderStatus = async (req, res) => {
       type:    "order_update",
       title:   "Order Updated",
       message: `Your order ${order.orderId} status is now: ${status}.`,
-    });
+    }).catch(() => {});
 
     res.json({ order });
   } catch (err) {
@@ -229,61 +270,67 @@ exports.updateOrderStatus = async (req, res) => {
 /* ══════════════════════════════════════════════════
    POST /api/orders/:id/rollback
    ────────────────────────────────────────────────
-   Called via navigator.sendBeacon when user
-   leaves/refreshes checkout page mid-payment.
-   - Only cancels pending/processing orders
-   - Restores product stock
-   - Marks linked Payment record as cancelled
-   - Idempotent: already cancelled → 200 silently
+   Handles page refresh/tab close rollback.
 ══════════════════════════════════════════════════ */
 exports.rollbackOrder = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    // Only the owner can rollback
+  try {
+    const order = await Order.findById(req.params.id).session(session);
+    if (!order) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Order not found" });
+    }
+
     if (order.user.toString() !== req.user.id) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // If already cancelled / shipped / delivered → skip silently
+    // skip if terminal status
     if (["cancelled", "shipped", "delivered", "paid"].includes(order.status)) {
+      await session.abortTransaction();
+      session.endSession();
       return res.json({ message: "No rollback needed", status: order.status });
     }
 
-    // Only rollback pending or processing orders
-    if (!["pending", "processing"].includes(order.status)) {
-      return res.status(400).json({ message: `Cannot rollback order with status: ${order.status}` });
-    }
-
-    // Cancel the order
     order.status = "cancelled";
-    await order.save();
+    await order.save({ session });
 
-    // Restore stock for each item
+    // Restore stock
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } });
+      await Product.findByIdAndUpdate(
+        item.product, 
+        { $inc: { stock: item.qty } },
+        { session }
+      );
     }
 
-    // Cancel linked payment record if it exists and is still pending
-    const payment = await Payment.findOne({ order: order._id });
+    // Cancel payment link
+    const payment = await Payment.findOne({ order: order._id }).session(session);
     if (payment && payment.status === "pending") {
       payment.status = "cancelled";
-      await payment.save();
+      await payment.save({ session });
     }
+
+    await session.commitTransaction();
+    session.endSession();
 
     await ActivityLog.create({
       user:       req.user.id,
       action:     "order_rolled_back",
       resource:   "Order",
       resourceId: order._id.toString(),
-      ip:         req.ip,
-      userAgent:  req.headers["user-agent"],
-      details:    { reason: "User left checkout page" },
-    });
+      details:    { reason: "Checkout interruption" },
+    }).catch(() => {});
 
-    res.json({ message: "Order rolled back successfully", orderId: order._id });
+    res.json({ message: "Order rolled back successfully" });
   } catch (err) {
+    if (session.inTransaction()) await session.abortTransaction();
+    session.endSession();
     res.status(500).json({ message: err.message });
   }
 };

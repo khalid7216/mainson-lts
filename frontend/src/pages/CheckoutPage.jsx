@@ -138,8 +138,10 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
         });
 
         if (error) {
-          // Stripe returned an error — clear pending so rollback doesn't double-fire
+          // Stripe error (declined, etc.) — rollback since the order won't be completed in this session
+          await orderAPI.rollbackOrder(order._id).catch(() => {});
           pendingOrderId.current = null;
+          
           setErrorMsg(error.message);
           setStep("error");
           setOrderResult(order);
@@ -150,22 +152,25 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
         /* ── 3. Verify payment from DB (authoritative) ── */
         const verification = await paymentAPI.verifyPayment(order._id);
 
-        // Payment confirmed by DB — clear pending ref so rollback won't fire
-        pendingOrderId.current = null;
-
         if (verification.verified) {
+          // Payment confirmed by DB — clear pending ref so rollback won't fire
+          pendingOrderId.current = null;
           setOrderResult(order);
           setStep("success");
           setCart([]);
           toast("Payment successful! 🎉", "ok");
         } else {
-          setErrorMsg(`Payment could not be verified (status: ${verification.status}). Please contact support.`);
+          // Verification failed at DB/Stripe level — rollback to be safe
+          await orderAPI.rollbackOrder(order._id).catch(() => {});
+          pendingOrderId.current = null;
+          
+          setErrorMsg(`Payment could not be verified (status: ${verification.status}). Order has been cancelled.`);
           setStep("error");
           setOrderResult(order);
           toast("Payment verification failed", "err");
         }
       } else {
-        // Cash on Delivery — clear pending ref immediately
+        // Cash on Delivery — terminal success
         pendingOrderId.current = null;
         setOrderResult(order);
         setStep("success");
@@ -173,8 +178,11 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
         toast("Order placed successfully! (Cash on Delivery)", "ok");
       }
     } catch (err) {
-      pendingOrderId.current = null;
-      setErrorMsg(err.message);
+      if (pendingOrderId.current) {
+        await orderAPI.rollbackOrder(pendingOrderId.current).catch(() => {});
+        pendingOrderId.current = null;
+      }
+      setErrorMsg(err.message || "An unexpected error occurred during checkout.");
       setStep("error");
       toast(err.message, "err");
     } finally {
