@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Avatar, Btn, StatusTag } from "../../components/UI";
-import { ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
+import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
 import { productAPI, categoryAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
 
