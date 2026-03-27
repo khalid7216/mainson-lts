@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema(
       type:    Number,
       default: null,
     },
-    category: {
+    parentCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref:  "Category",
     },
@@ -49,20 +49,17 @@ const productSchema = new mongoose.Schema(
       type:    [String],
       default: [],
     },
-    stock: {
-      type:    Number,
-      default: 0,
-    },
-    sizes: [
+    variants: [
       {
+        color: String,
         size:  String,
-        stock: Number,
+        price: Number,
+        stock: {
+          type: Number,
+          default: 0
+        }
       }
     ],
-    colors: {
-      type:    [String],
-      default: [],
-    },
     materials: {
       type:    String,
       default: "",

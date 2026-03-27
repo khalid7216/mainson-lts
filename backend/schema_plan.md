@@ -56,10 +56,10 @@ erDiagram
 | `description` | String | Long-form for SEO |
 | `price` | Number, required | Current selling price |
 | `compareAtPrice` | Number | Original / strike-through price |
-| `category` | Ref(Category) | |
+| `parentCategory` | Ref(Category) | Replaces `category` for Breadcrumb hierarchy |
 | `badge` | Enum: `New`, `Sale`, `Bestseller`, `""` | |
 | `images` | [String] | Array of URLs |
-| `stock` | Number, default 0 | Inventory tracking |
+| `variants` | [Variant] | Array containing `{ color, size, price, stock }` |
 | `isActive` | Boolean, default true | Soft-delete / draft |
 
 ---
@@ -297,3 +297,24 @@ sequenceDiagram
     B->>B: Create Notification + ActivityLog
     F->>U: Show success + redirect
 ```
+
+---
+
+## 16. Implemented Feature Roadmap
+
+Based on the recent architecture upgrades, the following advanced features are fully integrated into the schema and application loop:
+
+### 1. The Hierarchy Challenge (Breadcrumbs)
+- **Problem**: Accurately tracking user paths and mapping hierarchical categories.
+- **Implementation**: The `Product` schema now uses `parentCategory` instead of a flat `category` string.
+- **Frontend**: The `useLocation()` hook parses the URL to instantly generate functional `.map()` segmented breadcrumb routes on Product pages.
+
+### 2. The Performance Challenge (Pagination)
+- **Problem**: Sluggish performance with large datasets and offset drift.
+- **Implementation**: `backend/controllers/productController.js` accepts `page` and `limit` queries to execute MongoDB `.skip((page - 1) * limit).limit(limit)`.
+- **Frontend Sync**: The `HomePage.jsx` fully relies on `useSearchParams` (e.g., `?page=2&sort=Featured`). React state and URL parameters are 100% synced so filters and pagination survive page refreshes.
+
+### 3. The Complexity Challenge (Variants)
+- **Problem**: Managing thousands of combinations of colors, sizes, and their specific SKU stocks.
+- **Implementation**: `sizes`, `colors`, and `stock` fields were dropped from the base `Product` schema and merged into a `variants` array. Each object holds specific `{ color, size, price, stock }`.
+- **Frontend Logic**: Deep client-side variant processing dynamically evaluates "Out of Stock" button-disabling states directly based on user selection matrices.

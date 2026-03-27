@@ -4,25 +4,42 @@
 // ═════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductCard, { QuickView } from "../components/ProductCard";
 import { Ticker } from "../components/Layout";
 import { Btn } from "../components/UI";
 import { NAV_CATEGORIES } from "../data/mockData";
 import { productAPI } from "../services/api";
+import Pagination from "../components/Pagination";
 
 const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
-  const [cat, setCat] = useState("All");
-  const [sort, setSort] = useState("Featured");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const cat = searchParams.get("category") || "All";
+  const sort = searchParams.get("sort") || "Featured";
+  const page = parseInt(searchParams.get("page") || "1", 10);
+
   const [qv, setQv] = useState(null);
-  const [key, setKey] = useState(0);
   const [apiProducts, setApiProducts] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const data = await productAPI.getProducts({ limit: 100 });
+        
+        let apiSort = "";
+        if (sort === "Price Low") apiSort = "price_asc";
+        if (sort === "Price High") apiSort = "price_desc";
+        if (sort === "Rating") apiSort = "rating";
+        
+        // Pass page and limit to the generic products route
+        const data = await productAPI.getProducts({ 
+          page, 
+          limit: 8, 
+          sort: apiSort
+        });
         const formattedProducts = data.products.map((p) => ({
           id: p._id,
           name: p.name,
@@ -36,6 +53,8 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           image: p.images?.[0] || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
         }));
         setApiProducts(formattedProducts);
+        setTotalPages(data.pages || 1);
+        setTotalProducts(data.total || 0);
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
@@ -43,22 +62,21 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       }
     };
     fetchProducts();
-  }, []);
+    window.scrollTo(0, 0);
+  }, [page, sort, cat]);
 
-  const products = apiProducts.filter((p) => cat === "All" || p.cat === cat).sort(
-    (a, b) =>
-      sort === "Price Low"
-        ? a.price - b.price
-        : sort === "Price High"
-        ? b.price - a.price
-        : sort === "Rating"
-        ? b.rating - a.rating
-        : 0
-  );
+  const products = apiProducts; // Filtered by backend now
 
   const changeFilter = (c) => {
-    setCat(c);
-    setKey((k) => k + 1);
+    setSearchParams({ category: c, sort, page: 1 });
+  };
+
+  const changeSort = (s) => {
+    setSearchParams({ category: cat, sort: s, page: 1 });
+  };
+
+  const changePage = (p) => {
+    setSearchParams({ category: cat, sort, page: p });
   };
 
   return (
@@ -333,10 +351,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
             <select
             value={sort}
-            onChange={(e) => {
-              setSort(e.target.value);
-              setKey((k) => k + 1);
-            }}
+            onChange={(e) => changeSort(e.target.value)}
             style={{
               padding: "9px 14px",
               borderRadius: 6,
@@ -361,7 +376,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
             letterSpacing: ".05em",
           }}
         >
-          {products.length} pieces
+          {totalProducts} pieces
         </p>
       </div>
 
@@ -383,7 +398,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         >
           {products.map((p, i) => (
             <ProductCard
-              key={`${key}-${p.id}`}
+              key={p.id}
               product={p}
               navigate={navigate} // ✅ ADDED: Pass navigate
               addToCart={addToCart}
@@ -394,6 +409,17 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
             />
           ))}
         </div>
+        
+        {/* Pagination Integration */}
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "40px 0" }}>Loading...</div>
+        ) : (
+          <Pagination 
+            currentPage={page} 
+            totalPages={totalPages} 
+            onPageChange={changePage} 
+          />
+        )}
       </div>
 
       {/* ── Editorial Banner ─────────────────────────── */}

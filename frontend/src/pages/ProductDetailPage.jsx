@@ -4,20 +4,28 @@
 // ═════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { Btn, StatusTag } from "../components/UI";
 import { productAPI } from "../services/api";
 import { HiStar, HiHeart, HiShoppingBag, HiCheck } from "react-icons/hi";
 import { IoArrowBack } from "react-icons/io5";
+import Breadcrumbs from "../components/Breadcrumbs";
 
 const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const { slug } = useParams();  // ✅ CHANGED: id → slug
   const toast = useToast();
   
+  const [searchParams, setSearchParams] = useSearchParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedSize, setSelectedSize] = useState(null);
+  
+  // Variants derived state
+  const urlColor = searchParams.get("color");
+  const urlSize = searchParams.get("size");
+  const [selectedColor, setSelectedColor] = useState(urlColor || null);
+  const [selectedSize, setSelectedSize] = useState(urlSize || null);
+  
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
@@ -34,18 +42,25 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
           description: p.description || "Crafted from the finest materials, this piece embodies timeless elegance.",
           price: p.price,
           orig: p.compareAtPrice,
-          cat: p.category?.name || "Uncategorized",
+          cat: p.parentCategory?.name || "Uncategorized",
           badge: p.badge,
           rating: data.avgRating || 4.5,
           reviews: data.numReviews || 0,
           image: p.images?.[0] || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
           images: p.images?.length ? p.images : ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80"],
-          sizes: p.sizes?.map(s => s.size) || ["XS", "S", "M", "L", "XL"],
+          variants: p.variants || [],
           materials: p.materials || "100% Premium Material",
           care: p.careInstructions || "Follow label instructions",
           madeIn: p.madeIn || "Unknown",
           sku: `ME-${p._id.substring(p._id.length - 4)}`
         });
+        
+        // Default to first available variant if none selected
+        if (p.variants?.length > 0) {
+          const first = p.variants[0];
+          if (!urlColor) setSelectedColor(first.color);
+          if (!urlSize) setSelectedSize(first.size);
+        }
       } catch (err) {
         console.error("Failed to fetch product:", err);
       } finally {
@@ -117,6 +132,16 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
     };
   }, [product]);
 
+  // Sync params when state changes
+  useEffect(() => {
+    if (selectedColor || selectedSize) {
+      const p = {};
+      if (selectedColor) p.color = selectedColor;
+      if (selectedSize) p.size = selectedSize;
+      setSearchParams(p, { replace: true });
+    }
+  }, [selectedColor, selectedSize, setSearchParams]);
+
   if (loading) {
     return (
       <div style={{ padding: "120px 32px", textAlign: "center" }}>
@@ -137,19 +162,35 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
   }
 
   const isWished = wishlist?.includes(product.id);
-  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["XS", "S", "M", "L", "XL"];
   
+  // Extract variants options
+  const variants = product.variants || [];
+  const uniqueColors = [...new Set(variants.map(v => v.color).filter(Boolean))];
+  const uniqueSizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
+  
+  // Find current active variant
+  const activeVariant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
+  const isOutOfStock = activeVariant ? activeVariant.stock <= 0 : false;
+  const currentPrice = activeVariant?.price || product.price;
+
+
   // Use images from response or mock fallback
   const images = product.images.length >= 3 ? product.images : [product.image, product.image, product.image];
 
-
-
   const handleAddToCart = () => {
-    if (!selectedSize) {
+    if (uniqueSizes.length > 0 && !selectedSize) {
       toast("Please select a size", "err");
       return;
     }
-    addToCart(product);
+    if (uniqueColors.length > 0 && !selectedColor) {
+      toast("Please select a color", "err");
+      return;
+    }
+    if (isOutOfStock) {
+      toast("This variant is currently out of stock", "err");
+      return;
+    }
+    addToCart({ ...product, selectedColor, selectedSize, price: currentPrice });
     toast(`${product.name} added to cart`, "ok");
   };
 
@@ -245,17 +286,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
           {/* Right: Details */}
           <div>
             {/* Breadcrumb */}
-            <p
-              style={{
-                fontSize: 11,
-                letterSpacing: ".2em",
-                textTransform: "uppercase",
-                color: "var(--gold)",
-                marginBottom: 16,
-              }}
-            >
-              {product.cat}
-            </p>
+            <Breadcrumbs />
 
             {/* Title */}
             <h1
@@ -305,7 +336,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                   color: "var(--gold2)",
                 }}
               >
-                ${product.price}
+                ${currentPrice}
               </span>
               {product.orig && (
                 <span
@@ -333,65 +364,79 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
               {product.description}
             </p>
 
-            {/* Size selector */}
-            <div style={{ marginBottom: 32 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 12,
-                }}
-              >
-                <label
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    letterSpacing: ".05em",
-                  }}
-                >
-                  Select Size
+            {/* Color selector */}
+            {uniqueColors.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ fontSize: 13, fontWeight: 500, letterSpacing: ".05em", display: "block", marginBottom: 12 }}>
+                  Select Color
                 </label>
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "var(--gold)",
-                    fontSize: 11,
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  Size Guide
-                </button>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {uniqueColors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: 8,
+                        border: `2px solid ${selectedColor === color ? "var(--gold)" : "var(--border2)"}`,
+                        background: selectedColor === color ? "rgba(201,168,76,.1)" : "none",
+                        color: selectedColor === color ? "var(--gold2)" : "var(--text)",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        transition: "all .2s",
+                      }}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              <div style={{ display: "flex", gap: 10 }}>
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 8,
-                      border: `2px solid ${
-                        selectedSize === size ? "var(--gold)" : "var(--border2)"
-                      }`,
-                      background:
-                        selectedSize === size ? "rgba(201,168,76,.1)" : "none",
-                      color: selectedSize === size ? "var(--gold2)" : "var(--text)",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                  >
-                    {size}
-                  </button>
-                ))}
+            {/* Size selector */}
+            {uniqueSizes.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, letterSpacing: ".05em" }}>Select Size</label>
+                </div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {uniqueSizes.map((size) => {
+                    // Check if this size + currently selected color exists in variants
+                    const matchingVariant = variants.find(v => v.size === size && (uniqueColors.length === 0 || v.color === selectedColor));
+                    const isAvailable = matchingVariant && matchingVariant.stock > 0;
+                    
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 8,
+                          border: `2px solid ${selectedSize === size ? "var(--gold)" : "var(--border2)"}`,
+                          background: selectedSize === size ? "rgba(201,168,76,.1)" : "none",
+                          color: selectedSize === size ? "var(--gold2)" : "var(--text)",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          transition: "all .2s",
+                          opacity: isAvailable ? 1 : 0.4,
+                          textDecoration: isAvailable ? "none" : "line-through"
+                        }}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
+                </div>
+                {isOutOfStock && (
+                  <p style={{ color: "var(--rose)", fontSize: 12, marginTop: 8 }}>
+                    This specific variant is currently out of stock.
+                  </p>
+                )}
               </div>
-            </div>
+            )}
 
             {/* Quantity */}
             <div style={{ marginBottom: 32 }}>
@@ -450,9 +495,10 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                 full
                 size="lg"
                 onClick={handleAddToCart}
-                style={{ flex: 1 }}
+                style={{ flex: 1, opacity: isOutOfStock ? 0.5 : 1, cursor: isOutOfStock ? "not-allowed" : "pointer" }}
+                disabled={isOutOfStock}
               >
-                <HiShoppingBag size={18} /> Add to Bag
+                <HiShoppingBag size={18} /> {isOutOfStock ? "Out of Stock" : "Add to Bag"}
               </Btn>
               <button
                 onClick={() => toggleWishlist(product.id)}

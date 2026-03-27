@@ -8,7 +8,7 @@ exports.getProducts = async (req, res) => {
     const { category, badge, sort, page = 1, limit = 20, search } = req.query;
     const filter = { isActive: true };
 
-    if (category) filter.category = category;
+    if (category) filter.parentCategory = category;
     if (badge)    filter.badge = badge;
     if (search)   filter.name = { $regex: search, $options: "i" };
 
@@ -20,7 +20,7 @@ exports.getProducts = async (req, res) => {
     const skip  = (page - 1) * limit;
     const total = await Product.countDocuments(filter);
     const products = await Product.find(filter)
-      .populate("category", "name slug")
+      .populate("parentCategory", "name slug")
       .sort(sortObj)
       .skip(skip)
       .limit(Number(limit));
@@ -35,7 +35,7 @@ exports.getProducts = async (req, res) => {
 exports.getProductBySlug = async (req, res) => {
   try {
     const product = await Product.findOne({ slug: req.params.slug, isActive: true })
-      .populate("category", "name slug");
+      .populate("parentCategory", "name slug");
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     const { avgRating, numReviews } = await Rating.calcAvgRating(product._id);
