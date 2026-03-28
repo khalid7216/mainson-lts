@@ -414,6 +414,34 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
           </h1>
         </button>
       </div>
+      
+      {/* Mobile Search Overlay */}
+      {showSearch && (
+        <div className="mobile-only" style={{
+          position: "fixed", top: 0, left: 0, right: 0, height: 72, background: "rgba(5,4,4,.97)", backdropFilter: "blur(12px)", 
+          zIndex: 1002, display: "flex", alignItems: "center", padding: "0 20px", borderBottom: "1px solid var(--border)"
+        }}>
+          <IoSearchOutline size={20} color="var(--dim)" style={{ marginRight: 12 }} />
+          <input 
+            autoFocus
+            type="text" 
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchCommit}
+            style={{
+              background: "transparent", border: "none", color: "var(--text)", 
+              fontSize: 16, outline: "none", width: "100%"
+            }}
+          />
+          <button 
+            onClick={() => { setShowSearch(false); setSearchQuery(""); }} 
+            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--dim)", display: "flex", padding: 10 }}
+          >
+            <IoCloseOutline size={22} />
+          </button>
+        </div>
+      )}
 
     </nav>
 
@@ -421,15 +449,23 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
     <div className="mobile-only mobile-bottom-nav">
       <button 
         className={`mobile-nav-item ${location.pathname === "/" ? "active" : ""}`}
-        onClick={() => navigate("/")}
+        onClick={() => { setShowSearch(false); navigate("/"); }}
       >
         <IoHomeOutline size={22} />
         <span>Home</span>
       </button>
       
       <button 
+        className={`mobile-nav-item ${showSearch ? "active" : ""}`}
+        onClick={() => { setShowSearch(true); if(location.pathname !== "/") navigate("/"); }}
+      >
+        <IoSearchOutline size={22} />
+        <span>Search</span>
+      </button>
+
+      <button 
         className={`mobile-nav-item ${location.pathname === "/cart" || location.pathname === "/checkout" ? "active" : ""}`}
-        onClick={() => navigate("/cart")}
+        onClick={() => { setShowSearch(false); navigate("/cart"); }}
         style={{ position: "relative" }}
       >
         <IoBagOutline size={22} />
@@ -443,7 +479,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
 
       <button 
         className={`mobile-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
-        onClick={() => navigate(user ? "/profile" : "/login")}
+        onClick={() => { setShowSearch(false); navigate(user ? "/profile" : "/login"); }}
       >
         <IoPersonOutline size={22} />
         <span>Profile</span>
@@ -452,7 +488,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
       {user ? (
         <button 
           className={`mobile-nav-item ${location.pathname === "/settings" ? "active" : ""}`}
-          onClick={() => navigate("/settings")}
+          onClick={() => { setShowSearch(false); navigate("/settings"); }}
         >
           <IoSettingsOutline size={22} />
           <span>Settings</span>
@@ -460,7 +496,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
       ) : (
         <button 
           className={`mobile-nav-item ${location.pathname === "/login" ? "active" : ""}`}
-          onClick={() => navigate("/login")}
+          onClick={() => { setShowSearch(false); navigate("/login"); }}
         >
           <IoLogOutOutline size={22} style={{ transform: "rotate(180deg)" }}/>
           <span>Sign In</span>
