@@ -318,3 +318,9 @@ Based on the recent architecture upgrades, the following advanced features are f
 - **Problem**: Managing thousands of combinations of colors, sizes, and their specific SKU stocks.
 - **Implementation**: `sizes`, `colors`, and `stock` fields were dropped from the base `Product` schema and merged into a `variants` array. Each object holds specific `{ color, size, price, stock }`.
 - **Frontend Logic**: Deep client-side variant processing dynamically evaluates "Out of Stock" button-disabling states directly based on user selection matrices.
+
+### 4. Professional Image Hosting (Cloudinary & Multer)
+- **Problem**: Storing large media files natively bloats the database and slows down server response times.
+- **Implementation**: Introduced `multer` as a middleware to stream incoming multipart/form-data into a temporary local `uploads` directory. The `productController` then securely uploads this file via the Cloudinary v2 SDK (`cloudinary.uploader.upload`) to the cloud. Upon successful upload, the system immediately deletes the temporary file using `fs.unlinkSync()`.
+- **Database Architecture**: The Product schema's `image` field was restructured from a flat string to an object `{ url, publicId }` to handle cloud URLs and facilitate easy future deletions from the Cloudinary container natively using the `publicId`.
+- **Frontend Integration**: Enhanced the `api.js` request handler to intuitively detect `FormData` instances. If an image binary is attached, it overrides the default `application/json` boundaries, allowing `ProductFormModal.jsx` to transmit live `File` objects securely over the network.
