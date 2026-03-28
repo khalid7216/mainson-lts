@@ -5,7 +5,7 @@ const Wishlist = require("../models/Wishlist");
 exports.getWishlist = async (req, res) => {
   try {
     const items = await Wishlist.find({ user: req.user.id })
-      .populate("product", "name slug price images badge")
+      .populate("product")
       .sort("-createdAt");
     res.json({ wishlist: items });
   } catch (err) {

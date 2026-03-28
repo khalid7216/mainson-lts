@@ -200,3 +200,18 @@ export const categoryAPI = {
     });
   },
 };
+
+/* ══════════════════════════════════════════════════
+   WISHLIST APIS
+══════════════════════════════════════════════════ */
+export const wishlistAPI = {
+  getWishlist: async () => {
+    return await request("/wishlist");
+  },
+  toggleWishlist: async (productId) => {
+    return await request("/wishlist/toggle", {
+      method: "POST",
+      body: JSON.stringify({ productId }),
+    });
+  },
+};

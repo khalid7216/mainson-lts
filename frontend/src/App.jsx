@@ -1,11 +1,12 @@
 // frontend/src/App.jsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { ToastProvider } from "./context/ToastContext";
+import { ToastProvider, useToast } from "./context/ToastContext";
+import { wishlistAPI } from "./services/api";
 import GlobalStyles from "./styles/GlobalStyles";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -25,8 +26,23 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 const AppContent = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const toast = useToast();
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+
+  // Fetch wishlist when user connects
+  useEffect(() => {
+    if (user) {
+      wishlistAPI.getWishlist()
+        .then(res => {
+          // res.wishlist is array of { _id, user, product: { _id, ... } }
+          setWishlist(res.wishlist.map(w => w.product._id || w.product.id || w.product));
+        })
+        .catch(err => console.error("Wishlist error:", err));
+    } else {
+      setWishlist([]);
+    }
+  }, [user]);
 
   /* Cart helpers */
   const addToCart = (product) =>
@@ -37,10 +53,29 @@ const AppContent = () => {
         : [...prev, { ...product, qty: 1 }];
     });
 
-  const toggleWishlist = (id) =>
+  const toggleWishlist = async (id) => {
+    if (!user) {
+      toast("Please login to save to wishlist", "err");
+      navigate("/login");
+      return;
+    }
+
+    // Optimistic UI update
     setWishlist((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
+
+    try {
+      await wishlistAPI.toggleWishlist(id);
+    } catch (err) {
+      console.error(err);
+      toast("Failed to update wishlist", "err");
+      // Revert on error
+      setWishlist((prev) =>
+        prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      );
+    }
+  };
 
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
@@ -142,7 +177,12 @@ const AppContent = () => {
                   path="/profile"
                   element={
                     user ? (
-                      <ProfilePage navigate={navigate} />
+                      <ProfilePage 
+                        navigate={navigate} 
+                        wishlist={wishlist}
+                        toggleWishlist={toggleWishlist}
+                        addToCart={addToCart}
+                      />
                     ) : (
                       <Navigate to="/login" replace />
                     )

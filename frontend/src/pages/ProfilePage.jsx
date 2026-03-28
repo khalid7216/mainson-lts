@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { orderAPI, paymentAPI } from "../services/api";
+import { orderAPI, paymentAPI, wishlistAPI } from "../services/api";
 import { Avatar, Btn, Tag, StatusTag } from "../components/UI";
+import ProductCard, { QuickView } from "../components/ProductCard";
 import { IoClose, IoArrowBack, IoCubeOutline, IoHeartOutline, IoLocationOutline, IoCardOutline } from "react-icons/io5";
 
-const ProfilePage = ({ navigate }) => {
+const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
   const { user } = useAuth();
   const toast = useToast();
   
   const [tab, setTab] = useState("orders");
   const [orders, setOrders] = useState([]);
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [qv, setQv] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null); // For receipt view
   const [cancellingId, setCancellingId] = useState(null);
@@ -23,8 +26,22 @@ const ProfilePage = ({ navigate }) => {
 
     if (tab === "orders") {
       fetchOrders();
+    } else if (tab === "wishlist") {
+      fetchWishlist();
     }
   }, [user, tab, navigate]);
+
+  const fetchWishlist = async () => {
+    try {
+      setLoading(true);
+      const res = await wishlistAPI.getWishlist();
+      setWishlistItems(res.wishlist);
+    } catch (err) {
+      toast("Failed to fetch wishlist", "err");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -176,6 +193,13 @@ const ProfilePage = ({ navigate }) => {
   /* ── Main Profile View ───────────────────────────── */
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 32px 60px" }}>
+      {qv && (
+        <QuickView
+          product={qv}
+          onClose={() => setQv(null)}
+          addToCart={addToCart}
+        />
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 48 }} className="grid-1-mobile">
 
         {/* ── Sidebar ─────────────────────────────── */}
@@ -226,7 +250,7 @@ const ProfilePage = ({ navigate }) => {
         </div>
 
         {/* ── Content ──────────────────────────────── */}
-        <div className="fu">
+        <div className="fu" style={{ minWidth: 0 }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 300, marginBottom: 8, textTransform: "capitalize" }}>
             {TABS.find((t) => t.id === tab)?.label}
           </h1>
@@ -310,12 +334,63 @@ const ProfilePage = ({ navigate }) => {
             )
           )}
 
+          {/* Wishlist list */}
+          {tab === "wishlist" && (
+            loading ? (
+              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+                Loading wishlist...
+              </div>
+            ) : wishlistItems.length === 0 ? (
+              <div style={{ padding: "60px 0", textAlign: "center", background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10 }}>
+                <div style={{ marginBottom: 16, opacity: .3, display: 'flex', justifyContent: 'center' }}>
+                  <IoHeartOutline size={48} />
+                </div>
+                <p style={{ color: "var(--muted)", marginBottom: 24 }}>No wishlist saved yet</p>
+                <Btn v="primary" onClick={() => navigate("/")}>Browse Collection</Btn>
+              </div>
+            ) : (
+              <div className="prod-grid-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(275px, 1fr))", gap: 28 }}>
+                {wishlistItems.map((item, i) => {
+                  const p = item.product;
+                  if (!p) return null; // in case product was deleted
+                  const formattedProduct = {
+                    id: p._id,
+                    name: p.name,
+                    slug: p.slug,
+                    price: p.price,
+                    orig: p.compareAtPrice,
+                    cat: p.category?.name || "Uncategorized",
+                    badge: p.badge,
+                    rating: p.ratings?.length ? p.ratings : 4.5,
+                    reviews: 0,
+                    image: p.images?.[0] || p.image?.url || p.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
+                  };
+
+                  return (
+                    <ProductCard
+                      key={formattedProduct.id}
+                      product={formattedProduct}
+                      navigate={navigate}
+                      addToCart={addToCart}
+                      wishlist={wishlist}
+                      toggleWishlist={async (id) => {
+                         await toggleWishlist(id);
+                         fetchWishlist();
+                      }}
+                      onQuickView={() => setQv(formattedProduct)}
+                      delay={i * 0.05}
+                    />
+                  );
+                })}
+              </div>
+            )
+          )}
+
           {/* Empty states for other tabs */}
-          {tab !== "orders" && (
+          {tab !== "orders" && tab !== "wishlist" && (
             <div style={{ padding: "60px 0", textAlign: "center", background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10 }}>
               <div style={{ marginBottom: 16, opacity: .3, display: 'flex', justifyContent: 'center' }}>
                 {
-                  TABS.find((t) => t.id === tab)?.id === "wishlist" ? <IoHeartOutline size={48} /> :
                   TABS.find((t) => t.id === tab)?.id === "addresses" ? <IoLocationOutline size={48} /> :
                   <IoCardOutline size={48} />
                 }
@@ -323,11 +398,7 @@ const ProfilePage = ({ navigate }) => {
               <p style={{ color: "var(--muted)", marginBottom: 24 }}>
                 No {tab} saved yet
               </p>
-              {tab === "wishlist" ? (
-                <Btn v="primary" onClick={() => navigate("/")}>Browse Collection</Btn>
-              ) : (
-                <Btn v="ghost">+ Add {tab === "addresses" ? "Address" : "Payment Method"}</Btn>
-              )}
+              <Btn v="ghost">+ Add {tab === "addresses" ? "Address" : "Payment Method"}</Btn>
             </div>
           )}
         </div>
