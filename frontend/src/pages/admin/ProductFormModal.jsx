@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Btn, Inp, Spinner, StatusTag } from "../../components/UI";
 
 /* ══════════════════════════════════════════════════════
@@ -320,6 +320,15 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
   );
 
   const [imagePreview, setImagePreview] = useState(product?.images?.[0] || product?.image?.url || product?.image || "");
+
+  useEffect(() => {
+    // Cleanup object URL to prevent memory leaks
+    return () => {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);

@@ -10,9 +10,31 @@ exports.getProducts = async (req, res) => {
     const { category, badge, sort, page = 1, limit = 20, search } = req.query;
     const filter = { isActive: true };
 
-    if (category) filter.parentCategory = category;
+    if (category && category !== "All") filter.parentCategory = category;
     if (badge)    filter.badge = badge;
-    if (search)   filter.name = { $regex: search, $options: "i" };
+    
+    if (search) {
+      const sanitizedSearch = search.trim();
+      if (sanitizedSearch) {
+        const regex = new RegExp(sanitizedSearch, "i");
+        
+        // Find matching categories by name first since parentCategory is an ObjectId
+        const Category = require("../models/Category");
+        const matchingCategories = await Category.find({ name: regex }).select("_id");
+        const categoryIds = matchingCategories.map(c => c._id);
+
+        filter.$or = [
+          { name: regex },
+          { description: regex },
+          { tags: regex },
+          { subCategory: regex }
+        ];
+
+        if (categoryIds.length > 0) {
+          filter.$or.push({ parentCategory: { $in: categoryIds } });
+        }
+      }
+    }
 
     let sortObj = { createdAt: -1 };
     if (sort === "price_asc")  sortObj = { price: 1 };
@@ -59,7 +81,7 @@ exports.createProduct = async (req, res) => {
 
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "maison_elite/products"
+        folder: "maison_lite/products"
       });
       productData.image = {
         url: result.secure_url,
@@ -89,7 +111,7 @@ exports.updateProduct = async (req, res) => {
 
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "maison_elite/products"
+        folder: "maison_lite/products"
       });
       updateData.image = {
         url: result.secure_url,

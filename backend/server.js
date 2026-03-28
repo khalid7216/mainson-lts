@@ -3,6 +3,7 @@ const express      = require("express");
 const cors         = require("cors");
 const cookieParser = require("cookie-parser");
 const path         = require("path");
+const mongoSanitize = require("express-mongo-sanitize");
 const connectDB    = require("./config/db");
 const authRoutes         = require("./routes/authRoutes");
 const productRoutes      = require("./routes/productRoutes");
@@ -56,6 +57,9 @@ app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
 /* ── API Routes ─────────────────────────────────── */
 app.use("/api/auth",          authRoutes);

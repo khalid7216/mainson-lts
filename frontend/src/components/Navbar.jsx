@@ -4,16 +4,45 @@
 // ═════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Avatar } from "./UI";
-import { IoHomeOutline, IoBagOutline, IoPersonOutline, IoSettingsOutline, IoFlashOutline, IoLogOutOutline } from "react-icons/io5";
+import { IoHomeOutline, IoBagOutline, IoPersonOutline, IoSettingsOutline, IoFlashOutline, IoLogOutOutline, IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 
 const Navbar = ({ navigate, cartCount = 0 }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [scrolled, setScrolled] = useState(false);
   const [dropdown, setDropdown] = useState(false);
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [showSearch, setShowSearch] = useState(false);
+
+  // Sync state with URL if changed externally
+  useEffect(() => {
+    setSearchQuery(searchParams.get("search") || "");
+  }, [searchParams]);
+
+  // Handle Search Submission (debounced)
+  useEffect(() => {
+    if (location.pathname !== "/") return; // Only apply debounce fetch if on home page
+    const handler = setTimeout(() => {
+      if (searchQuery) {
+        setSearchParams(prev => { prev.set("search", searchQuery); prev.set("page", "1"); return prev; });
+      } else {
+        setSearchParams(prev => { prev.delete("search"); return prev; });
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery, setSearchParams, location.pathname]);
+
+  const handleSearchCommit = (e) => {
+    if (e.key === "Enter") {
+      if (location.pathname !== "/") navigate("/?search=" + searchQuery);
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -83,6 +112,53 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
 
         {/* Navigation */}
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+
+          {/* Search Icon & Box */}
+          <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+            {showSearch ? (
+              <div 
+                style={{
+                  display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)",
+                  border: "1px solid var(--border2)", borderRadius: 100, padding: "6px 14px",
+                  width: 220, transition: "all .3s ease",
+                }}
+              >
+                <IoSearchOutline size={16} color="var(--dim)" style={{ flexShrink: 0, marginRight: 8 }} />
+                <input 
+                  autoFocus
+                  type="text" 
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchCommit}
+                  style={{
+                    background: "transparent", border: "none", color: "var(--text)", 
+                    fontSize: 13, outline: "none", width: "100%"
+                  }}
+                />
+                <button 
+                  onClick={() => { setShowSearch(false); setSearchQuery(""); }} 
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "var(--dim)", display: "flex", padding: 0 }}
+                >
+                  <IoCloseOutline size={16} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowSearch(true)}
+                style={{
+                  background: "none", border: "none", color: "var(--muted)", cursor: "pointer", 
+                  display: "flex", alignItems: "center", gap: 6, fontSize: 13, letterSpacing: ".08em",
+                  transition: "color .2s"
+                }}
+                onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
+                onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
+              >
+                <IoSearchOutline size={16} /> <span className="hide-tablet">Search</span>
+              </button>
+            )}
+          </div>
+
           {/* Cart */}
           <button
             onClick={() => navigate("/cart")}

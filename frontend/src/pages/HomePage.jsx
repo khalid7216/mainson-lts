@@ -16,6 +16,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const cat = searchParams.get("category") || "All";
   const sort = searchParams.get("sort") || "Featured";
+  const search = searchParams.get("search") || "";
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   const [qv, setQv] = useState(null);
@@ -38,7 +39,8 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         const data = await productAPI.getProducts({ 
           page, 
           limit: 8, 
-          sort: apiSort
+          sort: apiSort,
+          search
         });
         const formattedProducts = data.products.map((p) => ({
           id: p._id,
@@ -62,21 +64,24 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       }
     };
     fetchProducts();
-    window.scrollTo(0, 0);
-  }, [page, sort, cat]);
+  }, [page, sort, cat, search]);
 
-  const products = apiProducts; // Filtered by backend now
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page, cat]);
+
+  const products = apiProducts;
 
   const changeFilter = (c) => {
-    setSearchParams({ category: c, sort, page: 1 });
+    setSearchParams({ category: c, sort, page: 1, search });
   };
 
   const changeSort = (s) => {
-    setSearchParams({ category: cat, sort: s, page: 1 });
+    setSearchParams({ category: cat, sort: s, page: 1, search });
   };
 
   const changePage = (p) => {
-    setSearchParams({ category: cat, sort, page: p });
+    setSearchParams({ category: cat, sort, page: p, search });
   };
 
   return (

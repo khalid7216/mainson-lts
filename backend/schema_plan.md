@@ -321,6 +321,16 @@ Based on the recent architecture upgrades, the following advanced features are f
 
 ### 4. Professional Image Hosting (Cloudinary & Multer)
 - **Problem**: Storing large media files natively bloats the database and slows down server response times.
-- **Implementation**: Introduced `multer` as a middleware to stream incoming multipart/form-data into a temporary local `uploads` directory. The `productController` then securely uploads this file via the Cloudinary v2 SDK (`cloudinary.uploader.upload`) to the cloud. Upon successful upload, the system immediately deletes the temporary file using `fs.unlinkSync()`.
+- **Implementation**: Introduced `multer` as a middleware to stream incoming multipart/form-data into a temporary local `uploads` directory. The `productController` then securely uploads this file via the Cloudinary v2 SDK (`cloudinary.uploader.upload`) to the cloud with the parameter `folder: 'maison_lite/products'`. Upon successful upload, the system immediately deletes the temporary file using `fs.unlinkSync()`.
+
+### 5. Advanced Search & Security
+- **Implementation**: `express-mongo-sanitize` is integrated in `server.js` to strip `$`, `.` and prevent NoSQL Injection in `req.body` and `req.query`.
+- **Search Logic**: Dynamic search filters via `$or` and `.trim()` edge-case protection against empty queries.
+
+#### Database Indexing Support
+Run this command in your MongoDB shell or Compass to enable optimized text searches if needed:
+```js
+db.products.createIndex({ name: "text", description: "text" })
+```
 - **Database Architecture**: The Product schema's `image` field was restructured from a flat string to an object `{ url, publicId }` to handle cloud URLs and facilitate easy future deletions from the Cloudinary container natively using the `publicId`.
 - **Frontend Integration**: Enhanced the `api.js` request handler to intuitively detect `FormData` instances. If an image binary is attached, it overrides the default `application/json` boundaries, allowing `ProductFormModal.jsx` to transmit live `File` objects securely over the network.
