@@ -120,7 +120,7 @@ const ProfilePage = ({ navigate }) => {
                {selectedOrder.items.map((item, idx) => (
                  <div key={idx} style={{ display: "flex", gap: 16, alignItems: "center" }}>
                    <div style={{ width: 48, height: 60, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border2)" }}>
-                      <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={item.image?.url || item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                    </div>
                    <div style={{ flex: 1 }}>
                      <p style={{ fontSize: 13, fontWeight: 500 }}>{item.name}</p>
@@ -284,7 +284,7 @@ const ProfilePage = ({ navigate }) => {
                   <div style={{ marginTop: 20, display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
                     {o.items.map((item, idx) => (
                       <div key={idx} style={{ flexShrink: 0, width: 48, height: 60, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border2)" }}>
-                        <img src={item.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=100"} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={item.image?.url || item.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=100"} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       </div>
                     ))}
                   </div>

@@ -81,7 +81,7 @@ export const AdminDashboard = () => (
           <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <span style={{ fontSize: 10, color: "var(--dim)", width: 16 }}>#{i + 1}</span>
             <div style={{ width: 40, height: 40, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)", flexShrink: 0 }}>
-              <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -205,7 +205,7 @@ export const AdminProducts = () => {
               <tr key={p.id}>
                 <td style={{ width: 60, padding: "10px" }}>
                   <div style={{ width: 50, height: 50, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)" }}>
-                    <img src={p.images?.[0] || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={p.images?.[0] || p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                 </td>
                 <td style={{ fontWeight: 500 }}>{p.name}</td>

@@ -50,7 +50,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           badge: p.badge,
           rating: p.ratings?.length ? p.ratings : 4.5, // Dummy default if not available
           reviews: 0,
-          image: p.images?.[0] || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
+          image: p.images?.[0] || p.image?.url || p.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
         }));
         setApiProducts(formattedProducts);
         setTotalPages(data.pages || 1);

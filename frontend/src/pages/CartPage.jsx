@@ -126,7 +126,7 @@ const CartPage = ({ cart, setCart, navigate }) => {
                   }}
                 >
                   <img
-                    src={item.image}
+                    src={item.image?.url || item.image}
                     alt={item.name}
                     style={{
                       width: "100%",

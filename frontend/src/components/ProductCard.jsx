@@ -42,7 +42,7 @@ export const QuickView = ({ product: p, onClose, addToCart }) => {
             }}
           >
             <img
-              src={p.image}
+              src={p.image?.url || p.image}
               alt={p.name}
               style={{
                 width: "100%",
@@ -377,7 +377,7 @@ const ProductCard = ({
         }}
       >
         <img
-          src={p.image}
+          src={p.image?.url || p.image}
           alt={p.name}
           style={{
             width: "100%",

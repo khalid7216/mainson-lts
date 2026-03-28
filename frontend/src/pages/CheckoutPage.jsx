@@ -420,7 +420,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
                     width: 56, height: 68, borderRadius: 6, overflow: "hidden",
                     background: "var(--lift)", flexShrink: 0,
                   }}>
-                    <img src={item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={item.image?.url || item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{item.name}</p>

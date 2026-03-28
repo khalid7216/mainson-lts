@@ -46,7 +46,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
           badge: p.badge,
           rating: data.avgRating || 4.5,
           reviews: data.numReviews || 0,
-          image: p.images?.[0] || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
+          image: p.images?.[0] || p.image?.url || p.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
           images: p.images?.length ? p.images : ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80"],
           variants: p.variants || [],
           materials: p.materials || "100% Premium Material",
@@ -175,7 +175,9 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
 
 
   // Use images from response or mock fallback
-  const images = product.images.length >= 3 ? product.images : [product.image, product.image, product.image];
+  const images = product.images?.length >= 3 
+    ? product.images 
+    : [product.image?.url || product.image, product.image?.url || product.image, product.image?.url || product.image];
 
   const handleAddToCart = () => {
     if (uniqueSizes.length > 0 && !selectedSize) {
