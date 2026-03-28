@@ -137,21 +137,15 @@ export const AdminProducts = () => {
 
   const items = allProds.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
 
-  const handleSave = async (saved) => {
+  const handleSave = async (savedFormData) => {
     try {
-      const payload = {
-        ...saved,
-        images: saved.image ? [saved.image] : [],
-        tags: typeof saved.tags === "string" ? saved.tags.split(",").map((t) => t.trim()).filter(Boolean) : (saved.tags || []),
-        stock: saved.sizes?.reduce((sum, s) => sum + (Number(s.stock) || 0), 0) || 0,
-      };
-
-      if (saved._id) {
+      const id = savedFormData.get("_id");
+      if (id) {
         // Update
-        await productAPI.update(saved._id, payload);
+        await productAPI.update(id, savedFormData);
       } else {
         // Create
-        await productAPI.create(payload);
+        await productAPI.create(savedFormData);
       }
       fetchProducts(); // Refresh list
     } catch (err) {

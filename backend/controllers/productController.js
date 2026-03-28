@@ -1,6 +1,8 @@
 // backend/controllers/productController.js
 const Product  = require("../models/Product");
 const Rating   = require("../models/Rating");
+const cloudinary = require("../config/cloudinary");
+const fs = require("fs");
 
 /* ── GET /api/products ──────────────────────────── */
 exports.getProducts = async (req, res) => {
@@ -48,9 +50,28 @@ exports.getProductBySlug = async (req, res) => {
 /* ── POST /api/products (Admin) ─────────────────── */
 exports.createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body);
+    let productData = { ...req.body };
+    
+    // Parse arrays/JSON strings from FormData
+    if (productData.sizes && typeof productData.sizes === "string") productData.sizes = JSON.parse(productData.sizes);
+    if (productData.colors && typeof productData.colors === "string") productData.colors = JSON.parse(productData.colors);
+    if (productData.tags && typeof productData.tags === "string") productData.tags = productData.tags.split(',').map(t => t.trim());
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "maison_elite/products"
+      });
+      productData.image = {
+        url: result.secure_url,
+        publicId: result.public_id
+      };
+      fs.unlinkSync(req.file.path);
+    }
+
+    const product = await Product.create(productData);
     res.status(201).json({ product });
   } catch (err) {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     res.status(400).json({ message: err.message });
   }
 };
@@ -58,12 +79,31 @@ exports.createProduct = async (req, res) => {
 /* ── PUT /api/products/:id (Admin) ──────────────── */
 exports.updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    let updateData = { ...req.body };
+    
+    // Parse arrays/JSON strings from FormData
+    if (updateData.sizes && typeof updateData.sizes === "string") updateData.sizes = JSON.parse(updateData.sizes);
+    if (updateData.colors && typeof updateData.colors === "string") updateData.colors = JSON.parse(updateData.colors);
+    if (updateData.tags && typeof updateData.tags === "string") updateData.tags = updateData.tags.split(',').map(t => t.trim());
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "maison_elite/products"
+      });
+      updateData.image = {
+        url: result.secure_url,
+        publicId: result.public_id
+      };
+      fs.unlinkSync(req.file.path);
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true, runValidators: true,
     });
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json({ product });
   } catch (err) {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     res.status(400).json({ message: err.message });
   }
 };

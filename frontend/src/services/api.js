@@ -2,15 +2,19 @@
 const API_URL = import.meta.env.VITE_API_URL || "https://maison-backend.vercel.app/api";
 // const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 /* ── Helper: make API request with credentials ───── */
-const request = async (endpoint, options = {}) => {
+const request = async (endpoint, options = {}, isFormData = false) => {
   const config = {
     ...options,
     headers: {
-      "Content-Type": "application/json",
       ...options.headers,
     },
     credentials: "include", // Send cookies
   };
+
+  if (!isFormData) {
+    config.headers["Content-Type"] = "application/json";
+  }
+
 
   const token = localStorage.getItem("token");
   if (token) {
@@ -157,18 +161,20 @@ export const productAPI = {
 
   /* Create product (Admin) */
   create: async (body) => {
+    const isFormData = body instanceof FormData;
     return await request("/products", {
       method: "POST",
-      body: JSON.stringify(body),
-    });
+      body: isFormData ? body : JSON.stringify(body),
+    }, isFormData);
   },
 
   /* Update product (Admin) */
   update: async (id, body) => {
+    const isFormData = body instanceof FormData;
     return await request(`/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(body),
-    });
+      body: isFormData ? body : JSON.stringify(body),
+    }, isFormData);
   },
 
   /* Delete/Deactivate product (Admin) */

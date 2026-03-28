@@ -45,9 +45,9 @@ const productSchema = new mongoose.Schema(
       enum: ["New", "Sale", "Bestseller", "Limited", "Exclusive", ""],
       default: "",
     },
-    images: {
-      type:    [String],
-      default: [],
+    image: {
+      url: { type: String, required: false },
+      publicId: { type: String, required: false }
     },
     variants: [
       {

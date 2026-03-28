@@ -66,7 +66,7 @@ export const validateProduct = (form) => {
                                      errors.price    = "Valid price is required";
   if (form.compareAtPrice && Number(form.compareAtPrice) <= Number(form.price))
                                      errors.compareAtPrice = "Must be greater than selling price";
-  if (!form.image || !form.image.trim()) errors.image = "Product image is required";
+  if (!form.image && !form.imageFile) errors.image = "Product image is required";
   if (form.sizes.length === 0)       errors.sizes    = "Add at least one size";
   if (form.colors.length === 0)      errors.colors   = "Select at least one color";
   return errors;
@@ -313,10 +313,13 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           isNewArrival:   product.badge === "New",
           sizes:          product.sizes || [],
           colors:         product.colors || [],
-          image:          product.images?.[0] || product.image || "",
+          image:          product.images?.[0] || product.image?.url || product.image || "",
+          imageFile:      null,
         }
-      : { ...EMPTY_PRODUCT }
+      : { ...EMPTY_PRODUCT, imageFile: null }
   );
+
+  const [imagePreview, setImagePreview] = useState(product?.images?.[0] || product?.image?.url || product?.image || "");
 
   const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
@@ -333,7 +336,27 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
     if (Object.keys(errs).length) return;
     setLoading(true);
     try {
-      onSave?.(form);
+      const formData = new FormData();
+      if (product?._id) formData.append("_id", product._id);
+      
+      // Append fields
+      Object.keys(form).forEach(key => {
+        if (key === "imageFile") {
+          if (form.imageFile) formData.append("image", form.imageFile);
+        } else if (key === "sizes" || key === "colors") {
+          formData.append(key, JSON.stringify(form[key]));
+        } else if (key === "tags") {
+          let tagString = Array.isArray(form.tags) ? form.tags.join(",") : typeof form.tags === "string" ? form.tags : "";
+          formData.append("tags", tagString);
+        } else if (key !== "image") {
+          formData.append(key, form[key]);
+        }
+      });
+      // also compute stock:
+      const totalStock = form.sizes?.reduce((sum, s) => sum + (Number(s.stock) || 0), 0) || 0;
+      formData.append("stock", totalStock);
+
+      await onSave?.(formData);
       onClose();
     } catch (err) {
       console.error("Modal save failed:", err);
@@ -451,13 +474,20 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
               </Section>
 
               <Section title="Product Image">
-                <Field label="Image URL" required error={errors.image}>
+                <Field label="Upload Image" required error={errors.image}>
                   <input
-                    value={form.image}
-                    onChange={(e) => set("image", e.target.value)}
-                    placeholder="https://example.com/image.jpg"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        set("imageFile", file);
+                        set("image", "uploaded");
+                        setImagePreview(URL.createObjectURL(file));
+                      }
+                    }}
                     style={{
-                      width: "100%", padding: "12px 14px", borderRadius: 6,
+                      width: "100%", padding: "8px", borderRadius: 6,
                       border: `1px solid ${errors.image ? "var(--rose)" : "var(--border2)"}`,
                       background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
                     }}
@@ -465,40 +495,25 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                 </Field>
 
                 {/* Image preview */}
-                {form.image && (
+                {imagePreview && (
                   <div style={{ marginTop: 14 }}>
                     <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>Preview</p>
                     <div style={{
                       width: "100%", maxWidth: 300, height: 200,
                       borderRadius: 8, overflow: "hidden",
                       border: "1px solid var(--border)",
-                      background: "var(--lift)",
+                      background: "var(--lift)", display: "flex", alignItems: "center", justifyContent: "center"
                     }}>
                       <img
-                        src={form.image}
+                        src={imagePreview}
                         alt="Preview"
                         style={{
                           width: "100%", height: "100%",
                           objectFit: "cover",
                           objectPosition: "center",
                         }}
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
                       />
-                      <div style={{
-                        width: "100%", height: "100%",
-                        display: "none",
-                        alignItems: "center", justifyContent: "center",
-                        color: "var(--dim)", fontSize: 13,
-                      }}>
-                        Invalid image URL
-                      </div>
                     </div>
-                    <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 8, lineHeight: 1.6 }}>
-                      💡 Tip: Use <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" style={{ color: "var(--gold)", textDecoration: "underline" }}>Unsplash</a> for free high-quality images
-                    </p>
                   </div>
                 )}
               </Section>
