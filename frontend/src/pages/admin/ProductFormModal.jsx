@@ -341,6 +341,8 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
       
       // Append fields
       Object.keys(form).forEach(key => {
+        if (["_id", "id", "__v", "createdAt", "updatedAt"].includes(key)) return;
+        
         if (key === "imageFile") {
           if (form.imageFile) formData.append("image", form.imageFile);
         } else if (key === "sizes" || key === "colors") {

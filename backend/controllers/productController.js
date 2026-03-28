@@ -80,6 +80,7 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     let updateData = { ...req.body };
+    delete updateData._id; // Prevent updating immutable ID
     
     // Parse arrays/JSON strings from FormData
     if (updateData.sizes && typeof updateData.sizes === "string") updateData.sizes = JSON.parse(updateData.sizes);
