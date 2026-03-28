@@ -2,12 +2,10 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os'); // Added OS module
 
-// Ensure uploads folder exists in local context
-const UPLOADS_FOLDER = path.join(__dirname, '../uploads');
-if (!fs.existsSync(UPLOADS_FOLDER)) {
-  fs.mkdirSync(UPLOADS_FOLDER, { recursive: true });
-}
+// In serverless environments (like Vercel), only the /tmp directory is writable.
+const UPLOADS_FOLDER = os.tmpdir();
 
 // Set up disk storage for temporary files before Cloudinary upload
 const storage = multer.diskStorage({
