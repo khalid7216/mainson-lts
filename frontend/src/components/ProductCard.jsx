@@ -364,6 +364,9 @@ const ProductCard = ({
         animationFillMode: "both",
         opacity: 0,
         cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
       }}
     >
       {/* Image box */}
@@ -490,38 +493,53 @@ const ProductCard = ({
       </div>
 
       {/* Info row */}
-      <div style={{ padding: "18px 4px 8px" }}>
+      <div 
+        style={{ 
+          padding: "16px 4px 6px", 
+          display: "flex", 
+          flexDirection: "column", 
+          flexGrow: 1 
+        }}
+      >
         <p
           style={{
             fontSize: 10,
             letterSpacing: ".22em",
             textTransform: "uppercase",
             color: "var(--gold)",
-            marginBottom: 7,
+            marginBottom: 6,
           }}
         >
           {p.cat}
         </p>
+        
+        <h3
+          style={{
+            fontSize: 16,
+            fontWeight: 300,
+            color: "var(--text)",
+            lineHeight: 1.3,
+            marginBottom: 8,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {p.name}
+        </h3>
+
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "baseline",
+            alignItems: "center",
+            marginTop: "auto",
+            marginBottom: 16,
           }}
         >
-          <h3
-            style={{
-              fontSize: 16,
-              fontWeight: 300,
-              color: "var(--text)",
-              lineHeight: 1.2,
-              flex: 1,
-              paddingRight: 12,
-            }}
-          >
-            {p.name}
-          </h3>
-          <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <div>
             <span style={{ fontSize: 16, fontWeight: 500 }}>${p.price}</span>
             {p.orig && (
               <span
@@ -536,38 +554,51 @@ const ProductCard = ({
               </span>
             )}
           </div>
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ color: "var(--gold)", fontSize: 11, display: "flex", gap: 2 }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <IoStar key={i} size={11} color={i < Math.floor(p.rating) ? "var(--gold)" : "var(--dim)"} />
+              ))}
+            </span>
+            <span style={{ fontSize: 11, color: "var(--dim)" }}>
+              ({p.reviews})
+            </span>
+          </div>
         </div>
         
         {/* Mobile quick action */}
-        <div className="mobile-only" style={{ marginTop: 12 }}>
+        <div className="mobile-only" style={{ marginBottom: 4 }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               addToCart(p);
               toast(`${p.name} added!`, "ok");
             }}
-            style={{ width: "100%", padding: "8px 0", background: "var(--gold)", border: "none", borderRadius: 4, color: "#0d0b0a", fontSize: 10, textTransform: "uppercase", fontWeight: 600, letterSpacing: ".1em" }}
+            style={{ 
+              width: "100%", 
+              padding: "10px 0", 
+              background: "transparent", 
+              border: "1px solid var(--border)", 
+              borderRadius: 4, 
+              color: "var(--text)", 
+              fontSize: 10, 
+              textTransform: "uppercase", 
+              fontWeight: 400, 
+              letterSpacing: ".1em",
+              transition: "all .2s"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = "var(--gold)";
+              e.target.style.color = "var(--gold)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = "var(--border)";
+              e.target.style.color = "var(--text)";
+            }}
           >
             Add to Bag
           </button>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            marginTop: 8,
-          }}
-        >
-          <span style={{ color: "var(--gold)", fontSize: 11, display: "flex", gap: 2 }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <IoStar key={i} size={11} color={i < Math.floor(p.rating) ? "var(--gold)" : "var(--dim)"} />
-            ))}
-          </span>
-          <span style={{ fontSize: 11, color: "var(--dim)" }}>
-            ({p.reviews})
-          </span>
         </div>
       </div>
     </div>
