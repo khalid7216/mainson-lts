@@ -524,33 +524,41 @@ export const AdminSettings = ({ toast }) => {
    MEDIA LIBRARY
 ═══════════════════════════════════════════════════ */
 export const AdminMedia = () => {
-  const [mediaList, setMediaList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [filter, setFilter] = useState("all"); // "all" | "library" | "product"
-  const [copied, setCopied] = useState(null);
+  const [mediaList,  setMediaList]  = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [uploading,  setUploading]  = useState(false);
+  const [filter,     setFilter]     = useState("all");
+  const [search,     setSearch]     = useState("");
+  const [sort,       setSort]       = useState("newest");
+  const [viewMode,   setViewMode]   = useState("grid");
+  const [selected,   setSelected]   = useState(new Set());
+  const [dragging,   setDragging]   = useState(false);
+  const [drawer,     setDrawer]     = useState(null);  // null | media item
+  const [copied,     setCopied]     = useState(null);
   const fileInputRef = useRef(null);
 
+  /* ── Fetch ─────────────────────────────────────── */
   const fetchMedia = async () => {
     try {
       setLoading(true);
-      const data = await mediaAPI.getAll();
+      const data = await mediaAPI.getAll({ search, sort, source: filter });
       setMediaList(data.media || []);
-    } catch (err) {
+      setSelected(new Set());
+    } catch {
       alert("Failed to fetch media");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchMedia(); }, []);
+  useEffect(() => { fetchMedia(); }, [search, sort, filter]);
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  /* ── Upload (single or multiple) ───────────────── */
+  const handleUpload = async (files) => {
+    if (!files?.length) return;
     try {
       setUploading(true);
-      await mediaAPI.upload(file);
+      await mediaAPI.upload(Array.from(files));
       fetchMedia();
     } catch (err) {
       alert("Upload failed: " + err.message);
@@ -560,135 +568,403 @@ export const AdminMedia = () => {
     }
   };
 
+  /* ── Delete (single) ───────────────────────────── */
   const handleDelete = async (id) => {
-    if (!window.confirm("Permanently delete this image from the Media Library and Cloudinary?")) return;
+    if (!window.confirm("Permanently delete this image from Library and Cloudinary?")) return;
     try {
       await mediaAPI.delete(id);
+      if (drawer?._id === id) setDrawer(null);
       fetchMedia();
-    } catch (err) {
-      alert("Delete failed: " + err.message);
-    }
+    } catch (err) { alert("Delete failed: " + err.message); }
   };
 
-  const copyToClipboard = (url, id) => {
+  /* ── Bulk delete ───────────────────────────────── */
+  const handleBulkDelete = async () => {
+    if (!selected.size) return;
+    if (!window.confirm(`Delete ${selected.size} selected image(s) permanently?`)) return;
+    try {
+      await mediaAPI.bulkDelete([...selected]);
+      fetchMedia();
+    } catch (err) { alert("Bulk delete failed: " + err.message); }
+  };
+
+  /* ── Select toggle ─────────────────────────────── */
+  const toggleSelect = (id, source) => {
+    if (source === "product") return; // product images not deletable
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  /* ── Copy URL ──────────────────────────────────── */
+  const copyURL = (url, id) => {
     navigator.clipboard.writeText(url);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const visible = mediaList.filter((m) =>
-    filter === "all" ? true : m.source === filter
-  );
+  /* ── Drag & Drop handlers ──────────────────────── */
+  const onDragOver  = (e) => { e.preventDefault(); setDragging(true); };
+  const onDragLeave = ()  => setDragging(false);
+  const onDrop      = (e) => { e.preventDefault(); setDragging(false); handleUpload(e.dataTransfer.files); };
 
   const libraryCount = mediaList.filter((m) => m.source === "library").length;
   const productCount = mediaList.filter((m) => m.source === "product").length;
 
+  /* ─────────────── RENDER ─────────────── */
   return (
-    <div className="fu">
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+    <div className="fu" style={{ position: "relative" }}>
+
+      {/* ── Inline styles for cards & drawer ── */}
+      <style>{`
+        .mc .ov { opacity:0; transition:.18s; background:rgba(0,0,0,.65);
+          position:absolute; inset:0; display:flex; flex-direction:column;
+          align-items:center; justify-content:center; gap:9px; }
+        .mc:hover .ov { opacity:1; }
+        .mc .chk { position:absolute; top:8px; right:8px; z-index:6; width:20px; height:20px;
+          border-radius:50%; border:2px solid #fff; background:rgba(0,0,0,.4);
+          cursor:pointer; display:flex; align-items:center; justify-content:center;
+          font-size:11px; color:#fff; transition:.15s; }
+        .mc:hover .chk, .mc.sel .chk { opacity:1 !important; }
+        .mc .chk { opacity:0; }
+        .mc.sel .chk { background:var(--gold); border-color:var(--gold); color:#000; opacity:1 !important; }
+        .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; }
+        .drawer { position:fixed; top:0; right:0; height:100vh; width:340px; background:var(--surface);
+          border-left:1px solid var(--border); z-index:201; overflow-y:auto;
+          display:flex; flex-direction:column; box-shadow:-4px 0 24px rgba(0,0,0,.4); }
+        .bulk-bar { position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+          background:var(--card); border:1px solid var(--border2); border-radius:100px;
+          padding:10px 20px; display:flex; align-items:center; gap:16px; z-index:199;
+          box-shadow:0 8px 32px rgba(0,0,0,.4); }
+      `}</style>
+
+      {/* ── Header ── */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
         <div>
           <h1 className="section-title">Media Library</h1>
           <p className="section-sub">{mediaList.length} total · {libraryCount} uploaded · {productCount} from products</p>
         </div>
-        <div>
-          <input type="file" accept="image/*" ref={fileInputRef} onChange={handleUpload} style={{ display: "none" }} />
-          <Btn v="primary" onClick={() => fileInputRef.current?.click()}>
-            {uploading ? "Uploading..." : "+ Upload Image"}
-          </Btn>
+        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+          <input type="file" accept="image/*" multiple ref={fileInputRef}
+            onChange={(e) => handleUpload(e.target.files)} style={{ display:"none" }} />
+          <button onClick={() => fileInputRef.current?.click()}
+            style={{ padding:"9px 20px", background:"var(--gold)", color:"#000", border:"none",
+              borderRadius:6, cursor:"pointer", fontSize:12, fontWeight:700,
+              fontFamily:"'Jost',sans-serif", letterSpacing:".08em", transition:"opacity .2s",
+              opacity: uploading ? .6 : 1 }}>
+            {uploading ? "Uploading…" : "+ Upload"}
+          </button>
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        {[["all", "All"], ["library", "Uploaded"], ["product", "Products"]].map(([val, label]) => (
-          <button
-            key={val}
-            onClick={() => setFilter(val)}
-            style={{
-              padding: "7px 18px", borderRadius: 100, cursor: "pointer",
-              border: `1px solid ${filter === val ? "var(--gold)" : "var(--border)"}`,
-              background: filter === val ? "rgba(201,168,76,.12)" : "none",
-              color: filter === val ? "var(--gold2)" : "var(--muted)",
-              fontSize: 11, letterSpacing: ".08em", fontFamily: "'Jost', sans-serif", transition: "all .2s",
-            }}
-          >
+      {/* ── Toolbar (Search · Sort · View Toggle) ── */}
+      <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap", alignItems:"center" }}>
+        {/* Search */}
+        <div style={{ position:"relative", flex:1, minWidth:180 }}>
+          <span style={{ position:"absolute", left:11, top:"50%", transform:"translateY(-50%)",
+            color:"var(--muted)", fontSize:13, pointerEvents:"none" }}>🔍</span>
+          <input value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search images…"
+            style={{ width:"100%", padding:"9px 12px 9px 32px", borderRadius:6,
+              border:"1px solid var(--border2)", background:"var(--lift)",
+              color:"var(--text)", fontSize:12, fontFamily:"'Jost',sans-serif",
+              boxSizing:"border-box" }} />
+        </div>
+        {/* Sort */}
+        <select value={sort} onChange={(e) => setSort(e.target.value)}
+          style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)",
+            background:"var(--lift)", color:"var(--text)", fontSize:12,
+            fontFamily:"'Jost',sans-serif", cursor:"pointer" }}>
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="name">Name A–Z</option>
+          <option value="size">Largest First</option>
+        </select>
+        {/* View toggle */}
+        <div style={{ display:"flex", border:"1px solid var(--border)", borderRadius:6, overflow:"hidden" }}>
+          {[["grid","⊞"],["list","☰"]].map(([mode, icon]) => (
+            <button key={mode} onClick={() => setViewMode(mode)}
+              style={{ padding:"8px 14px", border:"none", cursor:"pointer", fontSize:15,
+                background: viewMode === mode ? "rgba(201,168,76,.18)" : "none",
+                color: viewMode === mode ? "var(--gold2)" : "var(--muted)",
+                transition:"all .18s" }}>
+              {icon}
+            </button>
+          ))}
+        </div>
+        {/* Filter tabs */}
+        {[["all","All"],["library","Uploaded"],["product","Products"]].map(([val, label]) => (
+          <button key={val} onClick={() => setFilter(val)}
+            style={{ padding:"8px 16px", borderRadius:100, cursor:"pointer",
+              border:`1px solid ${filter===val ? "var(--gold)" : "var(--border)"}`,
+              background: filter===val ? "rgba(201,168,76,.12)" : "none",
+              color: filter===val ? "var(--gold2)" : "var(--muted)",
+              fontSize:11, letterSpacing:".08em", fontFamily:"'Jost',sans-serif", transition:"all .2s" }}>
             {label}
           </button>
         ))}
       </div>
 
-      {/* Grid */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28, minHeight: 400 }}>
-        <style>{`
-          .media-card .overlay { opacity: 0; transition: opacity 0.2s; background: rgba(0,0,0,0.65);
-            position: absolute; top:0; left:0; right:0; bottom:0;
-            display:flex; flex-direction:column; justify-content:center; align-items:center; gap: 10px; }
-          .media-card:hover .overlay { opacity: 1; }
-        `}</style>
+      {/* ── Drag & Drop Zone ── */}
+      <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+        onClick={() => fileInputRef.current?.click()}
+        style={{ border:`2px dashed ${dragging ? "var(--gold)" : "var(--border2)"}`,
+          borderRadius:10, padding:"22px 0", textAlign:"center", marginBottom:20,
+          background: dragging ? "rgba(201,168,76,.06)" : "var(--lift)",
+          cursor:"pointer", transition:"all .2s",
+          boxShadow: dragging ? "0 0 0 3px rgba(201,168,76,.15)" : "none" }}>
+        <p style={{ fontSize:24, marginBottom:6, opacity:.7 }}>☁</p>
+        <p style={{ fontSize:13, color:"var(--muted)", lineHeight:1.6 }}>
+          {dragging ? "Drop to upload!" : "Drag & drop images here, or click to browse"}
+        </p>
+        <p style={{ fontSize:10, color:"var(--dim)", marginTop:4 }}>Supports JPG · PNG · WEBP · multiple files at once</p>
+      </div>
 
+      {/* ── GRID / LIST ── */}
+      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:24, minHeight:300 }}>
         {loading ? (
-          <p style={{ color: "var(--dim)" }}>Loading media...</p>
-        ) : visible.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
-            <p style={{ fontSize: 40, marginBottom: 16 }}>📷</p>
+          <p style={{ color:"var(--dim)" }}>Loading media…</p>
+        ) : mediaList.length === 0 ? (
+          <div style={{ textAlign:"center", padding:"50px 0", color:"var(--muted)" }}>
+            <p style={{ fontSize:36, marginBottom:14 }}>📷</p>
             <p>No images found. Upload your first image to get started.</p>
           </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(196px, 1fr))", gap: 20 }}>
-            {visible.map((m) => (
-              <div
-                key={m._id + (m.source || "")}
-                className="media-card"
-                style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", background: "var(--lift)", position: "relative" }}
-              >
-                {/* Source badge */}
-                <div style={{
-                  position: "absolute", top: 8, left: 8, zIndex: 5,
-                  padding: "2px 8px", borderRadius: 4, fontSize: 9, fontWeight: 700,
-                  letterSpacing: ".1em", textTransform: "uppercase",
-                  background: m.source === "product" ? "rgba(107,157,217,.85)" : "rgba(201,168,76,.85)",
-                  color: m.source === "product" ? "#fff" : "#000",
-                }}>
-                  {m.source === "product" ? "Product" : "Library"}
-                </div>
-
-                {/* Image with hover overlay */}
-                <div style={{ width: "100%", aspectRatio: "1/1", position: "relative" }}>
-                  <img src={m.url} alt={m.productName || "Media"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  <div className="overlay">
-                    <button
-                      onClick={() => copyToClipboard(m.url, m._id)}
-                      style={{ padding: "8px 16px", background: "var(--gold)", color: "#000", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
-                    >
-                      {copied === m._id ? "✓ Copied!" : "Copy URL"}
-                    </button>
-                    {m.source !== "product" && (
-                      <button
-                        onClick={() => handleDelete(m._id)}
-                        style={{ padding: "8px 16px", background: "var(--rose)", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 500 }}
-                      >
-                        Delete
+        ) : viewMode === "grid" ? (
+          /* ── Grid ── */
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px,1fr))", gap:18 }}>
+            {mediaList.map((m) => {
+              const isSelected = selected.has(String(m._id));
+              return (
+                <div key={m._id + m.source} className={`mc${isSelected ? " sel" : ""}`}
+                  style={{ border:`1px solid ${isSelected ? "var(--gold)" : "var(--border)"}`,
+                    borderRadius:8, overflow:"hidden", background:"var(--lift)", position:"relative",
+                    cursor:"pointer", transition:"border-color .2s",
+                    boxShadow: isSelected ? "0 0 0 2px rgba(201,168,76,.25)" : "none" }}>
+                  {/* Source badge */}
+                  <div style={{ position:"absolute", top:8, left:8, zIndex:5, padding:"2px 7px",
+                    borderRadius:4, fontSize:9, fontWeight:700, letterSpacing:".08em",
+                    textTransform:"uppercase",
+                    background: m.source === "product" ? "rgba(107,157,217,.9)" : "rgba(201,168,76,.9)",
+                    color: m.source === "product" ? "#fff" : "#000" }}>
+                    {m.source === "product" ? "Product" : "Library"}
+                  </div>
+                  {/* Checkbox */}
+                  {m.source !== "product" && (
+                    <div className="chk" onClick={(e) => { e.stopPropagation(); toggleSelect(String(m._id), m.source); }}>
+                      {isSelected ? "✓" : ""}
+                    </div>
+                  )}
+                  {/* Image */}
+                  <div style={{ width:"100%", aspectRatio:"1/1", position:"relative" }}
+                    onClick={() => setDrawer(m)}>
+                    <img src={m.url} alt={m.productName || "media"}
+                      style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                    <div className="ov">
+                      <button onClick={(e) => { e.stopPropagation(); copyURL(m.url, m._id); }}
+                        style={{ padding:"7px 14px", background:"var(--gold)", color:"#000",
+                          border:"none", borderRadius:4, cursor:"pointer", fontSize:11, fontWeight:700 }}>
+                        {copied === m._id ? "✓ Copied!" : "Copy URL"}
                       </button>
-                    )}
+                      {m.source !== "product" && (
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(m._id); }}
+                          style={{ padding:"7px 14px", background:"var(--rose)", color:"#fff",
+                            border:"none", borderRadius:4, cursor:"pointer", fontSize:11, fontWeight:500 }}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {/* Footer */}
+                  <div style={{ padding:"8px 10px", borderTop:"1px solid var(--border)" }}
+                    onClick={() => setDrawer(m)}>
+                    <p style={{ fontSize:11, color:"var(--text)", fontWeight:500,
+                      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {m.productName || (m.public_id ? m.public_id.split("/").pop() : "media")}
+                    </p>
+                    <p style={{ fontSize:9, color:"var(--muted)", marginTop:3 }}>
+                      {m.size ? (m.size/1024).toFixed(1)+"KB · " : ""}{(m.format||"IMG").toUpperCase()}
+                    </p>
                   </div>
                 </div>
-
-                {/* Info footer */}
-                <div style={{ padding: "9px 11px", borderTop: "1px solid var(--border)" }}>
-                  <p style={{ fontSize: 11, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }} title={m.productName || m.public_id}>
-                    {m.productName || (m.public_id ? m.public_id.split("/").pop() : "uploaded_media")}
-                  </p>
-                  <p style={{ fontSize: 10, color: "var(--muted)", marginTop: 3 }}>
-                    {m.size ? (m.size / 1024).toFixed(1) + " KB · " : ""}{m.format ? m.format.toUpperCase() : "IMG"}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+        ) : (
+          /* ── List ── */
+          <table className="tbl" style={{ width:"100%" }}>
+            <thead>
+              <tr>
+                <th style={{ width:40 }}></th>
+                <th></th>
+                <th>Name</th>
+                <th>Source</th>
+                <th>Size</th>
+                <th>Format</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mediaList.map((m) => {
+                const isSelected = selected.has(String(m._id));
+                return (
+                  <tr key={m._id + m.source}
+                    style={{ background: isSelected ? "rgba(201,168,76,.06)" : "none", cursor:"pointer" }}>
+                    {/* Checkbox */}
+                    <td onClick={(e) => e.stopPropagation()}>
+                      {m.source !== "product" && (
+                        <div onClick={() => toggleSelect(String(m._id), m.source)}
+                          style={{ width:18, height:18, borderRadius:"50%", border:"2px solid var(--border2)",
+                            background: isSelected ? "var(--gold)" : "none",
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            cursor:"pointer", fontSize:10, color:"#000", transition:".15s" }}>
+                          {isSelected ? "✓" : ""}
+                        </div>
+                      )}
+                    </td>
+                    {/* Thumb */}
+                    <td onClick={() => setDrawer(m)}>
+                      <div style={{ width:44, height:44, borderRadius:5, overflow:"hidden",
+                        background:"var(--lift)", border:"1px solid var(--border)", flexShrink:0 }}>
+                        <img src={m.url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                      </div>
+                    </td>
+                    <td onClick={() => setDrawer(m)} style={{ fontSize:12, fontWeight:500, maxWidth:200,
+                      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {m.productName || (m.public_id ? m.public_id.split("/").pop() : "media")}
+                    </td>
+                    <td>
+                      <span style={{ padding:"2px 8px", borderRadius:4, fontSize:9, fontWeight:700,
+                        background: m.source==="product" ? "rgba(107,157,217,.2)" : "rgba(201,168,76,.2)",
+                        color: m.source==="product" ? "#6b9dd9" : "var(--gold2)" }}>
+                        {m.source === "product" ? "Product" : "Library"}
+                      </span>
+                    </td>
+                    <td style={{ fontSize:11, color:"var(--muted)" }}>
+                      {m.size ? (m.size/1024).toFixed(1)+" KB" : "—"}
+                    </td>
+                    <td style={{ fontSize:11, color:"var(--muted)" }}>
+                      {(m.format||"IMG").toUpperCase()}
+                    </td>
+                    <td>
+                      <div style={{ display:"flex", gap:6 }}>
+                        <button onClick={() => copyURL(m.url, m._id)}
+                          style={{ padding:"4px 10px", borderRadius:4, border:"1px solid var(--border2)",
+                            background:"none", color: copied===m._id ? "var(--gold2)" : "var(--text)",
+                            cursor:"pointer", fontSize:10, fontFamily:"'Jost',sans-serif" }}>
+                          {copied===m._id ? "✓ Copied" : "Copy URL"}
+                        </button>
+                        {m.source !== "product" && (
+                          <button onClick={() => handleDelete(m._id)}
+                            style={{ padding:"4px 10px", borderRadius:4,
+                              border:"1px solid rgba(192,57,43,.3)",
+                              background:"none", color:"var(--rose)",
+                              cursor:"pointer", fontSize:10, fontFamily:"'Jost',sans-serif" }}>
+                            Del
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </div>
+
+      {/* ── Bulk Action Bar ── */}
+      {selected.size > 0 && (
+        <div className="bulk-bar">
+          <span style={{ fontSize:12, color:"var(--gold2)", fontWeight:600 }}>
+            {selected.size} selected
+          </span>
+          <button onClick={handleBulkDelete}
+            style={{ padding:"6px 16px", borderRadius:100, background:"var(--rose)",
+              color:"#fff", border:"none", cursor:"pointer", fontSize:11,
+              fontFamily:"'Jost',sans-serif", fontWeight:600 }}>
+            Delete Selected
+          </button>
+          <button onClick={() => setSelected(new Set())}
+            style={{ background:"none", border:"none", color:"var(--muted)",
+              cursor:"pointer", fontSize:16, lineHeight:1 }}>
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* ── Detail Drawer ── */}
+      {drawer && (
+        <>
+          <div className="drawer-overlay" onClick={() => setDrawer(null)} />
+          <div className="drawer">
+            {/* Preview */}
+            <div style={{ width:"100%", aspectRatio:"1/1", background:"#000" }}>
+              <img src={drawer.url} alt="preview"
+                style={{ width:"100%", height:"100%", objectFit:"contain" }} />
+            </div>
+            {/* Info */}
+            <div style={{ padding:20, flex:1 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18 }}>
+                <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:400, flex:1 }}>
+                  {drawer.productName || (drawer.public_id ? drawer.public_id.split("/").pop() : "media")}
+                </p>
+                <button onClick={() => setDrawer(null)}
+                  style={{ background:"none", border:"none", color:"var(--muted)",
+                    cursor:"pointer", fontSize:20, lineHeight:1, flexShrink:0 }}>×</button>
+              </div>
+              {/* Meta rows */}
+              {[
+                ["Source",  drawer.source === "product" ? "Product Image" : "Library Upload"],
+                ["Format",  (drawer.format || "Unknown").toUpperCase()],
+                ["Size",    drawer.size ? (drawer.size/1024).toFixed(1)+" KB" : "—"],
+                ["Uploaded", drawer.createdAt ? new Date(drawer.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" }) : "—"],
+                ...(drawer.productName ? [["Product", drawer.productName]] : []),
+              ].map(([k, v]) => (
+                <div key={k} style={{ display:"flex", justifyContent:"space-between",
+                  padding:"9px 0", borderBottom:"1px solid var(--border)", fontSize:12 }}>
+                  <span style={{ color:"var(--muted)" }}>{k}</span>
+                  <span style={{ fontWeight:500, textAlign:"right", maxWidth:"60%",
+                    overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{v}</span>
+                </div>
+              ))}
+              {/* URL copy */}
+              <div style={{ marginTop:20 }}>
+                <p style={{ fontSize:10, color:"var(--muted)", letterSpacing:".1em",
+                  textTransform:"uppercase", marginBottom:8 }}>Image URL</p>
+                <div style={{ display:"flex", gap:8 }}>
+                  <input readOnly value={drawer.url}
+                    onClick={(e) => e.target.select()}
+                    style={{ flex:1, padding:"8px 10px", borderRadius:5,
+                      border:"1px solid var(--border2)", background:"var(--lift)",
+                      color:"var(--dim)", fontSize:10, overflow:"hidden",
+                      textOverflow:"ellipsis" }} />
+                  <button onClick={() => copyURL(drawer.url, drawer._id)}
+                    style={{ padding:"8px 14px", background:"var(--gold)", color:"#000",
+                      border:"none", borderRadius:5, cursor:"pointer",
+                      fontSize:11, fontWeight:700, whiteSpace:"nowrap" }}>
+                    {copied === drawer._id ? "✓" : "Copy"}
+                  </button>
+                </div>
+              </div>
+              {/* Delete */}
+              {drawer.source !== "product" && (
+                <button onClick={() => handleDelete(drawer._id)} style={{ marginTop:18,
+                  width:"100%", padding:"10px", borderRadius:6,
+                  border:"1px solid rgba(192,57,43,.4)", background:"none",
+                  color:"var(--rose)", cursor:"pointer", fontSize:12,
+                  fontFamily:"'Jost',sans-serif", fontWeight:500 }}>
+                  Delete from Library
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
+
+
 

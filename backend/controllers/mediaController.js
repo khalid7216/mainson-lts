@@ -4,74 +4,96 @@ const Product = require("../models/Product");
 const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
 
-/* ── POST /api/media/upload ─────────────────────── */
+/* ── POST /api/media/upload  (supports 1–10 files) ─── */
 exports.uploadMedia = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file provided" });
+    const files = req.files || (req.file ? [req.file] : []);
+    if (!files.length) return res.status(400).json({ message: "No files provided" });
+
+    const saved = [];
+    for (const file of files) {
+      try {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "maison_lite/media",
+        });
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+
+        const media = await Media.create({
+          url:        result.secure_url,
+          public_id:  result.public_id,
+          format:     result.format,
+          size:       result.bytes,
+          uploadedBy: req.user._id,
+        });
+        saved.push(media);
+      } catch (err) {
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        // skip failed files but continue others
+      }
     }
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "maison_lite/media",
-    });
-
-    // Remove temp file from disk
-    fs.unlinkSync(req.file.path);
-
-    // Save metadata to DB
-    const media = await Media.create({
-      url:        result.secure_url,
-      public_id:  result.public_id,
-      format:     result.format,
-      size:       result.bytes,
-      uploadedBy: req.user._id,
-    });
-
-    res.status(201).json({ message: "Media uploaded successfully", media });
+    if (!saved.length) return res.status(500).json({ message: "All uploads failed" });
+    res.status(201).json({ message: `${saved.length} file(s) uploaded`, media: saved });
   } catch (err) {
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     res.status(500).json({ message: err.message });
   }
 };
 
-/* ── GET /api/media ─────────────────────────────── */
-// Returns dedicated Media Library items PLUS all product images
+/* ── GET /api/media  (?search=&sort=&source=) ─────── */
 exports.getAllMedia = async (req, res) => {
   try {
-    // 1. Dedicated media library uploads
-    const libraryItems = await Media.find()
+    const { search = "", sort = "newest", source } = req.query;
+
+    // 1. Library uploads
+    let libraryQuery = Media.find();
+    if (search) {
+      libraryQuery = libraryQuery.where("public_id", new RegExp(search, "i"));
+    }
+    const libraryItems = await libraryQuery
       .populate("uploadedBy", "name email")
-      .sort({ createdAt: -1 })
       .lean();
 
-    // 2. Product images — only products that have an image URL
-    const products = await Product.find(
-      { "image.url": { $exists: true, $ne: null, $ne: "" } },
-      { name: 1, image: 1, createdAt: 1 }
-    )
-      .sort({ createdAt: -1 })
-      .lean();
+    // 2. Product images
+    const productFilter = { "image.url": { $exists: true, $ne: null } };
+    if (search) productFilter.name = new RegExp(search, "i");
 
-    // Normalize product images into the same shape as Media documents
+    const products = await Product.find(productFilter, {
+      name: 1, image: 1, createdAt: 1,
+    }).lean();
+
     const productItems = products
       .filter((p) => p.image?.url)
       .map((p) => ({
-        _id:        p._id,            // use product's own _id
-        url:        p.image.url,
-        public_id:  p.image.publicId || null,
-        format:     p.image.url?.split(".").pop()?.split("?")[0] || "jpg",
-        size:       null,             // product images don't store byte size
-        source:     "product",        // distinguish from library uploads
+        _id:         p._id,
+        url:         p.image.url,
+        public_id:   p.image.publicId || null,
+        format:      (p.image.url?.split(".").pop()?.split("?")[0] || "jpg").substring(0, 4),
+        size:        null,
+        source:      "product",
         productName: p.name,
-        createdAt:  p.createdAt,
+        createdAt:   p.createdAt,
       }));
 
-    // 3. Merge: library items first (newest first), then product images
-    const media = [
+    // 3. Merge with source tag
+    let media = [
       ...libraryItems.map((m) => ({ ...m, source: "library" })),
       ...productItems,
     ];
+
+    // 4. Filter by source
+    if (source && source !== "all") {
+      media = media.filter((m) => m.source === source);
+    }
+
+    // 5. Sort
+    media.sort((a, b) => {
+      const da = new Date(a.createdAt);
+      const db = new Date(b.createdAt);
+      if (sort === "oldest")   return da - db;
+      if (sort === "name")     return (a.productName || a.public_id || "").localeCompare(b.productName || b.public_id || "");
+      if (sort === "size")     return (b.size || 0) - (a.size || 0);
+      return db - da; // newest (default)
+    });
 
     res.json({ media });
   } catch (err) {
@@ -80,23 +102,34 @@ exports.getAllMedia = async (req, res) => {
 };
 
 /* ── DELETE /api/media/:id ──────────────────────── */
-// Only library-uploaded media can be deleted (not product images directly)
 exports.deleteMedia = async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
     if (!media) {
-      return res.status(404).json({ message: "Media not found in library. Product images must be deleted via the Products section." });
+      return res.status(404).json({ message: "Not found in library. Product images must be deleted via Products section." });
     }
-
-    // Attempt to delete it from Cloudinary
-    if (media.public_id) {
-      await cloudinary.uploader.destroy(media.public_id);
-    }
-
-    // Delete from MongoDB
+    if (media.public_id) await cloudinary.uploader.destroy(media.public_id);
     await Media.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted", id: req.params.id });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-    res.json({ message: "Media deleted successfully", id: req.params.id });
+/* ── DELETE /api/media/bulk ─────────────────────── */
+exports.bulkDeleteMedia = async (req, res) => {
+  try {
+    const { ids } = req.body; // array of MongoDB IDs
+    if (!ids || !ids.length) return res.status(400).json({ message: "No IDs provided" });
+
+    const items = await Media.find({ _id: { $in: ids } });
+    for (const item of items) {
+      if (item.public_id) {
+        try { await cloudinary.uploader.destroy(item.public_id); } catch (_) {}
+      }
+    }
+    await Media.deleteMany({ _id: { $in: ids } });
+    res.json({ message: `${items.length} item(s) deleted`, deleted: ids });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

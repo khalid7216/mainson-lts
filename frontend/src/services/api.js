@@ -220,18 +220,24 @@ export const wishlistAPI = {
    MEDIA APIS
 ══════════════════════════════════════════════════ */
 export const mediaAPI = {
-  upload: async (file) => {
+  // accepts a single File or an array of Files
+  upload: async (files) => {
     const formData = new FormData();
-    formData.append("file", file);
-    return await request("/media/upload", {
-      method: "POST",
-      body: formData,
-    }, true);
+    const fileList = Array.isArray(files) ? files : [files];
+    fileList.forEach((f) => formData.append("files", f));
+    return await request("/media/upload", { method: "POST", body: formData }, true);
   },
-  getAll: async () => {
-    return await request("/media");
+  getAll: async ({ search = "", sort = "newest", source = "all" } = {}) => {
+    const params = new URLSearchParams({ search, sort, source }).toString();
+    return await request(`/media?${params}`);
   },
   delete: async (id) => {
     return await request(`/media/${id}`, { method: "DELETE" });
+  },
+  bulkDelete: async (ids) => {
+    return await request("/media/bulk", {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    });
   },
 };
