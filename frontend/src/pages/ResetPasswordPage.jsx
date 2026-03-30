@@ -9,7 +9,7 @@ import { useToast } from "../context/ToastContext";
 import { AuthWrap } from "../components/Layout";
 import { Btn, Inp, Spinner } from "../components/UI";
 import { authAPI } from "../services/api";
-import { IoTimeOutline, IoCheckmarkOutline, IoLockClosedOutline } from "react-icons/io5";
+import { IoTimeOutline, IoCheckmarkOutline, IoLockClosedOutline, IoArrowBack } from "react-icons/io5";
 
 const ResetPasswordPage = () => {
   const { token } = useParams();
@@ -53,7 +53,7 @@ const ResetPasswordPage = () => {
     try {
       await authAPI.resetPassword(token, form.password);
       setSuccess(true);
-      toast("Password reset successful! ✦", "ok");
+      toast("Password reset successful!", "ok");
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       setLoading(false);
@@ -120,7 +120,7 @@ const ResetPasswordPage = () => {
               marginTop: 16,
             }}
           >
-            ← Back to Sign In
+            <IoArrowBack size={12} style={{ marginRight: 4 }} /> Back to Sign In
           </button>
         </div>
       </AuthWrap>
@@ -207,7 +207,7 @@ const ResetPasswordPage = () => {
         </Btn>
 
         <button onClick={() => navigate("/login")} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: 13, margin: "0 auto", display: "flex" }}>
-          ← Back to Sign In
+          <IoArrowBack size={12} style={{ marginRight: 4 }} /> Back to Sign In
         </button>
       </div>
     </AuthWrap>

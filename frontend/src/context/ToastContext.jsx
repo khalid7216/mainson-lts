@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react";
+import { IoCheckmarkOutline, IoCloseOutline, IoInformationCircleOutline } from "react-icons/io5";
 
 const ToastCtx = createContext(null);
 
@@ -13,7 +14,7 @@ export const ToastProvider = ({ children }) => {
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3200);
   }, []);
 
-  const icons = { ok: "✓", err: "✕", info: "◆" };
+  const icons = { ok: <IoCheckmarkOutline size={16} />, err: <IoCloseOutline size={16} />, info: <IoInformationCircleOutline size={16} /> };
 
   return (
     <ToastCtx.Provider value={add}>

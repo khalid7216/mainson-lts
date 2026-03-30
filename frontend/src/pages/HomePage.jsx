@@ -11,6 +11,7 @@ import { Btn } from "../components/UI";
 import { NAV_CATEGORIES } from "../data/mockData";
 import { productAPI } from "../services/api";
 import Pagination from "../components/Pagination";
+import { IoSparklesOutline, IoLogoInstagram, IoLogoTwitter, IoLogoPinterest } from "react-icons/io5";
 
 const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const [qv, setQv] = useState(null);
@@ -161,7 +162,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
               animationDelay: ".1s",
             }}
           >
-            ✦ Spring / Summer 2026 ✦
+            <IoSparklesOutline style={{ marginRight: 4, verticalAlign: "middle" }} size={12} /> Spring / Summer 2026 <IoSparklesOutline style={{ marginLeft: 4, verticalAlign: "middle" }} size={12} />
           </p>
           <h1
             className="fu hero-title"
@@ -451,7 +452,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                 meets purpose.
               </p>
               <div style={{ display: "flex", gap: 12 }}>
-                {["◈", "◉", "◆"].map((s, i) => (
+                {[<IoLogoInstagram size={16} />, <IoLogoTwitter size={16} />, <IoLogoPinterest size={16} />].map((icon, i) => (
                   <button
                     key={i}
                     style={{
@@ -474,7 +475,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                       e.target.style.color = "var(--dim)";
                     }}
                   >
-                    {s}
+                    {icon}
                   </button>
                 ))}
               </div>

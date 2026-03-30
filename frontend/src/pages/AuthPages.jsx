@@ -10,6 +10,7 @@ import { useToast } from "../context/ToastContext";
 import { AuthWrap } from "../components/Layout";
 import { Btn, Inp, Spinner } from "../components/UI";
 import { authAPI } from "../services/api";
+import { IoMailOutline, IoLockClosedOutline, IoCheckmarkOutline, IoArrowBack } from "react-icons/io5";
 
 /* ═══════════════════════════════════════════════════
    LOGIN PAGE (UPDATED: Welcome message with user name)
@@ -42,7 +43,7 @@ export const LoginPage = () => {
     if (result.success) {
       // ✅ NEW: Extract first name for welcome message
       const firstName = result.user?.name?.split(" ")[0] || "there";
-      toast(`Welcome back, ${firstName}! ✦`, "ok");
+      toast(`Welcome back, ${firstName}!`, "ok");
       setTimeout(() => navigate("/"), 400);
     } else {
       toast(result.error || "Login failed", "err");
@@ -59,7 +60,7 @@ export const LoginPage = () => {
         <Inp
           label="Email Address"
           type="email"
-          icon="✉"
+          icon={<IoMailOutline />}
           value={form.email}
           onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
           placeholder="your@email.com"
@@ -97,7 +98,7 @@ export const LoginPage = () => {
               color: "var(--dim)",
               fontSize: 15,
             }}>
-              🔒
+              <IoLockClosedOutline size={16} />
             </span>
             <input
               type={showPass ? "text" : "password"}
@@ -255,7 +256,7 @@ export const SignupPage = () => {
 
     if (result.success) {
       // ✅ NEW: Show success message and redirect to login
-      toast("Account created successfully! Please login to continue ✦", "ok");
+      toast("Account created successfully! Please login to continue", "ok");
       setTimeout(() => navigate("/login"), 1500);
     } else {
       toast(result.error || "Signup failed", "err");
@@ -305,7 +306,7 @@ export const SignupPage = () => {
                   transition: "all .3s",
                 }}
               >
-                {step > i + 1 ? "✓" : i + 1}
+                {step > i + 1 ? <IoCheckmarkOutline size={14} /> : i + 1}
               </div>
               <span
                 style={{
@@ -376,7 +377,7 @@ export const SignupPage = () => {
           <Inp
             label="Email Address"
             type="email"
-            icon="✉"
+            icon={<IoMailOutline />}
             value={form.email}
             onChange={(e) =>
               setForm((p) => ({ ...p, email: e.target.value }))
@@ -399,7 +400,7 @@ export const SignupPage = () => {
                   fontSize: 15,
                 }}
               >
-                🔒
+                <IoLockClosedOutline size={16} />
               </span>
               <input
                 type="password"
@@ -446,7 +447,7 @@ export const SignupPage = () => {
           <Inp
             label="Confirm Password"
             type="password"
-            icon="🔒"
+            icon={<IoLockClosedOutline />}
             value={form.confirm}
             onChange={(e) =>
               setForm((p) => ({ ...p, confirm: e.target.value }))
@@ -492,9 +493,11 @@ export const SignupPage = () => {
                     color: "var(--gold)",
                     fontSize: 12,
                     lineHeight: 1,
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  ✓
+                  <IoCheckmarkOutline size={14} />
                 </span>
               )}
             </div>
@@ -530,7 +533,7 @@ export const SignupPage = () => {
                 setErrors({});
               }}
             >
-              ← Back
+              <IoArrowBack size={12} style={{ marginRight: 4 }} /> Back
             </Btn>
             <Btn
               v="primary"
@@ -601,7 +604,7 @@ export const ForgotPage = () => {
     try {
       await authAPI.forgotPassword(email);
       setSent(true);
-      toast("Reset link sent! Check your email ✦", "ok");
+      toast("Reset link sent! Check your email", "ok");
     } catch (err) {
       setError(err.message);
       toast(err.message, "err");
@@ -639,7 +642,7 @@ export const ForgotPage = () => {
           <Inp
             label="Email Address"
             type="email"
-            icon="✉"
+            icon={<IoMailOutline />}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
@@ -685,7 +688,7 @@ export const ForgotPage = () => {
               (e.currentTarget.style.color = "var(--muted)")
             }
           >
-            ← Back to Sign In
+            <IoArrowBack size={12} style={{ marginRight: 4 }} /> Back to Sign In
           </button>
         </form>
       ) : (
@@ -704,7 +707,7 @@ export const ForgotPage = () => {
               fontSize: 32,
             }}
           >
-            ✉️
+            <IoMailOutline size={36} />
           </div>
           <p style={{ color: "var(--muted)", marginBottom: 10, fontSize: 14 }}>
             A reset link has been sent to
@@ -731,10 +734,10 @@ export const ForgotPage = () => {
             }}
           >
             <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.8 }}>
-              ✦ Check your spam folder if not received
+              • Check your spam folder if not received
               <br />
-              ✦ Link expires in 30 minutes
-              <br />✦{" "}
+              • Link expires in 30 minutes
+              <br />•{" "}
               <button
                 onClick={() => setSent(false)}
                 style={{

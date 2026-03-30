@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { useToast } from "../context/ToastContext";
 import { Btn, StatusTag } from "../components/UI";
+import { IoBagOutline, IoCheckmarkOutline } from "react-icons/io5";
 
 const CartPage = ({ cart, setCart, navigate }) => {
   const toast = useToast();
@@ -69,7 +70,7 @@ const CartPage = ({ cart, setCart, navigate }) => {
               fontSize: 48,
             }}
           >
-            🛍️
+            <IoBagOutline size={48} />
           </div>
           <h2
             style={{
@@ -399,11 +400,10 @@ const CartPage = ({ cart, setCart, navigate }) => {
 
               {/* Trust badges */}
               <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
-                <p style={{ fontSize: 11, color: "var(--dim)", lineHeight: 1.8 }}>
-                  ✓ Secure checkout
-                  <br />
-                  ✓ Free returns within 30 days
-                  <br />✓ Complimentary gift wrapping
+                <p style={{ fontSize: 11, color: "var(--dim)", lineHeight: 1.8, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoCheckmarkOutline size={14} color="var(--emerald)" /> Secure checkout</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoCheckmarkOutline size={14} color="var(--emerald)" /> Free returns within 30 days</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoCheckmarkOutline size={14} color="var(--emerald)" /> Complimentary gift wrapping</span>
                 </p>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { Avatar, Btn, Tag } from "../../components/UI";
+import { IoGridOutline, IoCubeOutline, IoReceiptOutline, IoPeopleOutline, IoTrendingUpOutline, IoImagesOutline, IoSettingsOutline, IoLockClosedOutline, IoArrowBack } from "react-icons/io5";
 import {
   AdminDashboard,
   AdminProducts,
@@ -16,13 +17,13 @@ import {
 import { PRODUCTS, ORDERS, CUSTOMERS } from "../../data/mockData";
 
 const NAV_ITEMS = [
-  { id: "dashboard", icon: "▣", label: "Dashboard" },
-  { id: "products",  icon: "◈", label: "Products",  badge: PRODUCTS.length },
-  { id: "orders",    icon: "◉", label: "Orders",    badge: ORDERS.length },
-  { id: "customers", icon: "◎", label: "Customers", badge: CUSTOMERS.length },
-  { id: "analytics", icon: "△", label: "Analytics" },
-  { id: "media",     icon: "📷", label: "Media" },
-  { id: "settings",  icon: "◆", label: "Settings" },
+  { id: "dashboard", icon: <IoGridOutline size={16} />, label: "Dashboard" },
+  { id: "products",  icon: <IoCubeOutline size={16} />, label: "Products",  badge: PRODUCTS.length },
+  { id: "orders",    icon: <IoReceiptOutline size={16} />, label: "Orders",    badge: ORDERS.length },
+  { id: "customers", icon: <IoPeopleOutline size={16} />, label: "Customers", badge: CUSTOMERS.length },
+  { id: "analytics", icon: <IoTrendingUpOutline size={16} />, label: "Analytics" },
+  { id: "media",     icon: <IoImagesOutline size={16} />, label: "Media" },
+  { id: "settings",  icon: <IoSettingsOutline size={16} />, label: "Settings" },
 ];
 
 const AdminPanel = ({ navigate }) => {
@@ -43,7 +44,7 @@ const AdminPanel = ({ navigate }) => {
           gap: 20,
         }}
       >
-        <span style={{ fontSize: 56 }}>🔒</span>
+        <span style={{ fontSize: 56, display: "flex", justifyContent: "center" }}><IoLockClosedOutline size={56} /></span>
         <h2
           style={{
             fontFamily: "'Playfair Display', serif",
@@ -115,7 +116,7 @@ const AdminPanel = ({ navigate }) => {
               className={`side-btn${section === n.id ? " active" : ""}`}
               onClick={() => setSection(n.id)}
             >
-              <span style={{ fontSize: 14, width: 18, textAlign: "center" }}>
+              <span style={{ fontSize: 14, width: 18, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {n.icon}
               </span>
               <span style={{ flex: 1 }}>{n.label}</span>
@@ -165,7 +166,7 @@ const AdminPanel = ({ navigate }) => {
               e.target.style.color = "var(--muted)";
             }}
           >
-            ← Back to Store
+            <IoArrowBack size={12} style={{ marginRight: 4 }} /> Back to Store
           </button>
         </div>
       </aside>

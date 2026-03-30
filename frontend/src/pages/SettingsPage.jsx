@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Btn, Inp, Spinner } from "../components/UI";
 import { authAPI } from "../services/api";
-import { IoPersonOutline, IoLockClosedOutline, IoKeyOutline } from "react-icons/io5";
+import { IoPersonOutline, IoLockClosedOutline, IoKeyOutline, IoSparklesOutline } from "react-icons/io5";
 
 const SettingsPage = ({ navigate }) => {
   const { user, updateUser, logout } = useAuth();
@@ -64,7 +64,7 @@ const SettingsPage = ({ navigate }) => {
       if (!response.ok) throw new Error(data.message);
 
       updateUser({ name: profileForm.name, email: profileForm.email });
-      toast("Profile updated successfully ✦", "ok");
+      toast("Profile updated successfully", "ok");
     } catch (error) {
       toast(error.message, "err");
     } finally {
@@ -113,7 +113,7 @@ const SettingsPage = ({ navigate }) => {
 
       if (!response.ok) throw new Error(data.message);
 
-      toast("Password changed successfully ✦", "ok");
+      toast("Password changed successfully", "ok");
       setPassForm({ current: "", new: "", confirm: "" });
     } catch (error) {
       toast(error.message, "err");
@@ -345,11 +345,11 @@ const SettingsPage = ({ navigate }) => {
                     Password Requirements:
                   </strong>
                   <br />
-                  ✦ At least 8 characters long
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoSparklesOutline size={12} /> At least 8 characters long</span>
                   <br />
-                  ✦ Cannot be the same as current password
-                  <br />✦ Include uppercase, lowercase, and numbers for best
-                  security
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoSparklesOutline size={12} /> Cannot be the same as current password</span>
+                  <br /><span style={{ display: "flex", alignItems: "center", gap: 6 }}><IoSparklesOutline size={12} /> Include uppercase, lowercase, and numbers for best
+                  security</span>
                 </p>
               </div>
 

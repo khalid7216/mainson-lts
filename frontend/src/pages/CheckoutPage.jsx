@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { orderAPI, paymentAPI } from "../services/api";
 import { Btn } from "../components/UI";
-import { IoArrowBack, IoCheckmarkCircle, IoCloseCircle, IoWalletOutline } from "react-icons/io5";
+import { IoArrowBack, IoCheckmarkCircle, IoCloseCircle, IoWalletOutline, IoFlaskOutline } from "react-icons/io5";
 
 const CARD_STYLE = {
   style: {
@@ -362,7 +362,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
                     marginTop: 24,
                   }}>
                     <p style={{ fontSize: 12, color: "var(--gold2)", lineHeight: 1.6 }}>
-                      🧪 <strong>Test mode</strong> — Use card <code style={{ background: "var(--lift)", padding: "2px 6px", borderRadius: 4 }}>4242 4242 4242 4242</code>, any future date, any CVC.
+                      <IoFlaskOutline size={14} style={{ verticalAlign: "middle", marginRight: 4 }} /> <strong>Test mode</strong> — Use card <code style={{ background: "var(--lift)", padding: "2px 6px", borderRadius: 4 }}>4242 4242 4242 4242</code>, any future date, any CVC.
                     </p>
                   </div>
                 </>

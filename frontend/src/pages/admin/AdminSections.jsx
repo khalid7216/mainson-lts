@@ -3,6 +3,7 @@ import { Avatar, Btn, StatusTag } from "../../components/UI";
 import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
 import { productAPI, categoryAPI, mediaAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
+import { IoCashOutline, IoBagOutline, IoPeopleOutline, IoHeartOutline, IoPersonOutline, IoStar, IoImagesOutline, IoSearchOutline, IoGridOutline, IoListOutline, IoCloudUploadOutline, IoCheckmarkOutline, IoCloseOutline, IoDownloadOutline } from "react-icons/io5";
 
 /* ── Reusable Stat card ─────────────────────────────── */
 export const StatCard = ({ icon, label, value, delta, sub }) => (
@@ -39,10 +40,10 @@ export const AdminDashboard = () => (
 
     {/* Stats row */}
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18, marginBottom: 28 }}>
-      <StatCard icon="💰" label="Revenue (Feb)" value="$48,290" delta="+18.4%" />
-      <StatCard icon="🛍" label="Orders"        value="284"     delta="+7.2%"  />
-      <StatCard icon="👥" label="Customers"     value="1,842"   delta="+12.1%" />
-      <StatCard icon="♡"  label="Wishlist"      value="4,218"   sub="Conversion 14.2%" />
+      <StatCard icon={<IoCashOutline size={26} />} label="Revenue (Feb)" value="$48,290" delta="+18.4%" />
+      <StatCard icon={<IoBagOutline size={26} />} label="Orders"        value="284"     delta="+7.2%"  />
+      <StatCard icon={<IoPeopleOutline size={26} />} label="Customers"     value="1,842"   delta="+12.1%" />
+      <StatCard icon={<IoHeartOutline size={26} />}  label="Wishlist"      value="4,218"   sub="Conversion 14.2%" />
     </div>
 
     {/* Recent orders + Top sellers */}
@@ -219,7 +220,7 @@ export const AdminProducts = () => {
                   )}
                 </td>
                 <td>
-                  <span style={{ color: "var(--gold)", fontSize: 12 }}>★</span> {p.rating}
+                  <IoStar size={12} color="var(--gold)" style={{ verticalAlign: "middle", marginRight: 2 }} /> {p.rating}
                 </td>
                 <td>
                   {p.badge ? <StatusTag status={p.badge} /> : <span style={{ color: "var(--dim)", fontSize: 12 }}>—</span>}
@@ -265,7 +266,7 @@ export const AdminOrders = () => {
           <h1 className="section-title">Orders</h1>
           <p className="section-sub">{ORDERS.length} total orders this month</p>
         </div>
-        <Btn v="ghost">↓ Export CSV</Btn>
+        <Btn v="ghost"><IoDownloadOutline size={14} style={{ verticalAlign: "middle", marginRight: 4 }} /> Export CSV</Btn>
       </div>
 
       {/* Filter tabs */}
@@ -378,9 +379,9 @@ export const AdminAnalytics = () => {
 
       {/* KPI row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, marginBottom: 28 }}>
-        <StatCard icon="💰" label="Total Revenue" value="$263,090" delta="+24.3%" />
-        <StatCard icon="🛍" label="Total Orders"  value="1,847"    delta="+15.2%" />
-        <StatCard icon="◎"  label="Avg. Order"    value="$164.80"  delta="+8.1%"  />
+        <StatCard icon={<IoCashOutline size={26} />} label="Total Revenue" value="$263,090" delta="+24.3%" />
+        <StatCard icon={<IoBagOutline size={26} />} label="Total Orders"  value="1,847"    delta="+15.2%" />
+        <StatCard icon={<IoPersonOutline size={26} />}  label="Avg. Order"    value="$164.80"  delta="+8.1%"  />
       </div>
 
       {/* Revenue bar chart */}
@@ -512,7 +513,7 @@ export const AdminSettings = ({ toast }) => {
             </div>
           ))}
           <div style={{ marginTop: 20 }}>
-            <Btn v="primary" onClick={() => toast("Settings saved ✦", "ok")}>Save Changes</Btn>
+            <Btn v="primary" onClick={() => toast("Settings saved", "ok")}>Save Changes</Btn>
           </div>
         </div>
       ))}
@@ -664,7 +665,7 @@ export const AdminMedia = () => {
         {/* Search */}
         <div style={{ position:"relative", flex:1, minWidth:180 }}>
           <span style={{ position:"absolute", left:11, top:"50%", transform:"translateY(-50%)",
-            color:"var(--muted)", fontSize:13, pointerEvents:"none" }}>🔍</span>
+            color:"var(--muted)", fontSize:13, pointerEvents:"none", display:"flex" }}><IoSearchOutline size={14} /></span>
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search images…"
             style={{ width:"100%", padding:"9px 12px 9px 32px", borderRadius:6,
@@ -684,7 +685,7 @@ export const AdminMedia = () => {
         </select>
         {/* View toggle */}
         <div style={{ display:"flex", border:"1px solid var(--border)", borderRadius:6, overflow:"hidden" }}>
-          {[["grid","⊞"],["list","☰"]].map(([mode, icon]) => (
+          {[["grid",<IoGridOutline size={16} />],["list",<IoListOutline size={16} />]].map(([mode, icon]) => (
             <button key={mode} onClick={() => setViewMode(mode)}
               style={{ padding:"8px 14px", border:"none", cursor:"pointer", fontSize:15,
                 background: viewMode === mode ? "rgba(201,168,76,.18)" : "none",
@@ -715,7 +716,7 @@ export const AdminMedia = () => {
           background: dragging ? "rgba(201,168,76,.06)" : "var(--lift)",
           cursor:"pointer", transition:"all .2s",
           boxShadow: dragging ? "0 0 0 3px rgba(201,168,76,.15)" : "none" }}>
-        <p style={{ fontSize:24, marginBottom:6, opacity:.7 }}>☁</p>
+        <p style={{ fontSize:24, marginBottom:6, opacity:.7, display:"flex", justifyContent:"center" }}><IoCloudUploadOutline size={28} /></p>
         <p style={{ fontSize:13, color:"var(--muted)", lineHeight:1.6 }}>
           {dragging ? "Drop to upload!" : "Drag & drop images here, or click to browse"}
         </p>
@@ -728,7 +729,7 @@ export const AdminMedia = () => {
           <p style={{ color:"var(--dim)" }}>Loading media…</p>
         ) : mediaList.length === 0 ? (
           <div style={{ textAlign:"center", padding:"50px 0", color:"var(--muted)" }}>
-            <p style={{ fontSize:36, marginBottom:14 }}>📷</p>
+            <p style={{ fontSize:36, marginBottom:14, display:"flex", justifyContent:"center" }}><IoImagesOutline size={40} /></p>
             <p>No images found. Upload your first image to get started.</p>
           </div>
         ) : viewMode === "grid" ? (
@@ -753,7 +754,7 @@ export const AdminMedia = () => {
                   {/* Checkbox */}
                   {m.source !== "product" && (
                     <div className="chk" onClick={(e) => { e.stopPropagation(); toggleSelect(String(m._id), m.source); }}>
-                      {isSelected ? "✓" : ""}
+                      {isSelected ? <IoCheckmarkOutline size={12} /> : ""}
                     </div>
                   )}
                   {/* Image */}
@@ -765,7 +766,7 @@ export const AdminMedia = () => {
                       <button onClick={(e) => { e.stopPropagation(); copyURL(m.url, m._id); }}
                         style={{ padding:"7px 14px", background:"var(--gold)", color:"#000",
                           border:"none", borderRadius:4, cursor:"pointer", fontSize:11, fontWeight:700 }}>
-                        {copied === m._id ? "✓ Copied!" : "Copy URL"}
+                        {copied === m._id ? <><IoCheckmarkOutline size={12} /> Copied!</> : "Copy URL"}
                       </button>
                       {m.source !== "product" && (
                         <button onClick={(e) => { e.stopPropagation(); handleDelete(m._id); }}
@@ -819,7 +820,7 @@ export const AdminMedia = () => {
                             background: isSelected ? "var(--gold)" : "none",
                             display:"flex", alignItems:"center", justifyContent:"center",
                             cursor:"pointer", fontSize:10, color:"#000", transition:".15s" }}>
-                          {isSelected ? "✓" : ""}
+                          {isSelected ? <IoCheckmarkOutline size={11} /> : ""}
                         </div>
                       )}
                     </td>
@@ -853,7 +854,7 @@ export const AdminMedia = () => {
                           style={{ padding:"4px 10px", borderRadius:4, border:"1px solid var(--border2)",
                             background:"none", color: copied===m._id ? "var(--gold2)" : "var(--text)",
                             cursor:"pointer", fontSize:10, fontFamily:"'Jost',sans-serif" }}>
-                          {copied===m._id ? "✓ Copied" : "Copy URL"}
+                          {copied===m._id ? <><IoCheckmarkOutline size={11} /> Copied</> : "Copy URL"}
                         </button>
                         {m.source !== "product" && (
                           <button onClick={() => handleDelete(m._id)}
@@ -944,7 +945,7 @@ export const AdminMedia = () => {
                     style={{ padding:"8px 14px", background:"var(--gold)", color:"#000",
                       border:"none", borderRadius:5, cursor:"pointer",
                       fontSize:11, fontWeight:700, whiteSpace:"nowrap" }}>
-                    {copied === drawer._id ? "✓" : "Copy"}
+                    {copied === drawer._id ? <IoCheckmarkOutline size={12} /> : "Copy"}
                   </button>
                 </div>
               </div>
