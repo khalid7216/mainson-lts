@@ -18,7 +18,7 @@ const settingsRoutes     = require("./routes/settingsRoutes");
 const shippingRoutes     = require("./routes/shippingRoutes");
 const notificationRoutes   = require("./routes/notificationRoutes");
 const activityLogRoutes    = require("./routes/activityLogRoutes");
-
+const mediaRoutes          = require("./routes/mediaRoutes");
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
@@ -75,7 +75,7 @@ app.use("/api/settings",       settingsRoutes);
 app.use("/api/shipping",       shippingRoutes);
 app.use("/api/notifications",  notificationRoutes);
 app.use("/api/activity-logs",  activityLogRoutes);
-
+app.use("/api/media",          mediaRoutes);
 app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date() }));
 
 /* ── API 404 handler ────────────────────────────── */

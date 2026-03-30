@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Avatar, Btn, StatusTag } from "../../components/UI";
 import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
-import { productAPI, categoryAPI } from "../../services/api";
+import { productAPI, categoryAPI, mediaAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
 
 /* ── Reusable Stat card ─────────────────────────────── */
@@ -516,6 +516,133 @@ export const AdminSettings = ({ toast }) => {
           </div>
         </div>
       ))}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════
+   MEDIA LIBRARY
+═══════════════════════════════════════════════════ */
+export const AdminMedia = () => {
+  const [mediaList, setMediaList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const fetchMedia = async () => {
+    try {
+      setLoading(true);
+      const data = await mediaAPI.getAll();
+      setMediaList(data.media || []);
+    } catch (err) {
+      alert("Failed to fetch media");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedia();
+  }, []);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      await mediaAPI.upload(file);
+      fetchMedia();
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Permanently delete this image from database and Cloudinary?")) return;
+    try {
+      await mediaAPI.delete(id);
+      fetchMedia();
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+    }
+  };
+
+  const copyToClipboard = (url) => {
+    navigator.clipboard.writeText(url);
+    alert("URL Copied to clipboard!");
+  };
+
+  return (
+    <div className="fu">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+        <div>
+          <h1 className="section-title">Media Library</h1>
+          <p className="section-sub">{mediaList.length} files stored</p>
+        </div>
+        <div>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleUpload}
+            style={{ display: "none" }}
+          />
+          <Btn v="primary" onClick={() => fileInputRef.current?.click()}>
+            {uploading ? "Uploading..." : "+ Upload Image"}
+          </Btn>
+        </div>
+      </div>
+
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28, minHeight: 400 }}>
+        {loading ? (
+          <p style={{ color: "var(--dim)" }}>Loading media...</p>
+        ) : mediaList.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+            <p style={{ fontSize: 40, marginBottom: 16 }}>📷</p>
+            <p>No media files found. Upload your first image to get started.</p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 24 }}>
+            {mediaList.map((m) => (
+              <div key={m._id} style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", background: "var(--lift)", position: "relative" }} className="media-card">
+                <style>{`
+                  .media-card .overlay { opacity: 0; transition: opacity 0.2s; background: rgba(0,0,0,0.6); position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap: 10px; }
+                  .media-card:hover .overlay { opacity: 1; }
+                `}</style>
+                <div style={{ width: "100%", aspectRatio: "1/1", position: "relative" }}>
+                  <img src={m.url} alt="Media upload" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <div className="overlay">
+                    <button
+                      onClick={() => copyToClipboard(m.url)}
+                      style={{ padding: "8px 16px", background: "var(--gold)", color: "#000", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 13, fontWeight: 500 }}
+                    >
+                      Copy URL
+                    </button>
+                    <button
+                      onClick={() => handleDelete(m._id)}
+                      style={{ padding: "8px 16px", background: "var(--rose)", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 13, fontWeight: 500 }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+                <div style={{ padding: "10px 12px", borderTop: "1px solid var(--border)" }}>
+                  <p style={{ fontSize: 11, color: "var(--dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={m.url}>
+                    {m.public_id ? m.public_id.split('/').pop() : "uploaded_media"}
+                  </p>
+                  <p style={{ fontSize: 10, color: "var(--muted)", marginTop: 4 }}>
+                    {m.size ? (m.size / 1024).toFixed(1) + " KB" : "-"} • {m.format ? m.format.toUpperCase() : "IMG"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

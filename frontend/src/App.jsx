@@ -10,6 +10,7 @@ import { wishlistAPI } from "./services/api";
 import GlobalStyles from "./styles/GlobalStyles";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
+import ShopPage from "./pages/ShopPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -131,6 +132,17 @@ const AppContent = () => {
                   path="/"
                   element={
                     <HomePage
+                      navigate={navigate}
+                      addToCart={addToCart}
+                      wishlist={wishlist}
+                      toggleWishlist={toggleWishlist}
+                    />
+                  }
+                />
+                <Route
+                  path="/shop"
+                  element={
+                    <ShopPage
                       navigate={navigate}
                       addToCart={addToCart}
                       wishlist={wishlist}

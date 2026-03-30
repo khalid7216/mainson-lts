@@ -13,16 +13,8 @@ import { productAPI } from "../services/api";
 import Pagination from "../components/Pagination";
 
 const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const cat = searchParams.get("category") || "All";
-  const sort = searchParams.get("sort") || "Featured";
-  const search = searchParams.get("search") || "";
-  const page = parseInt(searchParams.get("page") || "1", 10);
-
   const [qv, setQv] = useState(null);
   const [apiProducts, setApiProducts] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,16 +23,11 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         setLoading(true);
         
         let apiSort = "";
-        if (sort === "Price Low") apiSort = "price_asc";
-        if (sort === "Price High") apiSort = "price_desc";
-        if (sort === "Rating") apiSort = "rating";
         
-        // Pass page and limit to the generic products route
+        // Fetch only top 4 newest/featured products for the homepage
         const data = await productAPI.getProducts({ 
-          page, 
-          limit: 8, 
-          sort: apiSort,
-          search
+          page: 1, 
+          limit: 4 
         });
         const formattedProducts = data.products.map((p) => ({
           id: p._id,
@@ -55,8 +42,6 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           image: p.images?.[0] || p.image?.url || p.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
         }));
         setApiProducts(formattedProducts);
-        setTotalPages(data.pages || 1);
-        setTotalProducts(data.total || 0);
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
@@ -64,25 +49,9 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       }
     };
     fetchProducts();
-  }, [page, sort, cat, search]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page, cat]);
+  }, []);
 
   const products = apiProducts;
-
-  const changeFilter = (c) => {
-    setSearchParams({ category: c, sort, page: 1, search });
-  };
-
-  const changeSort = (s) => {
-    setSearchParams({ category: cat, sort: s, page: 1, search });
-  };
-
-  const changePage = (p) => {
-    setSearchParams({ category: cat, sort, page: p, search });
-  };
 
   return (
     <div>
@@ -330,58 +299,13 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         </div>
       </section>
 
-      {/* ── Filters ──────────────────────────────────── */}
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "48px clamp(20px, 5vw, 32px) 0" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 16,
-          }}
-        >
-          <div className="hide-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, width: "100%", WebkitOverflowScrolling: "touch" }}>
-            {NAV_CATEGORIES.map((c) => (
-              <button
-                key={c}
-                className={`chip${cat === c ? " active" : ""}`}
-                onClick={() => changeFilter(c)}
-                style={{ flexShrink: 0 }}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-          <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
-            <select
-            value={sort}
-            onChange={(e) => changeSort(e.target.value)}
-            style={{
-              padding: "9px 14px",
-              borderRadius: 6,
-              border: "1px solid var(--border2)",
-              background: "var(--card)",
-              color: "var(--text)",
-              fontSize: 12,
-              cursor: "pointer",
-            }}
-          >
-            {["Featured", "Price Low", "Price High", "Rating"].map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </div>
-        </div>
-        <p
-          style={{
-            fontSize: 12,
-            color: "var(--dim)",
-            marginTop: 12,
-            letterSpacing: ".05em",
-          }}
-        >
-          {totalProducts} pieces
+      {/* ── Featured Section Title ───────────────────── */}
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "64px clamp(20px, 5vw, 32px) 20px" }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 300, textAlign: "center" }}>
+          Trending Latest Arrivals
+        </h2>
+        <p style={{ textAlign: "center", color: "var(--muted)", marginTop: 12, letterSpacing: ".05em" }}>
+          A curated selection of our most loved pieces.
         </p>
       </div>
 
@@ -415,15 +339,15 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           ))}
         </div>
         
-        {/* Pagination Integration */}
+        {/* Explore All Button */}
         {loading ? (
           <div style={{ textAlign: "center", padding: "40px 0" }}>Loading...</div>
         ) : (
-          <Pagination 
-            currentPage={page} 
-            totalPages={totalPages} 
-            onPageChange={changePage} 
-          />
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
+            <Btn v="secondary" size="lg" onClick={() => navigate("/shop")}>
+              Explore Full Collection →
+            </Btn>
+          </div>
         )}
       </div>
 

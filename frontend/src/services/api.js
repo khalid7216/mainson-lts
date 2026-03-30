@@ -215,3 +215,23 @@ export const wishlistAPI = {
     });
   },
 };
+
+/* ══════════════════════════════════════════════════
+   MEDIA APIS
+══════════════════════════════════════════════════ */
+export const mediaAPI = {
+  upload: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return await request("/media/upload", {
+      method: "POST",
+      body: formData,
+    }, true);
+  },
+  getAll: async () => {
+    return await request("/media");
+  },
+  delete: async (id) => {
+    return await request(`/media/${id}`, { method: "DELETE" });
+  },
+};

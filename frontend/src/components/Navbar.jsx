@@ -27,7 +27,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
 
   // Handle Search Submission (debounced)
   useEffect(() => {
-    if (location.pathname !== "/") return; // Only apply debounce fetch if on home page
+    if (location.pathname !== "/shop") return; // Only apply debounce fetch if on shop page
     const handler = setTimeout(() => {
       if (searchQuery) {
         setSearchParams(prev => { prev.set("search", searchQuery); prev.set("page", "1"); return prev; });
@@ -40,7 +40,12 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
 
   const handleSearchCommit = (e) => {
     if (e.key === "Enter") {
-      if (location.pathname !== "/") navigate("/?search=" + searchQuery);
+      if (searchQuery) {
+        navigate("/shop?search=" + encodeURIComponent(searchQuery));
+        setShowSearch(false);
+      } else {
+        navigate("/shop");
+      }
     }
   };
 
@@ -456,11 +461,11 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
       </button>
       
       <button 
-        className={`mobile-nav-item ${showSearch ? "active" : ""}`}
-        onClick={() => { setShowSearch(true); if(location.pathname !== "/") navigate("/"); }}
+        className={`mobile-nav-item ${location.pathname === "/shop" || showSearch ? "active" : ""}`}
+        onClick={() => { setShowSearch(true); if(location.pathname !== "/shop") navigate("/shop"); }}
       >
         <IoSearchOutline size={22} />
-        <span>Search</span>
+        <span>Shop</span>
       </button>
 
       <button 

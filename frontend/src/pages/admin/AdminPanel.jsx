@@ -11,6 +11,7 @@ import {
   AdminCustomers,
   AdminAnalytics,
   AdminSettings,
+  AdminMedia,
 } from "./AdminSections";
 import { PRODUCTS, ORDERS, CUSTOMERS } from "../../data/mockData";
 
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { id: "orders",    icon: "◉", label: "Orders",    badge: ORDERS.length },
   { id: "customers", icon: "◎", label: "Customers", badge: CUSTOMERS.length },
   { id: "analytics", icon: "△", label: "Analytics" },
+  { id: "media",     icon: "📷", label: "Media" },
   { id: "settings",  icon: "◆", label: "Settings" },
 ];
 
@@ -181,8 +183,9 @@ const AdminPanel = ({ navigate }) => {
         {section === "products" && <AdminProducts />}
         {section === "orders" && <AdminOrders />}
         {section === "customers" && <AdminCustomers />}
-        {section === "analytics" && <AdminAnalytics />}
-        {section === "settings" && <AdminSettings toast={toast} />}
+        { section === "analytics" && <AdminAnalytics /> }
+        { section === "media"     && <AdminMedia /> }
+        { section === "settings"  && <AdminSettings toast={toast} /> }
       </main>
     </div>
   );
