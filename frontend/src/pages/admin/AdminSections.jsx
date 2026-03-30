@@ -527,6 +527,8 @@ export const AdminMedia = () => {
   const [mediaList, setMediaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [filter, setFilter] = useState("all"); // "all" | "library" | "product"
+  const [copied, setCopied] = useState(null);
   const fileInputRef = useRef(null);
 
   const fetchMedia = async () => {
@@ -541,14 +543,11 @@ export const AdminMedia = () => {
     }
   };
 
-  useEffect(() => {
-    fetchMedia();
-  }, []);
+  useEffect(() => { fetchMedia(); }, []);
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       setUploading(true);
       await mediaAPI.upload(file);
@@ -562,7 +561,7 @@ export const AdminMedia = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Permanently delete this image from database and Cloudinary?")) return;
+    if (!window.confirm("Permanently delete this image from the Media Library and Cloudinary?")) return;
     try {
       await mediaAPI.delete(id);
       fetchMedia();
@@ -571,71 +570,117 @@ export const AdminMedia = () => {
     }
   };
 
-  const copyToClipboard = (url) => {
+  const copyToClipboard = (url, id) => {
     navigator.clipboard.writeText(url);
-    alert("URL Copied to clipboard!");
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
+
+  const visible = mediaList.filter((m) =>
+    filter === "all" ? true : m.source === filter
+  );
+
+  const libraryCount = mediaList.filter((m) => m.source === "library").length;
+  const productCount = mediaList.filter((m) => m.source === "product").length;
 
   return (
     <div className="fu">
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
         <div>
           <h1 className="section-title">Media Library</h1>
-          <p className="section-sub">{mediaList.length} files stored</p>
+          <p className="section-sub">{mediaList.length} total · {libraryCount} uploaded · {productCount} from products</p>
         </div>
         <div>
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={handleUpload}
-            style={{ display: "none" }}
-          />
+          <input type="file" accept="image/*" ref={fileInputRef} onChange={handleUpload} style={{ display: "none" }} />
           <Btn v="primary" onClick={() => fileInputRef.current?.click()}>
             {uploading ? "Uploading..." : "+ Upload Image"}
           </Btn>
         </div>
       </div>
 
+      {/* Filter tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {[["all", "All"], ["library", "Uploaded"], ["product", "Products"]].map(([val, label]) => (
+          <button
+            key={val}
+            onClick={() => setFilter(val)}
+            style={{
+              padding: "7px 18px", borderRadius: 100, cursor: "pointer",
+              border: `1px solid ${filter === val ? "var(--gold)" : "var(--border)"}`,
+              background: filter === val ? "rgba(201,168,76,.12)" : "none",
+              color: filter === val ? "var(--gold2)" : "var(--muted)",
+              fontSize: 11, letterSpacing: ".08em", fontFamily: "'Jost', sans-serif", transition: "all .2s",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid */}
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28, minHeight: 400 }}>
+        <style>{`
+          .media-card .overlay { opacity: 0; transition: opacity 0.2s; background: rgba(0,0,0,0.65);
+            position: absolute; top:0; left:0; right:0; bottom:0;
+            display:flex; flex-direction:column; justify-content:center; align-items:center; gap: 10px; }
+          .media-card:hover .overlay { opacity: 1; }
+        `}</style>
+
         {loading ? (
           <p style={{ color: "var(--dim)" }}>Loading media...</p>
-        ) : mediaList.length === 0 ? (
+        ) : visible.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
             <p style={{ fontSize: 40, marginBottom: 16 }}>📷</p>
-            <p>No media files found. Upload your first image to get started.</p>
+            <p>No images found. Upload your first image to get started.</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 24 }}>
-            {mediaList.map((m) => (
-              <div key={m._id} style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", background: "var(--lift)", position: "relative" }} className="media-card">
-                <style>{`
-                  .media-card .overlay { opacity: 0; transition: opacity 0.2s; background: rgba(0,0,0,0.6); position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap: 10px; }
-                  .media-card:hover .overlay { opacity: 1; }
-                `}</style>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(196px, 1fr))", gap: 20 }}>
+            {visible.map((m) => (
+              <div
+                key={m._id + (m.source || "")}
+                className="media-card"
+                style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", background: "var(--lift)", position: "relative" }}
+              >
+                {/* Source badge */}
+                <div style={{
+                  position: "absolute", top: 8, left: 8, zIndex: 5,
+                  padding: "2px 8px", borderRadius: 4, fontSize: 9, fontWeight: 700,
+                  letterSpacing: ".1em", textTransform: "uppercase",
+                  background: m.source === "product" ? "rgba(107,157,217,.85)" : "rgba(201,168,76,.85)",
+                  color: m.source === "product" ? "#fff" : "#000",
+                }}>
+                  {m.source === "product" ? "Product" : "Library"}
+                </div>
+
+                {/* Image with hover overlay */}
                 <div style={{ width: "100%", aspectRatio: "1/1", position: "relative" }}>
-                  <img src={m.url} alt="Media upload" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={m.url} alt={m.productName || "Media"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   <div className="overlay">
                     <button
-                      onClick={() => copyToClipboard(m.url)}
-                      style={{ padding: "8px 16px", background: "var(--gold)", color: "#000", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 13, fontWeight: 500 }}
+                      onClick={() => copyToClipboard(m.url, m._id)}
+                      style={{ padding: "8px 16px", background: "var(--gold)", color: "#000", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
                     >
-                      Copy URL
+                      {copied === m._id ? "✓ Copied!" : "Copy URL"}
                     </button>
-                    <button
-                      onClick={() => handleDelete(m._id)}
-                      style={{ padding: "8px 16px", background: "var(--rose)", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 13, fontWeight: 500 }}
-                    >
-                      Delete
-                    </button>
+                    {m.source !== "product" && (
+                      <button
+                        onClick={() => handleDelete(m._id)}
+                        style={{ padding: "8px 16px", background: "var(--rose)", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 500 }}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div style={{ padding: "10px 12px", borderTop: "1px solid var(--border)" }}>
-                  <p style={{ fontSize: 11, color: "var(--dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={m.url}>
-                    {m.public_id ? m.public_id.split('/').pop() : "uploaded_media"}
+
+                {/* Info footer */}
+                <div style={{ padding: "9px 11px", borderTop: "1px solid var(--border)" }}>
+                  <p style={{ fontSize: 11, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }} title={m.productName || m.public_id}>
+                    {m.productName || (m.public_id ? m.public_id.split("/").pop() : "uploaded_media")}
                   </p>
-                  <p style={{ fontSize: 10, color: "var(--muted)", marginTop: 4 }}>
-                    {m.size ? (m.size / 1024).toFixed(1) + " KB" : "-"} • {m.format ? m.format.toUpperCase() : "IMG"}
+                  <p style={{ fontSize: 10, color: "var(--muted)", marginTop: 3 }}>
+                    {m.size ? (m.size / 1024).toFixed(1) + " KB · " : ""}{m.format ? m.format.toUpperCase() : "IMG"}
                   </p>
                 </div>
               </div>
@@ -646,3 +691,4 @@ export const AdminMedia = () => {
     </div>
   );
 };
+
