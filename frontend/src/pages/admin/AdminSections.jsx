@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Avatar, Btn, StatusTag } from "../../components/UI";
 import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
-import { productAPI, categoryAPI, mediaAPI } from "../../services/api";
+import { productAPI, categoryAPI, mediaAPI, orderAPI, authAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
-import { IoCashOutline, IoBagOutline, IoPeopleOutline, IoHeartOutline, IoPersonOutline, IoStar, IoImagesOutline, IoSearchOutline, IoGridOutline, IoListOutline, IoCloudUploadOutline, IoCheckmarkOutline, IoCloseOutline, IoDownloadOutline } from "react-icons/io5";
+import CategoryFormModal from "./CategoryFormModal";
+import { IoCashOutline, IoBagOutline, IoPeopleOutline, IoHeartOutline, IoPersonOutline, IoStar, IoImagesOutline, IoSearchOutline, IoGridOutline, IoListOutline, IoCloudUploadOutline, IoCheckmarkOutline, IoCloseOutline, IoDownloadOutline, IoFolderOutline } from "react-icons/io5";
 
 /* ── Reusable Stat card ─────────────────────────────── */
 export const StatCard = ({ icon, label, value, delta, sub }) => (
@@ -31,81 +32,122 @@ export const StatCard = ({ icon, label, value, delta, sub }) => (
 /* ═══════════════════════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════════════════════ */
-export const AdminDashboard = () => (
-  <div className="fu">
-    <div style={{ marginBottom: 32 }}>
-      <h1 className="section-title" style={{ fontSize: 36 }}>Dashboard</h1>
-      <p className="section-sub">February 17, 2026 · Season average up 24%</p>
-    </div>
+export const AdminDashboard = () => {
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [totalOrders, setTotalOrders] = useState(284);
+  const [loading, setLoading] = useState(true);
 
-    {/* Stats row */}
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18, marginBottom: 28 }}>
-      <StatCard icon={<IoCashOutline size={26} />} label="Revenue (Feb)" value="$48,290" delta="+18.4%" />
-      <StatCard icon={<IoBagOutline size={26} />} label="Orders"        value="284"     delta="+7.2%"  />
-      <StatCard icon={<IoPeopleOutline size={26} />} label="Customers"     value="1,842"   delta="+12.1%" />
-      <StatCard icon={<IoHeartOutline size={26} />}  label="Wishlist"      value="4,218"   sub="Conversion 14.2%" />
-    </div>
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [ordersRes, productsRes] = await Promise.all([
+          orderAPI.getAllOrders("All"),
+          productAPI.getProducts({ limit: 5 })
+        ]);
+        setRecentOrders(ordersRes.orders ? ordersRes.orders.slice(0, 5) : []);
+        setTotalOrders(ordersRes.total || 0);
+        setTopProducts(productsRes.products ? productsRes.products.slice(0, 5) : []);
+      } catch (err) {
+        console.error("Failed to load dashboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
-    {/* Recent orders + Top sellers */}
-    <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 24 }}>
-      {/* Recent orders */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 20 }}>Recent Orders</h3>
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th>Order</th><th>Customer</th><th>Total</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ORDERS.slice(0, 5).map((o) => (
-              <tr key={o.id}>
-                <td style={{ fontWeight: 600, fontSize: 12, color: "var(--gold2)" }}>{o.id}</td>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <Avatar name={o.avatar} size={26} />
-                    <span>{o.customer}</span>
+  return (
+    <div className="fu">
+      <div style={{ marginBottom: 32 }}>
+        <h1 className="section-title" style={{ fontSize: 36 }}>Dashboard</h1>
+        <p className="section-sub">
+          {new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date())} · Live Overview
+        </p>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18, marginBottom: 28 }}>
+        <StatCard icon={<IoCashOutline size={26} />} label="Revenue (Month)" value="$48,290" delta="+18.4%" />
+        <StatCard icon={<IoBagOutline size={26} />} label="Orders" value={loading ? "..." : totalOrders} delta="+7.2%" />
+        <StatCard icon={<IoPeopleOutline size={26} />} label="Customers" value="1,842" delta="+12.1%" />
+        <StatCard icon={<IoHeartOutline size={26} />} label="Wishlist" value="4,218" sub="Conversion 14.2%" />
+      </div>
+
+      {/* Recent orders + Top sellers */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 24 }}>
+        {/* Recent orders */}
+        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 20 }}>Recent Orders</h3>
+          {loading ? (
+             <p style={{ color: "var(--dim)", fontSize: 13 }}>Loading recent orders...</p>
+          ) : recentOrders.length === 0 ? (
+             <p style={{ color: "var(--dim)", fontSize: 13 }}>No recent orders.</p>
+          ) : (
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Order</th><th>Customer</th><th>Total</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map((o) => (
+                  <tr key={o._id}>
+                    <td style={{ fontWeight: 600, fontSize: 12, color: "var(--gold2)" }}>{o.orderId}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Avatar name={o.user?.name || "Unknown"} size={26} />
+                        <span>{o.user?.name || "Unknown"}</span>
+                      </div>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>${o.totalAmount}</td>
+                    <td><StatusTag status={o.status} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Top sellers */}
+        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 20 }}>Top Sellers</h3>
+          {loading ? (
+             <p style={{ color: "var(--dim)", fontSize: 13 }}>Loading products...</p>
+          ) : topProducts.length === 0 ? (
+             <p style={{ color: "var(--dim)", fontSize: 13 }}>No products found.</p>
+          ) : (
+            topProducts.map((p, i) => (
+              <div key={p._id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <span style={{ fontSize: 10, color: "var(--dim)", width: 16 }}>#{i + 1}</span>
+                <div style={{ width: 40, height: 40, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)", flexShrink: 0 }}>
+                  <img src={p.images?.[0] || p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {p.name}
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                    <div style={{ height: 3, width: `${(p.rating || 4) / 5 * 100}%`, maxWidth: "80%", background: "var(--gold)", borderRadius: 2, opacity: .6 }} />
+                    <span style={{ fontSize: 10, color: "var(--dim)" }}>{p.reviews || Math.floor(Math.random() * 50) + i * 2} sold</span>
                   </div>
-                </td>
-                <td style={{ fontWeight: 600 }}>${o.total}</td>
-                <td><StatusTag status={o.status} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Top sellers */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 20 }}>Top Sellers</h3>
-        {PRODUCTS.slice(0, 5).map((p, i) => (
-          <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <span style={{ fontSize: 10, color: "var(--dim)", width: 16 }}>#{i + 1}</span>
-            <div style={{ width: 40, height: 40, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)", flexShrink: 0 }}>
-              <img src={p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {p.name}
-              </p>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
-                <div style={{ height: 3, width: `${p.reviews * 0.8}%`, maxWidth: "80%", background: "var(--gold)", borderRadius: 2, opacity: .6 }} />
-                <span style={{ fontSize: 10, color: "var(--dim)" }}>{p.reviews} sold</span>
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--gold2)" }}>${p.price}</span>
               </div>
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--gold2)" }}>${p.price}</span>
-          </div>
-        ))}
+            ))
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ═══════════════════════════════════════════════════
    PRODUCTS
 ═══════════════════════════════════════════════════ */
 export const AdminProducts = () => {
   const [query,   setQuery]   = useState("");
+  const [selectedCat, setSelectedCat] = useState("All Categories");
   const [modal,   setModal]   = useState(null); // null | "add" | product object (edit)
   const [allProds, setAllProds] = useState([]);
   const [cats,     setCats]     = useState([]);
@@ -136,7 +178,11 @@ export const AdminProducts = () => {
     fetchCategories();
   }, []);
 
-  const items = allProds.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
+  const items = allProds.filter((p) => {
+    const matchQuery = p.name.toLowerCase().includes(query.toLowerCase());
+    const matchCat = selectedCat === "All Categories" || (p.parentCategory?.name === selectedCat);
+    return matchQuery && matchCat;
+  });
 
   const handleSave = async (savedFormData) => {
     try {
@@ -190,9 +236,13 @@ export const AdminProducts = () => {
             placeholder="Search products…"
             style={{ flex: 1, maxWidth: 320, padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 13 }}
           />
-          <select style={{ padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 12 }}>
-            {["All Categories", "Dresses", "Outerwear", "Tops", "Bottoms", "Shoes", "Accessories"].map((c) => (
-              <option key={c}>{c}</option>
+          <select 
+            value={selectedCat}
+            onChange={(e) => setSelectedCat(e.target.value)}
+            style={{ padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 12 }}>
+            <option value="All Categories">All Categories</option>
+            {cats.map((c) => (
+              <option key={c._id} value={c.name}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -210,7 +260,7 @@ export const AdminProducts = () => {
                   </div>
                 </td>
                 <td style={{ fontWeight: 500 }}>{p.name}</td>
-                <td style={{ color: "var(--muted)" }}>{p.category?.name || "Uncategorized"}</td>
+                <td style={{ color: "var(--muted)" }}>{p.parentCategory?.name || "Uncategorized"}</td>
                 <td>
                   <span style={{ color: "var(--gold2)", fontWeight: 600 }}>${p.price}</span>
                   {p.orig && (
@@ -252,19 +302,165 @@ export const AdminProducts = () => {
 };
 
 /* ═══════════════════════════════════════════════════
+   CATEGORIES
+═══════════════════════════════════════════════════ */
+export const AdminCategories = () => {
+  const [modal, setModal] = useState(null); // null | "add" | category object
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await categoryAPI.getCategories();
+      setCategories(data.categories || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleSave = async (payload) => {
+    try {
+      if (payload._id) {
+        await categoryAPI.updateCategory(payload._id, { ...payload });
+      } else {
+        await categoryAPI.createCategory({ ...payload });
+      }
+      fetchCategories();
+    } catch (err) {
+      alert("Error saving category: " + err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    try {
+      await categoryAPI.deleteCategory(id);
+      fetchCategories();
+    } catch (err) {
+      // Show backend guard message natively
+      alert(err.response?.data?.message || err.message || "Failed to delete");
+    }
+  };
+
+  return (
+    <div className="fu">
+      {modal && (
+        <CategoryFormModal
+          category={modal === "add" ? null : modal}
+          onClose={() => setModal(null)}
+          onSave={handleSave}
+        />
+      )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+        <div>
+          <h1 className="section-title">Categories</h1>
+          <p className="section-sub">{categories.length} taxonomy trees active</p>
+        </div>
+        <Btn v="primary" onClick={() => setModal("add")}>+ Add Category</Btn>
+      </div>
+
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+        {loading ? <p style={{ color: "var(--dim)" }}>Loading...</p> : (
+        <table className="tbl">
+          <thead>
+            <tr><th>Name</th><th>Slug</th><th>Banner</th><th>Description</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {categories.map((c) => (
+              <tr key={c._id}>
+                <td style={{ fontWeight: 600 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                     <IoFolderOutline style={{ color: "var(--gold)" }} size={16} /> {c.name}
+                  </div>
+                </td>
+                <td style={{ color: "var(--dim)", fontSize: 13 }}>/{c.slug}</td>
+                <td>
+                  {c.image ? (
+                    <div style={{ width: 44, height: 28, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
+                      <img src={c.image} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  ) : <span style={{ color: "var(--dim)" }}>—</span>}
+                </td>
+                <td style={{ color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {c.description || "—"}
+                </td>
+                <td>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={() => setModal(c)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, transition: "all .2s" }}>
+                      Edit
+                    </button>
+                    <button onClick={() => handleDelete(c._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>
+                      Del
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════
    ORDERS
 ═══════════════════════════════════════════════════ */
 export const AdminOrders = () => {
   const [filter, setFilter] = useState("All");
   const FILTERS = ["All", "Processing", "Shipped", "Delivered", "Cancelled"];
-  const items = filter === "All" ? ORDERS : ORDERS.filter((o) => o.status === filter);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const data = await orderAPI.getAllOrders(filter.toLowerCase());
+      setOrders(data.orders || []);
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [filter]);
+
+  const handleStatusChange = async (id, currentStatus) => {
+    // Basic cyclic status update for demo/action button
+    const sequence = ["pending", "processing", "shipped", "delivered"];
+    if (currentStatus === "cancelled") return;
+    const currentIndex = sequence.indexOf(currentStatus);
+    if (currentIndex === -1 || currentIndex === sequence.length - 1) return; // already delivered or unknown
+    const nextStatus = sequence[currentIndex + 1];
+
+    try {
+      setUpdatingId(id);
+      await orderAPI.updateOrderStatus(id, nextStatus);
+      fetchOrders();
+    } catch (err) {
+      alert("Status update failed: " + err.message);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div className="fu">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
         <div>
           <h1 className="section-title">Orders</h1>
-          <p className="section-sub">{ORDERS.length} total orders this month</p>
+          <p className="section-sub">{orders.length} total orders matching "{filter}"</p>
         </div>
         <Btn v="ghost"><IoDownloadOutline size={14} style={{ verticalAlign: "middle", marginRight: 4 }} /> Export CSV</Btn>
       </div>
@@ -290,37 +486,50 @@ export const AdminOrders = () => {
       </div>
 
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-        <table className="tbl">
-          <thead>
-            <tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr>
-          </thead>
-          <tbody>
-            {items.map((o) => (
-              <tr key={o.id}>
-                <td style={{ fontWeight: 700, color: "var(--gold2)", fontSize: 12 }}>{o.id}</td>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <Avatar name={o.avatar} size={30} />
-                    {o.customer}
-                  </div>
-                </td>
-                <td style={{ color: "var(--muted)" }}>{o.date}</td>
-                <td>{o.items}</td>
-                <td style={{ fontWeight: 700, fontSize: 14 }}>${o.total}</td>
-                <td><StatusTag status={o.status} /></td>
-                <td>
-                  <button
-                    style={{ padding: "5px 14px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif", transition: "all .2s" }}
-                    onMouseEnter={(e) => (e.target.style.borderColor = "var(--gold)")}
-                    onMouseLeave={(e) => (e.target.style.borderColor = "var(--border2)")}
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+          <p style={{ color: "var(--dim)" }}>Loading orders…</p>
+        ) : orders.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "50px 0", color: "var(--muted)" }}>
+            <p style={{ fontSize: 36, marginBottom: 14, display: "flex", justifyContent: "center" }}><IoBagOutline size={40} /></p>
+            <p>No orders found for this category.</p>
+          </div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o._id}>
+                  <td style={{ fontWeight: 700, color: "var(--gold2)", fontSize: 12 }}>{o.orderId}</td>
+                  <td>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <Avatar name={o.user?.name || "Unknown"} size={30} />
+                      {o.user?.name || "Unknown"}
+                    </div>
+                  </td>
+                  <td style={{ color: "var(--muted)" }}>
+                    {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(o.createdAt))}
+                  </td>
+                  <td>{o.items?.length || 0}</td>
+                  <td style={{ fontWeight: 700, fontSize: 14 }}>${o.totalAmount}</td>
+                  <td><StatusTag status={o.status} /></td>
+                  <td>
+                    <button
+                      disabled={updatingId === o._id || o.status === "cancelled" || o.status === "delivered"}
+                      onClick={() => handleStatusChange(o._id, o.status)}
+                      style={{ padding: "5px 14px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: (updatingId === o._id || o.status === "cancelled" || o.status === "delivered") ? "not-allowed" : "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif", transition: "all .2s", opacity: (o.status === "cancelled" || o.status === "delivered") ? 0.5 : 1 }}
+                      onMouseEnter={(e) => { if (!e.target.disabled) e.target.style.borderColor = "var(--gold)"; }}
+                      onMouseLeave={(e) => { if (!e.target.disabled) e.target.style.borderColor = "var(--border2)"; }}
+                    >
+                      {updatingId === o._id ? "Updating..." : (o.status === "delivered" || o.status === "cancelled" ? "View" : "Advance")}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
@@ -329,46 +538,88 @@ export const AdminOrders = () => {
 /* ═══════════════════════════════════════════════════
    CUSTOMERS
 ═══════════════════════════════════════════════════ */
-export const AdminCustomers = () => (
-  <div className="fu">
-    <div style={{ marginBottom: 28 }}>
-      <h1 className="section-title">Customers</h1>
-      <p className="section-sub">{CUSTOMERS.length} registered members</p>
-    </div>
+export const AdminCustomers = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-      <table className="tbl">
-        <thead>
-          <tr><th>Customer</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Tier</th></tr>
-        </thead>
-        <tbody>
-          {CUSTOMERS.map((c) => (
-            <tr key={c.id}>
-              <td>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <Avatar name={c.name} size={34} />
-                  <span style={{ fontWeight: 500 }}>{c.name}</span>
-                </div>
-              </td>
-              <td style={{ color: "var(--muted)" }}>{c.email}</td>
-              <td style={{ color: "var(--muted)" }}>{c.joined}</td>
-              <td style={{ fontWeight: 600 }}>{c.orders}</td>
-              <td style={{ fontWeight: 700, color: "var(--gold2)" }}>${c.spent.toLocaleString()}</td>
-              <td><StatusTag status={c.tier} /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const data = await authAPI.getCustomers();
+        setCustomers(data.users || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCustomers();
+  }, []);
+
+  return (
+    <div className="fu">
+      <div style={{ marginBottom: 28 }}>
+        <h1 className="section-title">Customers</h1>
+        <p className="section-sub">{customers.length} registered members</p>
+      </div>
+
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+        {loading ? <p style={{ color: "var(--dim)" }}>Loading members...</p> : (
+        <table className="tbl">
+          <thead>
+            <tr><th>Customer</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Tier</th></tr>
+          </thead>
+          <tbody>
+            {customers.map((c) => (
+              <tr key={c._id}>
+                <td>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <Avatar name={c.name} size={34} />
+                    <span style={{ fontWeight: 500 }}>{c.name}</span>
+                  </div>
+                </td>
+                <td style={{ color: "var(--muted)" }}>{c.email}</td>
+                <td style={{ color: "var(--muted)" }}>
+                  {new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(c.joined))}
+                </td>
+                <td style={{ fontWeight: 600 }}>{c.orders}</td>
+                <td style={{ fontWeight: 700, color: "var(--gold2)" }}>${c.spent.toLocaleString()}</td>
+                <td><StatusTag status={c.tier} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ═══════════════════════════════════════════════════
    ANALYTICS
 ═══════════════════════════════════════════════════ */
 export const AdminAnalytics = () => {
-  const maxRev = Math.max(...REV_DATA);
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [hoveredBar, setHoveredBar] = useState(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const data = await orderAPI.getAnalytics();
+        setAnalytics(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  if (loading || !analytics) return <div className="fu"><p style={{ color: "var(--dim)" }}>Loading analytics...</p></div>;
+
+  const maxRev = Math.max(...analytics.chart.data, 1); // Avoid div by 0
 
   return (
     <div className="fu">
@@ -379,9 +630,9 @@ export const AdminAnalytics = () => {
 
       {/* KPI row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, marginBottom: 28 }}>
-        <StatCard icon={<IoCashOutline size={26} />} label="Total Revenue" value="$263,090" delta="+24.3%" />
-        <StatCard icon={<IoBagOutline size={26} />} label="Total Orders"  value="1,847"    delta="+15.2%" />
-        <StatCard icon={<IoPersonOutline size={26} />}  label="Avg. Order"    value="$164.80"  delta="+8.1%"  />
+        <StatCard icon={<IoCashOutline size={26} />} label="Total Revenue" value={`$${analytics.totalRevenue.toLocaleString()}`} delta="Live" />
+        <StatCard icon={<IoBagOutline size={26} />} label="Total Orders"  value={analytics.totalOrders} delta="Live" />
+        <StatCard icon={<IoPersonOutline size={26} />}  label="Avg. Order" value={`$${analytics.avgOrder}`} delta="Live"  />
       </div>
 
       {/* Revenue bar chart */}
@@ -389,13 +640,13 @@ export const AdminAnalytics = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
           <div>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22 }}>Revenue Trend</h3>
-            <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 4 }}>Monthly gross · SS26 season</p>
+            <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 4 }}>Monthly gross · Live data</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            {["6M", "1Y", "All"].map((p) => (
+            {["6M"].map((p) => (
               <button
                 key={p}
-                style={{ padding: "6px 14px", borderRadius: 100, border: "1px solid var(--border2)", background: p === "6M" ? "rgba(201,168,76,.15)" : "none", color: p === "6M" ? "var(--gold2)" : "var(--muted)", fontSize: 11, cursor: "pointer", fontFamily: "'Jost', sans-serif", transition: "all .2s" }}
+                style={{ padding: "6px 14px", borderRadius: 100, border: "1px solid var(--border2)", background: "rgba(201,168,76,.15)", color: "var(--gold2)", fontSize: 11, cursor: "pointer", fontFamily: "'Jost', sans-serif", transition: "all .2s" }}
               >
                 {p}
               </button>
@@ -405,7 +656,7 @@ export const AdminAnalytics = () => {
 
         {/* Bars */}
         <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 200, paddingTop: 10, position: "relative" }}>
-          {REV_LABELS.map((month, i) => (
+          {analytics.chart.labels.map((month, i) => (
             <div
               key={month}
               style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
@@ -416,16 +667,16 @@ export const AdminAnalytics = () => {
                 <div
                   style={{ position: "absolute", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 6, padding: "8px 12px", fontSize: 12, color: "var(--text)", zIndex: 10, top: 0, whiteSpace: "nowrap", transform: "translateY(-100%)" }}
                 >
-                  {month}: ${REV_DATA[i].toLocaleString()}
+                  {month}: ${analytics.chart.data[i].toLocaleString()}
                 </div>
               )}
               <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 500, opacity: hoveredBar === i ? 1 : .7 }}>
-                ${(REV_DATA[i] / 1000).toFixed(0)}k
+                ${(analytics.chart.data[i] / 1000).toFixed(1)}k
               </span>
               <div style={{ width: "100%" }}>
                 <div
-                  className={`bar${i === REV_LABELS.length - 1 ? " active" : ""}`}
-                  style={{ height: (REV_DATA[i] / maxRev) * 160, width: "100%", opacity: hoveredBar !== null && hoveredBar !== i ? .5 : 1, transition: "opacity .2s" }}
+                  className={`bar${i === analytics.chart.labels.length - 1 ? " active" : ""}`}
+                  style={{ height: (analytics.chart.data[i] / maxRev) * 160, width: "100%", opacity: hoveredBar !== null && hoveredBar !== i ? .5 : 1, transition: "opacity .2s" }}
                 />
               </div>
               <span style={{ fontSize: 12, color: "var(--muted)" }}>{month}</span>
@@ -538,11 +789,19 @@ export const AdminMedia = () => {
   const [copied,     setCopied]     = useState(null);
   const fileInputRef = useRef(null);
 
+  const [categories, setCategories] = useState([]);
+  const [uploadCat,  setUploadCat]  = useState("");
+  const [filterCat,  setFilterCat]  = useState("All");
+
+  useEffect(() => {
+    categoryAPI.getCategories().then(res => setCategories(res.categories || [])).catch(() => {});
+  }, []);
+
   /* ── Fetch ─────────────────────────────────────── */
   const fetchMedia = async () => {
     try {
       setLoading(true);
-      const data = await mediaAPI.getAll({ search, sort, source: filter });
+      const data = await mediaAPI.getAll({ search, sort, source: filter, categoryId: filterCat });
       setMediaList(data.media || []);
       setSelected(new Set());
     } catch {
@@ -552,14 +811,14 @@ export const AdminMedia = () => {
     }
   };
 
-  useEffect(() => { fetchMedia(); }, [search, sort, filter]);
+  useEffect(() => { fetchMedia(); }, [search, sort, filter, filterCat]);
 
   /* ── Upload (single or multiple) ───────────────── */
   const handleUpload = async (files) => {
     if (!files?.length) return;
     try {
       setUploading(true);
-      await mediaAPI.upload(Array.from(files));
+      await mediaAPI.upload(Array.from(files), uploadCat);
       fetchMedia();
     } catch (err) {
       alert("Upload failed: " + err.message);
@@ -648,6 +907,10 @@ export const AdminMedia = () => {
           <p className="section-sub">{mediaList.length} total · {libraryCount} uploaded · {productCount} from products</p>
         </div>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+          <select value={uploadCat} onChange={e => setUploadCat(e.target.value)} style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)", background:"var(--lift)", color:"var(--text)", fontSize:12, fontFamily:"'Jost',sans-serif" }}>
+            <option value="">(No Category) Upload Folder</option>
+            {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+          </select>
           <input type="file" accept="image/*" multiple ref={fileInputRef}
             onChange={(e) => handleUpload(e.target.files)} style={{ display:"none" }} />
           <button onClick={() => fileInputRef.current?.click()}
@@ -673,6 +936,14 @@ export const AdminMedia = () => {
               color:"var(--text)", fontSize:12, fontFamily:"'Jost',sans-serif",
               boxSizing:"border-box" }} />
         </div>
+        {/* Category Filter */}
+        <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
+          style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)",
+            background:"var(--lift)", color:"var(--text)", fontSize:12,
+            fontFamily:"'Jost',sans-serif", cursor:"pointer" }}>
+          <option value="All">All Categories</option>
+          {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+        </select>
         {/* Sort */}
         <select value={sort} onChange={(e) => setSort(e.target.value)}
           style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)",

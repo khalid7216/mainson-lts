@@ -79,6 +79,12 @@ exports.createProduct = async (req, res) => {
     if (productData.colors && typeof productData.colors === "string") productData.colors = JSON.parse(productData.colors);
     if (productData.tags && typeof productData.tags === "string") productData.tags = productData.tags.split(',').map(t => t.trim());
 
+    // Map 'category' field from frontend to 'parentCategory' in schema
+    if (productData.category) {
+      productData.parentCategory = productData.category;
+      delete productData.category;
+    }
+
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "maison_lite/products"
@@ -108,6 +114,12 @@ exports.updateProduct = async (req, res) => {
     if (updateData.sizes && typeof updateData.sizes === "string") updateData.sizes = JSON.parse(updateData.sizes);
     if (updateData.colors && typeof updateData.colors === "string") updateData.colors = JSON.parse(updateData.colors);
     if (updateData.tags && typeof updateData.tags === "string") updateData.tags = updateData.tags.split(',').map(t => t.trim());
+
+    // Map 'category' field from frontend to 'parentCategory' in schema
+    if (updateData.category) {
+      updateData.parentCategory = updateData.category;
+      delete updateData.category;
+    }
 
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {

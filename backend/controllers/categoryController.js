@@ -1,5 +1,6 @@
 // backend/controllers/categoryController.js
 const Category = require("../models/Category");
+const Product = require("../models/Product");
 
 /* ── GET /api/categories ────────────────────────── */
 exports.getCategories = async (req, res) => {
@@ -37,6 +38,11 @@ exports.updateCategory = async (req, res) => {
 /* ── DELETE /api/categories/:id (Admin) ─────────── */
 exports.deleteCategory = async (req, res) => {
   try {
+    const productsCount = await Product.countDocuments({ parentCategory: req.params.id });
+    if (productsCount > 0) {
+      return res.status(400).json({ message: `Cannot delete: ${productsCount} products are linked to this category.` });
+    }
+
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return res.status(404).json({ message: "Category not found" });
     res.json({ message: "Category deleted" });

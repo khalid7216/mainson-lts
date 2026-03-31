@@ -6,6 +6,7 @@ const path         = require("path");
 const mongoSanitize = require("express-mongo-sanitize");
 const connectDB    = require("./config/db");
 const authRoutes         = require("./routes/authRoutes");
+const userRoutes         = require("./routes/userRoutes");
 const productRoutes      = require("./routes/productRoutes");
 const categoryRoutes     = require("./routes/categoryRoutes");
 const cartRoutes         = require("./routes/cartRoutes");
@@ -63,6 +64,7 @@ app.use(mongoSanitize());
 
 /* ── API Routes ─────────────────────────────────── */
 app.use("/api/auth",          authRoutes);
+app.use("/api/users",         userRoutes);
 app.use("/api/products",      productRoutes);
 app.use("/api/categories",    categoryRoutes);
 app.use("/api/cart",           cartRoutes);

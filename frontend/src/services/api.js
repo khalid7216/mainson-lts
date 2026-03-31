@@ -81,6 +81,11 @@ export const authAPI = {
       body: JSON.stringify({ password }),
     });
   },
+
+  /* Get all customers (Admin) */
+  getCustomers: async () => {
+    return await request("/users/admin/all");
+  },
 };
 
 /* ══════════════════════════════════════════════════
@@ -113,6 +118,25 @@ export const orderAPI = {
   /* Rollback order — cancel pending/processing order + restore stock */
   rollbackOrder: async (orderId) => {
     return await request(`/orders/${orderId}/rollback`, { method: "POST" });
+  },
+
+  /* Get all orders (Admin) */
+  getAllOrders: async (status = "All") => {
+    const qs = status.toLowerCase() !== "all" ? `?status=${status}` : "";
+    return await request(`/orders/admin/all${qs}`);
+  },
+
+  /* Update order status (Admin) */
+  updateOrderStatus: async (id, status) => {
+    return await request(`/orders/admin/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  /* Get analytics (Admin) */
+  getAnalytics: async () => {
+    return await request("/orders/admin/analytics");
   },
 };
 
@@ -221,15 +245,17 @@ export const wishlistAPI = {
 ══════════════════════════════════════════════════ */
 export const mediaAPI = {
   // accepts a single File or an array of Files
-  upload: async (files) => {
+  upload: async (files, categoryId = "") => {
     const formData = new FormData();
     const fileList = Array.isArray(files) ? files : [files];
     fileList.forEach((f) => formData.append("files", f));
+    if (categoryId) formData.append("categoryId", categoryId);
     return await request("/media/upload", { method: "POST", body: formData }, true);
   },
-  getAll: async ({ search = "", sort = "newest", source = "all" } = {}) => {
-    const params = new URLSearchParams({ search, sort, source }).toString();
-    return await request(`/media?${params}`);
+  getAll: async ({ search = "", sort = "newest", source = "all", categoryId = "All" } = {}) => {
+    const params = new URLSearchParams({ search, sort, source });
+    if (categoryId !== "All") params.append("categoryId", categoryId);
+    return await request(`/media?${params.toString()}`);
   },
   delete: async (id) => {
     return await request(`/media/${id}`, { method: "DELETE" });

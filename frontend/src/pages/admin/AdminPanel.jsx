@@ -10,6 +10,7 @@ import {
   AdminProducts,
   AdminOrders,
   AdminCustomers,
+  AdminCategories,
   AdminAnalytics,
   AdminSettings,
   AdminMedia,
@@ -17,10 +18,11 @@ import {
 import { PRODUCTS, ORDERS, CUSTOMERS } from "../../data/mockData";
 
 const NAV_ITEMS = [
-  { id: "dashboard", icon: <IoGridOutline size={16} />, label: "Dashboard" },
-  { id: "products",  icon: <IoCubeOutline size={16} />, label: "Products",  badge: PRODUCTS.length },
-  { id: "orders",    icon: <IoReceiptOutline size={16} />, label: "Orders",    badge: ORDERS.length },
-  { id: "customers", icon: <IoPeopleOutline size={16} />, label: "Customers", badge: CUSTOMERS.length },
+  { id: "dashboard",  icon: <IoGridOutline size={16} />, label: "Dashboard" },
+  { id: "categories", icon: <IoGridOutline size={16} />, label: "Categories" },
+  { id: "products",   icon: <IoCubeOutline size={16} />, label: "Products",  badge: PRODUCTS.length },
+  { id: "orders",     icon: <IoReceiptOutline size={16} />, label: "Orders",    badge: ORDERS.length },
+  { id: "customers",  icon: <IoPeopleOutline size={16} />, label: "Customers", badge: CUSTOMERS.length },
   { id: "analytics", icon: <IoTrendingUpOutline size={16} />, label: "Analytics" },
   { id: "media",     icon: <IoImagesOutline size={16} />, label: "Media" },
   { id: "settings",  icon: <IoSettingsOutline size={16} />, label: "Settings" },
@@ -181,6 +183,7 @@ const AdminPanel = ({ navigate }) => {
         }}
       >
         {section === "dashboard" && <AdminDashboard />}
+        {section === "categories" && <AdminCategories />}
         {section === "products" && <AdminProducts />}
         {section === "orders" && <AdminOrders />}
         {section === "customers" && <AdminCustomers />}

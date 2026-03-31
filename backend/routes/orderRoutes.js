@@ -9,6 +9,7 @@ const {
   getAllOrders,
   updateOrderStatus,
   rollbackOrder,
+  getAdminAnalytics,
 } = require("../controllers/orderController");
 
 router.use(protect);
@@ -20,6 +21,7 @@ router.put("/:id/cancel",     cancelOrder);
 router.post("/:id/rollback",  rollbackOrder);
 
 // Admin routes
+router.get("/admin/analytics",      adminOnly, getAdminAnalytics);
 router.get("/admin/all",            adminOnly, getAllOrders);
 router.put("/admin/:id/status",     adminOnly, updateOrderStatus);
 

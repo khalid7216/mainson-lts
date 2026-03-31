@@ -635,14 +635,14 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           {/* ════ TAB: SIZES & COLORS ════ */}
           {tab === "variants" && (
             <div>
-              <Section title={`Sizes ${form.category ? `— ${form.category}` : "(select category first)"}`}>
+              <Section title={`Sizes ${form.category ? `— ${categories.find(c => c._id === form.category)?.name || form.category}` : "(select category first)"}`}>
                 {!form.category ? (
                   <p style={{ fontSize: 13, color: "var(--dim)", padding: "16px 0" }}>
                     ← Go to Basic Info tab and select a category first
                   </p>
                 ) : (
                   <SizeStock
-                    category={form.category}
+                    category={categories.find(c => c._id === form.category)?.name || "Tops"}
                     sizes={form.sizes}
                     onChange={(val) => set("sizes", val)}
                     error={errors.sizes}

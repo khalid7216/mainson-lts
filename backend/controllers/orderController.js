@@ -334,3 +334,73 @@ exports.rollbackOrder = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+/* ══════════════════════════════════════════════════
+   GET /api/orders/admin/analytics (Admin)
+   ────────────────────────────────────────────────
+   Analytics details for Admin Dashboard
+══════════════════════════════════════════════════ */
+exports.getAdminAnalytics = async (req, res) => {
+  try {
+    const validStatuses = ["delivered", "paid", "shipped", "processing"];
+    
+    // Quick summary
+    const summary = await Order.aggregate([
+      { $match: { status: { $in: validStatuses } } },
+      { $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+      }}
+    ]);
+
+    const metrics = summary[0] || { totalRevenue: 0, totalOrders: 0 };
+    const avgOrder = metrics.totalOrders > 0 ? (metrics.totalRevenue / metrics.totalOrders).toFixed(2) : 0;
+
+    // Revenue Trend (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+
+    const trendAgg = await Order.aggregate([
+      { $match: { 
+          status: { $in: validStatuses },
+          createdAt: { $gte: sixMonthsAgo }
+      }},
+      { $group: {
+          _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" }
+      }},
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const labels = [];
+    const data = [];
+    
+    let curr = new Date(sixMonthsAgo);
+    for (let i = 0; i < 6; i++) {
+        labels.push(months[curr.getMonth()]);
+        data.push(0);
+        curr.setMonth(curr.getMonth() + 1);
+    }
+    
+    trendAgg.forEach(t => {
+      const mName = months[t._id.month - 1];
+      const idx = labels.indexOf(mName);
+      if (idx !== -1) {
+          data[idx] = t.revenue;
+      }
+    });
+
+    res.json({
+        totalRevenue: metrics.totalRevenue,
+        totalOrders: metrics.totalOrders,
+        avgOrder: Number(avgOrder),
+        chart: { labels, data }
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

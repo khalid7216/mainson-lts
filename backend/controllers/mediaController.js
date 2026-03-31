@@ -8,13 +8,21 @@ const fs = require("fs");
 exports.uploadMedia = async (req, res) => {
   try {
     const files = req.files || (req.file ? [req.file] : []);
+    const { categoryId } = req.body;
     if (!files.length) return res.status(400).json({ message: "No files provided" });
+
+    let folderName = "maison_lite/media";
+    if (categoryId) {
+        const Category = require("../models/Category");
+        const category = await Category.findById(categoryId);
+        if (category) folderName = `maison_lite/media/${category.slug}`;
+    }
 
     const saved = [];
     for (const file of files) {
       try {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: "maison_lite/media",
+          folder: folderName,
         });
         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
 
@@ -24,6 +32,7 @@ exports.uploadMedia = async (req, res) => {
           format:     result.format,
           size:       result.bytes,
           uploadedBy: req.user._id,
+          category:   categoryId || null,
         });
         saved.push(media);
       } catch (err) {
@@ -42,10 +51,13 @@ exports.uploadMedia = async (req, res) => {
 /* ── GET /api/media  (?search=&sort=&source=) ─────── */
 exports.getAllMedia = async (req, res) => {
   try {
-    const { search = "", sort = "newest", source } = req.query;
+    const { search = "", sort = "newest", source, categoryId } = req.query;
 
     // 1. Library uploads
     let libraryQuery = Media.find();
+    if (categoryId && categoryId !== "All") {
+      libraryQuery = libraryQuery.where("category", categoryId);
+    }
     if (search) {
       libraryQuery = libraryQuery.where("public_id", new RegExp(search, "i"));
     }
@@ -55,6 +67,9 @@ exports.getAllMedia = async (req, res) => {
 
     // 2. Product images
     const productFilter = { "image.url": { $exists: true, $ne: null } };
+    if (categoryId && categoryId !== "All") {
+      productFilter.parentCategory = categoryId;
+    }
     if (search) productFilter.name = new RegExp(search, "i");
 
     const products = await Product.find(productFilter, {
