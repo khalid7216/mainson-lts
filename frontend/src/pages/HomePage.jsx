@@ -4,7 +4,7 @@
 // ═════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import ProductCard, { QuickView } from "../components/ProductCard";
 import { Ticker } from "../components/Layout";
 import { Btn } from "../components/UI";
@@ -487,31 +487,31 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
               {
                 t: "Shop",
                 l: [
-                  "New Arrivals",
-                  "Dresses",
-                  "Outerwear",
-                  "Accessories",
-                  "Sale",
+                  { label: "New Arrivals", to: "/shop" },
+                  { label: "Dresses", to: "/shop?category=Dresses" },
+                  { label: "Outerwear", to: "/shop?category=Outerwear" },
+                  { label: "Accessories", to: "/shop?category=Accessories" },
+                  { label: "Sale", to: "/shop" },
                 ],
               },
               {
                 t: "Help",
                 l: [
-                  "Sizing Guide",
-                  "Returns",
-                  "Shipping",
-                  "Gift Cards",
-                  "Contact",
+                  { label: "Sizing Guide", to: "/page/sizing-guide" },
+                  { label: "Returns", to: "/page/returns" },
+                  { label: "Shipping", to: "/page/shipping" },
+                  { label: "Gift Cards", to: "/page/gift-cards" },
+                  { label: "Contact", to: "/page/contact" },
                 ],
               },
               {
                 t: "Maison",
                 l: [
-                  "Our Story",
-                  "Sustainability",
-                  "Press",
-                  "Careers",
-                  "Stockists",
+                  { label: "Our Story", to: "/page/our-story" },
+                  { label: "Sustainability", to: "/page/sustainability" },
+                  { label: "Press", to: "/page/press" },
+                  { label: "Careers", to: "/page/careers" },
+                  { label: "Stockists", to: "/page/stockists" },
                 ],
               },
             ].map((col) => (
@@ -527,14 +527,16 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                 >
                   {col.t}
                 </p>
-                {col.l.map((l) => (
-                  <p
-                    key={l}
+                {col.l.map((item) => (
+                  <Link
+                    key={item.label}
+                    to={item.to}
                     style={{
+                      display: "block",
                       color: "var(--muted)",
                       fontSize: 13,
                       marginBottom: 11,
-                      cursor: "pointer",
+                      textDecoration: "none",
                       transition: "color .2s",
                     }}
                     onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
@@ -542,8 +544,8 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                       (e.target.style.color = "var(--muted)")
                     }
                   >
-                    {l}
-                  </p>
+                    {item.label}
+                  </Link>
                 ))}
               </div>
             ))}

@@ -723,7 +723,8 @@ export const AdminOrders = () => {
     try {
       setUpdatingId(id);
       await orderAPI.updateOrderStatus(id, nextStatus);
-      fetchOrders();
+      // Optimistic UI update — only update the changed order in state, no full refetch/reload
+      setOrders(prev => prev.map(o => o._id === id ? { ...o, status: nextStatus } : o));
     } catch (err) {
       alert("Status update failed: " + err.message);
     } finally {
