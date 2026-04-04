@@ -31,6 +31,8 @@ const GlobalStyles = () => (
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
       padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone home indicator */
     }
 
@@ -52,15 +54,15 @@ const GlobalStyles = () => (
     ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
 
     /* ── Keyframes ── */
-    @keyframes fadeUp    { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp    { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:none; } }
     @keyframes fadeIn    { from { opacity:0; } to { opacity:1; } }
     @keyframes spin      { to { transform: rotate(360deg); } }
     @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:.4} }
     @keyframes shimmer   { 0%{background-position:-400% 0} 100%{background-position:400% 0} }
     @keyframes goldPulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0)} 50%{box-shadow:0 0 0 8px rgba(201,168,76,0)} }
     @keyframes marquee   { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-    @keyframes modalIn   { from{opacity:0;transform:scale(.94) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    @keyframes toastIn   { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes modalIn   { from{opacity:0;transform:scale(.94) translateY(20px)} to{opacity:1;transform:none;} }
+    @keyframes toastIn   { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:none;} }
 
     /* ── Utility animation classes ── */
     .fu { animation: fadeUp .65s cubic-bezier(.16,1,.3,1) both; }
@@ -131,7 +133,8 @@ const GlobalStyles = () => (
     }
     .modal-box {
       background: var(--surface); border: 1px solid var(--border2); border-radius: 12px;
-      max-width: 960px; width: 100%; max-height: 92vh; overflow-y: auto;
+      max-width: 960px; width: 100%; max-height: 90vh; overflow-y: auto;
+      padding: 32px;
       animation: modalIn .4s cubic-bezier(.16,1,.3,1);
       box-shadow: 0 40px 120px rgba(0,0,0,.8);
     }
@@ -289,8 +292,8 @@ const GlobalStyles = () => (
       .prod-card h3 { font-size: 13px !important; }
       
       /* Mobile modals */
-      .modal-box { max-width: 96vw !important; margin: 20px; max-height: 85vh !important; }
-      .modal-bg { padding: 10px !important; }
+      .modal-box { max-width: 96vw !important; margin: 0 !important; padding: 20px !important; max-height: 88vh !important; border-radius: 10px !important; }
+      .modal-bg { padding: 12px !important; align-items: flex-start; padding-top: 60px !important; }
       
       /* Mobile forms */
       .inp-wrap { margin-bottom: 16px; }

@@ -267,3 +267,77 @@ export const mediaAPI = {
     });
   },
 };
+
+/* ══════════════════════════════════════════════════
+   BANNER APIS
+══════════════════════════════════════════════════ */
+export const bannerAPI = {
+  getBanners: async () => {
+    return await request("/banners");
+  },
+  create: async (body) => {
+    return await request("/banners", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+  update: async (id, body) => {
+    return await request(`/banners/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  },
+  delete: async (id) => {
+    return await request(`/banners/${id}`, { method: "DELETE" });
+  },
+};
+
+/* ══════════════════════════════════════════════════
+   PAGE APIS
+══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   SEO APIS
+══════════════════════════════════════════════════ */
+export const seoAPI = {
+  /* Fetch SEO config for a specific page (public) */
+  getByPage: async (pageName) => {
+    return await request(`/seo/${pageName}`);
+  },
+
+  /* Fetch all SEO configs (Admin only) */
+  getAll: async () => {
+    return await request("/seo");
+  },
+
+  /* Create or update SEO config for a page (Admin) */
+  upsert: async (payload) => {
+    return await request("/seo/update", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
+export const pageAPI = {
+  getPages: async () => {
+    return await request("/pages");
+  },
+  getPageBySlug: async (slug) => {
+    return await request(`/pages/${slug}`);
+  },
+  create: async (body) => {
+    return await request("/pages", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+  update: async (id, body) => {
+    return await request(`/pages/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  },
+  delete: async (id) => {
+    return await request(`/pages/${id}`, { method: "DELETE" });
+  },
+};

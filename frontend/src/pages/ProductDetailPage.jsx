@@ -11,6 +11,7 @@ import { productAPI } from "../services/api";
 import { HiStar, HiHeart, HiShoppingBag, HiCheck } from "react-icons/hi";
 import { IoArrowBack } from "react-icons/io5";
 import Breadcrumbs from "../components/Breadcrumbs";
+import SEO from "../components/SEO";
 
 const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const { slug } = useParams();  // ✅ CHANGED: id → slug
@@ -198,6 +199,12 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
 
   return (
     <div style={{ padding: "clamp(80px, 12vh, 100px) 0 80px" }}>
+      <SEO
+        pageName="product"
+        title={`${product.name} — Maison Élite`}
+        description={product.description?.substring(0, 160) || `Shop ${product.name} at Maison Élite. Luxury fashion crafted from the finest materials.`}
+        ogImage={product.image}
+      />
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 clamp(16px, 5vw, 32px)" }}>
         {/* Back button */}
         <button

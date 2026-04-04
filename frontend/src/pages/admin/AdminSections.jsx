@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Avatar, Btn, StatusTag } from "../../components/UI";
 import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
-import { productAPI, categoryAPI, mediaAPI, orderAPI, authAPI } from "../../services/api";
+import { productAPI, categoryAPI, mediaAPI, orderAPI, authAPI, bannerAPI, pageAPI, seoAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
 import CategoryFormModal from "./CategoryFormModal";
 import { IoCashOutline, IoBagOutline, IoPeopleOutline, IoHeartOutline, IoPersonOutline, IoStar, IoImagesOutline, IoSearchOutline, IoGridOutline, IoListOutline, IoCloudUploadOutline, IoCheckmarkOutline, IoCloseOutline, IoDownloadOutline, IoFolderOutline } from "react-icons/io5";
@@ -139,6 +139,282 @@ export const AdminDashboard = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════
+   BANNERS
+═══════════════════════════════════════════════════ */
+export const AdminBanners = () => {
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null); // null, "add", banner object
+
+  const fetchBanners = async () => {
+    try {
+      const data = await bannerAPI.getBanners();
+      setBanners(data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBanners();
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this banner?")) return;
+    try {
+      await bannerAPI.delete(id);
+      fetchBanners();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData.entries());
+    
+    try {
+      if (modal && modal !== "add") {
+        await bannerAPI.update(modal._id, payload);
+      } else {
+        await bannerAPI.create(payload);
+      }
+      setModal(null);
+      fetchBanners();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  return (
+    <>
+      <div className="fu">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+          <div>
+            <h1 className="section-title">Banners</h1>
+            <p className="section-sub">Manage your banners and sliders across different sections</p>
+          </div>
+          <Btn v="primary" onClick={() => setModal("add")}>+ Add Banner</Btn>
+        </div>
+
+        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+          {loading ? <p style={{ color: "var(--dim)" }}>Loading banners...</p> : (
+          <table className="tbl">
+            <thead>
+              <tr><th>Title</th><th>Type</th><th>Section</th><th>Order</th><th>Status</th><th>Image</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {banners.map(b => (
+                <tr key={b._id}>
+                  <td style={{ fontWeight: 500 }}>{b.title}</td>
+                  <td style={{ color: "var(--muted)" }}>{b.type}</td>
+                  <td style={{ color: "var(--dim)", fontSize: 13 }}>
+                    <span style={{ padding: "4px 8px", background: "rgba(46,204,113,.1)", color: "var(--emerald)", borderRadius: 4 }}>{b.section}</span>
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{b.order}</td>
+                  <td><StatusTag status={b.status} /></td>
+                  <td>
+                    <div style={{ width: 60, height: 30, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
+                      {b.image?.url ? <img src={b.image.url} alt="banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ color: "var(--dim)", fontSize: 10, paddingLeft: 4 }}>None</span>}
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => setModal(b)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
+                      <button onClick={() => handleDelete(b._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          )}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
+          <div className="modal-box" style={{ maxWidth: 500 }}>
+            <h2 style={{ marginBottom: 20 }}>{modal === "add" ? "Create Banner" : "Edit Banner"}</h2>
+            <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Title</label>
+                <input name="title" defaultValue={modal?.title} required style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 140 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Type</label>
+                  <select name="type" defaultValue={modal?.type} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }}>
+                    <option>Banner</option>
+                    <option>Slider</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1, minWidth: 140 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Status</label>
+                  <select name="status" defaultValue={modal?.status} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }}>
+                    <option>Active</option>
+                    <option>Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Section</label>
+                <input name="section" defaultValue={modal?.section} required style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Order</label>
+                  <input type="number" min="0" name="order" defaultValue={modal?.order || 0} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+                </div>
+                <div style={{ flex: 2, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Image URL</label>
+                  <input name="image.url" defaultValue={modal?.image?.url} required style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>
+                <Btn v="ghost" type="button" onClick={() => setModal(null)}>Cancel</Btn>
+                <Btn v="primary" type="submit">Save Banner</Btn>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+/* ═══════════════════════════════════════════════════
+   PAGES
+═══════════════════════════════════════════════════ */
+export const AdminPages = () => {
+  const [pages, setPages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+
+  const fetchPages = async () => {
+    try {
+      const data = await pageAPI.getPages();
+      setPages(data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPages();
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this page?")) return;
+    try {
+      await pageAPI.delete(id);
+      fetchPages();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData.entries());
+    
+    try {
+      if (modal && modal !== "add") {
+        await pageAPI.update(modal._id, payload);
+      } else {
+        await pageAPI.create(payload);
+      }
+      setModal(null);
+      fetchPages();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  return (
+    <>
+      <div className="fu">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+          <div>
+            <h1 className="section-title">Pages</h1>
+            <p className="section-sub">Manage dynamic web pages and content.</p>
+          </div>
+          <Btn v="primary" onClick={() => setModal("add")}>+ Add Page</Btn>
+        </div>
+
+        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+          {loading ? <p style={{ color: "var(--dim)" }}>Loading pages...</p> : (
+          <table className="tbl">
+            <thead>
+              <tr><th>Title</th><th>Slug</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {pages.map(p => (
+                <tr key={p._id}>
+                  <td style={{ fontWeight: 500 }}>{p.title}</td>
+                  <td style={{ color: "var(--dim)", fontSize: 13 }}>/page/{p.slug}</td>
+                  <td><StatusTag status={p.status} /></td>
+                  <td style={{ color: "var(--muted)", fontSize: 12 }}>{new Date(p.updatedAt).toLocaleDateString()}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => window.open(`/page/${p.slug}`, '_blank')} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--gold)", cursor: "pointer", fontSize: 11 }}>View</button>
+                      <button onClick={() => setModal(p)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
+                      <button onClick={() => handleDelete(p._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          )}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
+          <div className="modal-box" style={{ maxWidth: 800 }}>
+            <h2 style={{ marginBottom: 20 }}>{modal === "add" ? "Create Page" : "Edit Page"}</h2>
+            <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Title</label>
+                  <input name="title" defaultValue={modal?.title} required style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Slug (auto if empty)</label>
+                  <input name="slug" defaultValue={modal?.slug} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+                </div>
+                <div style={{ minWidth: 130 }}>
+                  <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Status</label>
+                  <select name="status" defaultValue={modal?.status || "active"} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }}>
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Content (HTML)</label>
+                <textarea name="content" defaultValue={modal?.content} required rows="14" style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4, fontFamily: "monospace", fontSize: 13, resize: "vertical" }}></textarea>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                <Btn v="ghost" type="button" onClick={() => setModal(null)}>Cancel</Btn>
+                <Btn v="primary" type="submit">Save Page</Btn>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -1238,5 +1514,304 @@ export const AdminMedia = () => {
   );
 };
 
+/* ═══════════════════════════════════════════════════
+   ADMIN SEO
+═══════════════════════════════════════════════════ */
+export const AdminSeo = () => {
+  const PAGES = [
+    { key: "home",     label: "Home Page" },
+    { key: "shop",     label: "Shop / Collection" },
+    { key: "product",  label: "Product Pages (default)" },
+    { key: "cart",     label: "Cart" },
+    { key: "checkout", label: "Checkout" },
+    { key: "profile",  label: "Profile" },
+    { key: "about",    label: "About Us" },
+    { key: "contact",  label: "Contact" },
+  ];
 
+  const [selectedPage, setSelectedPage] = useState("home");
+  const [form, setForm] = useState({ title: "", description: "", keywords: "", ogImage: "", canonical: "", noIndex: false });
+  const [loading, setLoading]   = useState(false);
+  const [saving,  setSaving]    = useState(false);
+  const [saved,   setSaved]     = useState(false);
+  const [error,   setError]     = useState("");
+  const [allConfigs, setAllConfigs] = useState([]);
+
+  /* Fetch existing SEO when page changes */
+  useEffect(() => {
+    if (!selectedPage) return;
+    setLoading(true);
+    setError("");
+    setSaved(false);
+    seoAPI.getByPage(selectedPage)
+      .then(res => {
+        const s = res.seo;
+        setForm({
+          title:       s.title       || "",
+          description: s.description || "",
+          keywords:    Array.isArray(s.keywords) ? s.keywords.join(", ") : (s.keywords || ""),
+          ogImage:     s.ogImage     || "",
+          canonical:   s.canonical   || "",
+          noIndex:     s.noIndex     || false,
+        });
+      })
+      .catch(() => setForm({ title: "", description: "", keywords: "", ogImage: "", canonical: "", noIndex: false }))
+      .finally(() => setLoading(false));
+  }, [selectedPage]);
+
+  /* Also load all configs for the table */
+  const fetchAllConfigs = () => {
+    seoAPI.getAll().then(res => setAllConfigs(res.configs || [])).catch(() => {});
+  };
+  useEffect(() => { fetchAllConfigs(); }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSaved(false);
+    try {
+      await seoAPI.upsert({ pageName: selectedPage, ...form });
+      setSaved(true);
+      fetchAllConfigs();
+      // Clear cache so SEO component re-fetches
+      sessionStorage.removeItem(`seo_${selectedPage}`);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to save. Check all fields.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const titleLen = form.title.length;
+  const descLen  = form.description.length;
+  const titleColor = titleLen > 60 ? "var(--rose)" : titleLen > 50 ? "var(--gold)" : "var(--emerald)";
+  const descColor  = descLen  > 160 ? "var(--rose)" : descLen > 140 ? "var(--gold)" : "var(--emerald)";
+
+  const inputStyle = {
+    width: "100%", padding: "10px 14px",
+    background: "var(--lift)", border: "1px solid var(--border)",
+    color: "var(--text)", borderRadius: 6, fontSize: 13,
+    fontFamily: "'Jost', sans-serif",
+  };
+  const labelStyle = { display: "block", fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 7 };
+
+  return (
+    <div className="fu">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
+        <div>
+          <h1 className="section-title">SEO Manager</h1>
+          <p className="section-sub">Control meta titles, descriptions, and Open Graph tags per page — database-driven.</p>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
+
+        {/* ── Left: Form ── */}
+        <form onSubmit={handleSave} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28, display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* Page Selector */}
+          <div>
+            <label style={labelStyle}>Select Page</label>
+            <select
+              value={selectedPage}
+              onChange={e => setSelectedPage(e.target.value)}
+              style={{ ...inputStyle, cursor: "pointer" }}
+            >
+              {PAGES.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
+            </select>
+          </div>
+
+          {loading ? (
+            <p style={{ color: "var(--dim)", fontSize: 13, textAlign: "center", padding: "20px 0" }}>Loading current SEO data...</p>
+          ) : (<>
+
+          {/* Meta Title */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Meta Title</label>
+              <span style={{ fontSize: 11, color: titleColor, fontVariantNumeric: "tabular-nums" }}>
+                {titleLen} / 60
+              </span>
+            </div>
+            <input
+              style={{ ...inputStyle, borderColor: titleLen > 60 ? "var(--rose)" : "var(--border)" }}
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              placeholder="e.g. Maison Élite — Luxury Fashion House"
+              maxLength={70}
+              required
+            />
+            <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 5 }}>
+              Google shows the first 55–60 characters in search results.
+            </p>
+          </div>
+
+          {/* Meta Description */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Meta Description</label>
+              <span style={{ fontSize: 11, color: descColor, fontVariantNumeric: "tabular-nums" }}>
+                {descLen} / 160
+              </span>
+            </div>
+            <textarea
+              style={{ ...inputStyle, resize: "vertical", minHeight: 80, borderColor: descLen > 160 ? "var(--rose)" : "var(--border)" }}
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="A brief, compelling description that appears in Google results…"
+              rows={3}
+              maxLength={170}
+              required
+            />
+            <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 5 }}>
+              Keep between 120–160 characters for best visibility.
+            </p>
+          </div>
+
+          {/* Keywords */}
+          <div>
+            <label style={labelStyle}>Keywords (comma-separated)</label>
+            <input
+              style={inputStyle}
+              value={form.keywords}
+              onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))}
+              placeholder="luxury fashion, maison elite, designer clothing"
+            />
+          </div>
+
+          {/* OG Image */}
+          <div>
+            <label style={labelStyle}>OG Image URL (for WhatsApp / social preview)</label>
+            <input
+              style={inputStyle}
+              value={form.ogImage}
+              onChange={e => setForm(f => ({ ...f, ogImage: e.target.value }))}
+              placeholder="https://yoursite.com/og-image.jpg  (1200×630 recommended)"
+            />
+          </div>
+
+          {/* noIndex toggle */}
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
+            <input
+              type="checkbox"
+              checked={form.noIndex}
+              onChange={e => setForm(f => ({ ...f, noIndex: e.target.checked }))}
+              style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
+            />
+            <span style={{ fontSize: 13, color: "var(--muted)" }}>
+              <strong style={{ color: "var(--text)" }}>noindex</strong> — tell Google NOT to index this page
+            </span>
+          </label>
+
+          {/* Error / success */}
+          {error && <p style={{ background: "rgba(192,57,43,.1)", border: "1px solid rgba(192,57,43,.3)", color: "var(--rose)", padding: "10px 14px", borderRadius: 6, fontSize: 12 }}>{error}</p>}
+          {saved && <p style={{ background: "rgba(46,204,113,.1)", border: "1px solid rgba(46,204,113,.3)", color: "var(--emerald)", padding: "10px 14px", borderRadius: 6, fontSize: 12 }}>✓ SEO config saved successfully!</p>}
+
+          {/* Submit */}
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Btn v="primary" type="submit" disabled={saving}>
+              {saving ? "Saving…" : "Save SEO Config"}
+            </Btn>
+          </div>
+
+          </>)}
+        </form>
+
+        {/* ── Right: Google Preview + Table ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+          {/* Google Search Preview Card */}
+          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 24 }}>
+            <p style={{ fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 16 }}>Google Search Preview</p>
+
+            <div style={{ background: "#fff", borderRadius: 8, padding: "16px 20px", fontFamily: "Arial, sans-serif" }}>
+              {/* Site URL */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#f1f3f4", flexShrink: 0 }} />
+                <div>
+                  <p style={{ fontSize: 12, color: "#202124", lineHeight: 1.2 }}>mainson-frontend.vercel.app</p>
+                  <p style={{ fontSize: 11, color: "#4d5156" }}>
+                    {window.location.origin} › {selectedPage === "home" ? "" : selectedPage}
+                  </p>
+                </div>
+              </div>
+              {/* Title */}
+              <p style={{
+                fontSize: 18,
+                color: form.title ? "#1a0dab" : "#9aa0a6",
+                fontWeight: 400,
+                marginBottom: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: 480,
+              }}>
+                {form.title || "Your Page Title Will Appear Here"}
+              </p>
+              {/* Description */}
+              <p style={{
+                fontSize: 13,
+                color: form.description ? "#4d5156" : "#9aa0a6",
+                lineHeight: 1.6,
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                maxWidth: 520,
+              }}>
+                {form.description || "Your meta description will appear here. Make it compelling and under 160 characters."}
+              </p>
+            </div>
+
+            {/* Character meters */}
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>
+                  <span>Title length</span>
+                  <span style={{ color: titleColor }}>{titleLen}/60</span>
+                </div>
+                <div style={{ height: 4, background: "var(--border)", borderRadius: 2 }}>
+                  <div style={{ height: "100%", width: `${Math.min(100, (titleLen / 60) * 100)}%`, background: titleColor, borderRadius: 2, transition: "all .3s" }} />
+                </div>
+              </div>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>
+                  <span>Description length</span>
+                  <span style={{ color: descColor }}>{descLen}/160</span>
+                </div>
+                <div style={{ height: 4, background: "var(--border)", borderRadius: 2 }}>
+                  <div style={{ height: "100%", width: `${Math.min(100, (descLen / 160) * 100)}%`, background: descColor, borderRadius: 2, transition: "all .3s" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* All SEO configs table */}
+          {allConfigs.length > 0 && (
+            <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 24 }}>
+              <p style={{ fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 16 }}>Saved SEO Configs</p>
+              <table className="tbl">
+                <thead>
+                  <tr><th>Page</th><th>Title</th><th>noIndex</th><th>Updated</th></tr>
+                </thead>
+                <tbody>
+                  {allConfigs.map(c => (
+                    <tr key={c._id} style={{ cursor: "pointer" }} onClick={() => setSelectedPage(c.pageName)}>
+                      <td style={{ fontWeight: 600, color: "var(--gold2)", fontSize: 12 }}>{c.pageName}</td>
+                      <td style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 12 }}>{c.title}</td>
+                      <td>{c.noIndex ? <span style={{ color: "var(--rose)", fontSize: 11 }}>noindex</span> : <span style={{ color: "var(--emerald)", fontSize: 11 }}>index</span>}</td>
+                      <td style={{ color: "var(--dim)", fontSize: 11 }}>{new Date(c.updatedAt).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 

@@ -7,6 +7,7 @@ import { Ticker } from "../components/Layout";
 import { NAV_CATEGORIES } from "../data/mockData";
 import { productAPI } from "../services/api";
 import Pagination from "../components/Pagination";
+import SEO from "../components/SEO";
 
 const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -79,6 +80,7 @@ const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
 
   return (
     <div style={{ paddingTop: 72 }}>
+      <SEO pageName="shop" />
       <style>{`
         .shop-layout .shop-sidebar {
           display: none;

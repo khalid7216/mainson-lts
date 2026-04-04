@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /cart
+Disallow: /checkout
+Disallow: /profile
+Disallow: /settings
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password/
+
+# Sitemap location
+Sitemap: https://mainson-frontend.vercel.app/sitemap.xml

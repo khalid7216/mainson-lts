@@ -12,6 +12,7 @@ import { NAV_CATEGORIES } from "../data/mockData";
 import { productAPI } from "../services/api";
 import Pagination from "../components/Pagination";
 import { IoSparklesOutline, IoLogoInstagram, IoLogoTwitter, IoLogoPinterest } from "react-icons/io5";
+import SEO from "../components/SEO";
 
 const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const [qv, setQv] = useState(null);
@@ -56,6 +57,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
 
   return (
     <div>
+      <SEO pageName="home" />
       {qv && (
         <QuickView
           product={qv}

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useToast } from "../context/ToastContext";
 import { Btn, StatusTag } from "../components/UI";
 import { IoBagOutline, IoCheckmarkOutline } from "react-icons/io5";
+import SEO from "../components/SEO";
 
 const CartPage = ({ cart, setCart, navigate }) => {
   const toast = useToast();
@@ -33,6 +34,7 @@ const CartPage = ({ cart, setCart, navigate }) => {
         padding: "clamp(80px, 12vh, 120px) clamp(16px, 5vw, 32px) 80px",
       }}
     >
+      <SEO pageName="cart" />
       {/* Header */}
       <div style={{ marginBottom: 48 }}>
         <h1

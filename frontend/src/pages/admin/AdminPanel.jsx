@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { Avatar, Btn, Tag } from "../../components/UI";
-import { IoGridOutline, IoCubeOutline, IoReceiptOutline, IoPeopleOutline, IoTrendingUpOutline, IoImagesOutline, IoSettingsOutline, IoLockClosedOutline, IoArrowBack } from "react-icons/io5";
+import { IoGridOutline, IoCubeOutline, IoReceiptOutline, IoPeopleOutline, IoTrendingUpOutline, IoImagesOutline, IoSettingsOutline, IoLockClosedOutline, IoArrowBack, IoListOutline, IoSearchOutline } from "react-icons/io5";
 import {
   AdminDashboard,
   AdminProducts,
@@ -14,6 +14,9 @@ import {
   AdminAnalytics,
   AdminSettings,
   AdminMedia,
+  AdminBanners,
+  AdminPages,
+  AdminSeo,
 } from "./AdminSections";
 import { PRODUCTS, ORDERS, CUSTOMERS } from "../../data/mockData";
 
@@ -21,10 +24,13 @@ const NAV_ITEMS = [
   { id: "dashboard",  icon: <IoGridOutline size={16} />, label: "Dashboard" },
   { id: "categories", icon: <IoGridOutline size={16} />, label: "Categories" },
   { id: "products",   icon: <IoCubeOutline size={16} />, label: "Products",  badge: PRODUCTS.length },
+  { id: "pages",      icon: <IoListOutline size={16} />, label: "Pages" },
   { id: "orders",     icon: <IoReceiptOutline size={16} />, label: "Orders",    badge: ORDERS.length },
   { id: "customers",  icon: <IoPeopleOutline size={16} />, label: "Customers", badge: CUSTOMERS.length },
+  { id: "banners",    icon: <IoImagesOutline size={16} />, label: "Banners" },
   { id: "analytics", icon: <IoTrendingUpOutline size={16} />, label: "Analytics" },
   { id: "media",     icon: <IoImagesOutline size={16} />, label: "Media" },
+  { id: "seo",      icon: <IoSearchOutline size={16} />, label: "SEO" },
   { id: "settings",  icon: <IoSettingsOutline size={16} />, label: "Settings" },
 ];
 
@@ -68,8 +74,8 @@ const AdminPanel = ({ navigate }) => {
     <div
       style={{
         display: "flex",
-        height: "calc(100vh - 73px)",
-        overflow: "hidden",
+        height: "100vh",
+        overflow: "clip",
       }}
     >
       {/* ── Sidebar ────────────────────────────────── */}
@@ -189,6 +195,9 @@ const AdminPanel = ({ navigate }) => {
         {section === "customers" && <AdminCustomers />}
         { section === "analytics" && <AdminAnalytics /> }
         { section === "media"     && <AdminMedia /> }
+        { section === "banners"   && <AdminBanners /> }
+        { section === "pages"     && <AdminPages /> }
+        { section === "seo"       && <AdminSeo /> }
         { section === "settings"  && <AdminSettings toast={toast} /> }
       </main>
     </div>

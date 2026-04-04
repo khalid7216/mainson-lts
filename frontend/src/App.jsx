@@ -1,7 +1,7 @@
 // frontend/src/App.jsx
 
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -18,6 +18,7 @@ import SettingsPage from "./pages/SettingsPage";
 import AdminPanel from "./pages/admin/AdminPanel";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import DynamicPage from "./pages/DynamicPage";
 import { LoginPage, SignupPage, ForgotPage } from "./pages/AuthPages";
 
 /* ── Stripe setup ──────────────────────────────── */
@@ -26,6 +27,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 /* ── App Content (inside Router) ────────────────── */
 const AppContent = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const toast = useToast();
   const [cart, setCart] = useState([]);
@@ -126,7 +128,10 @@ const AppContent = () => {
           path="/*"
           element={
             <>
-              <Navbar navigate={navigate} cartCount={cartCount} />
+              {/* Hide public Navbar on admin panel */}
+              {!location.pathname.startsWith("/admin") && (
+                <Navbar navigate={navigate} cartCount={cartCount} />
+              )}
               <Routes>
                 <Route
                   path="/"
@@ -183,6 +188,12 @@ const AppContent = () => {
                       wishlist={wishlist}
                       toggleWishlist={toggleWishlist}
                     />
+                  }
+                />
+                <Route
+                  path="/page/:slug"
+                  element={
+                    <DynamicPage />
                   }
                 />
                 <Route
