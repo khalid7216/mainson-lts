@@ -4,6 +4,7 @@ import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mo
 import { productAPI, categoryAPI, mediaAPI, orderAPI, authAPI, bannerAPI, pageAPI, seoAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
 import CategoryFormModal from "./CategoryFormModal";
+import RichTextEditor from "./RichTextEditor";
 import { IoCashOutline, IoBagOutline, IoPeopleOutline, IoHeartOutline, IoPersonOutline, IoStar, IoImagesOutline, IoSearchOutline, IoGridOutline, IoListOutline, IoCloudUploadOutline, IoCheckmarkOutline, IoCloseOutline, IoDownloadOutline, IoFolderOutline } from "react-icons/io5";
 
 /* ── Reusable Stat card ─────────────────────────────── */
@@ -297,6 +298,7 @@ export const AdminPages = () => {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
+  const [editorContent, setEditorContent] = useState("");
 
   const fetchPages = async () => {
     try {
@@ -327,6 +329,12 @@ export const AdminPages = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
+    payload.content = editorContent; // Use rich editor content
+    
+    if (!payload.content || payload.content === "<br>") {
+      alert("Please add some content to the page.");
+      return;
+    }
     
     try {
       if (modal && modal !== "add") {
@@ -335,6 +343,7 @@ export const AdminPages = () => {
         await pageAPI.create(payload);
       }
       setModal(null);
+      setEditorContent("");
       fetchPages();
     } catch (err) {
       alert("Error: " + err.message);
@@ -403,8 +412,13 @@ export const AdminPages = () => {
                 </div>
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Content (HTML)</label>
-                <textarea name="content" defaultValue={modal?.content} required rows="14" style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4, fontFamily: "monospace", fontSize: 13, resize: "vertical" }}></textarea>
+                <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Content</label>
+                <RichTextEditor
+                  key={modal?._id || "new"}
+                  defaultValue={modal !== "add" ? modal?.content || "" : ""}
+                  onChange={(html) => setEditorContent(html)}
+                  placeholder="Start writing your page content..."
+                />
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
                 <Btn v="ghost" type="button" onClick={() => setModal(null)}>Cancel</Btn>
