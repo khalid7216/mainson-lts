@@ -504,6 +504,7 @@ export const AdminProducts = () => {
     <div className="fu">
       {modal && (
         <ProductFormModal
+          key={modal === "add" ? "add-product" : modal._id}
           product={modal === "add" ? null : modal}
           categories={cats}
           onClose={() => setModal(null)}
@@ -543,7 +544,7 @@ export const AdminProducts = () => {
           </thead>
           <tbody>
             {items.map((p) => (
-              <tr key={p.id}>
+              <tr key={p._id}>
                 <td style={{ width: 60, padding: "10px" }}>
                   <div style={{ width: 50, height: 50, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)" }}>
                     <img src={p.images?.[0] || p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

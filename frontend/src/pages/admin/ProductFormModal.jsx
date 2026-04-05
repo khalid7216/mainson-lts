@@ -387,7 +387,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         className="modal-box"
-        style={{ maxWidth: 780, display: "flex", flexDirection: "column", maxHeight: "90vh" }}
+        style={{ maxWidth: 780, display: "flex", flexDirection: "column", maxHeight: "90vh", overflow: "hidden" }}
       >
         {/* ── Header ──────────────────────────────── */}
         <div style={{
@@ -534,7 +534,13 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                   <Field label="Category" required error={errors.category}>
                     <Select
                       value={form.category}
-                      onChange={(e) => { set("category", e.target.value); set("sizes", []); }}
+                      onChange={(e) => { 
+                        const newCat = e.target.value;
+                        if (newCat !== form.category) {
+                          set("category", newCat); 
+                          set("sizes", []); 
+                        }
+                      }}
                       error={errors.category}
                     >
                       <option value="">— Select category —</option>
