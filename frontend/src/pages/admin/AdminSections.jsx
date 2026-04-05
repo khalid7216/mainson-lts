@@ -196,8 +196,7 @@ export const AdminBanners = () => {
 
   return (
     <>
-      <div className="fu">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
           <div>
             <h1 className="section-title">Banners</h1>
             <p className="section-sub">Manage your banners and sliders across different sections</p>
@@ -205,9 +204,10 @@ export const AdminBanners = () => {
           <Btn v="primary" onClick={() => setModal("add")}>+ Add Banner</Btn>
         </div>
 
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-          {loading ? <p style={{ color: "var(--dim)" }}>Loading banners...</p> : (
-          <table className="tbl">
+        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
+          <div className="tbl-wrap">
+            {loading ? <p style={{ color: "var(--dim)" }}>Loading banners...</p> : (
+            <table className="tbl">
             <thead>
               <tr><th>Title</th><th>Type</th><th>Section</th><th>Order</th><th>Status</th><th>Image</th><th>Actions</th></tr>
             </thead>
@@ -235,10 +235,10 @@ export const AdminBanners = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
-          )}
+            </table>
+            )}
+          </div>
         </div>
-      </div>
 
       {modal && (
         <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
@@ -353,7 +353,7 @@ export const AdminPages = () => {
   return (
     <>
       <div className="fu">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
           <div>
             <h1 className="section-title">Pages</h1>
             <p className="section-sub">Manage dynamic web pages and content.</p>
@@ -361,9 +361,10 @@ export const AdminPages = () => {
           <Btn v="primary" onClick={() => setModal("add")}>+ Add Page</Btn>
         </div>
 
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-          {loading ? <p style={{ color: "var(--dim)" }}>Loading pages...</p> : (
-          <table className="tbl">
+        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
+          <div className="tbl-wrap">
+            {loading ? <p style={{ color: "var(--dim)" }}>Loading pages...</p> : (
+            <table className="tbl">
             <thead>
               <tr><th>Title</th><th>Slug</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr>
             </thead>
@@ -384,10 +385,11 @@ export const AdminPages = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
-          )}
+            </table>
+            )}
         </div>
       </div>
+    </div>
 
       {modal && (
         <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
@@ -511,7 +513,7 @@ export const AdminProducts = () => {
           onSave={handleSave}
         />
       )}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
         <div>
           <h1 className="section-title">Products</h1>
           <p className="section-sub">{allProds.length} items in catalogue</p>
@@ -519,13 +521,13 @@ export const AdminProducts = () => {
         <Btn v="primary" onClick={() => setModal("add")}>+ Add Product</Btn>
       </div>
 
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
-        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
+        <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search products…"
-            style={{ flex: 1, maxWidth: 320, padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 13 }}
+            style={{ flex: 1, minWidth: 200, maxWidth: 320, padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 13 }}
           />
           <select 
             value={selectedCat}
@@ -538,7 +540,8 @@ export const AdminProducts = () => {
           </select>
         </div>
 
-        <table className="tbl">
+        <div className="tbl-wrap">
+          <table className="tbl">
           <thead>
             <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
           </thead>
@@ -586,7 +589,8 @@ export const AdminProducts = () => {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );

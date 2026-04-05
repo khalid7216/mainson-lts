@@ -138,6 +138,13 @@ const GlobalStyles = () => (
       animation: modalIn .4s cubic-bezier(.16,1,.3,1);
       box-shadow: 0 40px 120px rgba(0,0,0,.8);
     }
+    .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .grid-2-col { grid-template-columns: 1fr !important; } }
+
+    /* ── Table Wrapper ── */
+    .tbl-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; }
+    .tbl-wrap::-webkit-scrollbar { height: 4px; }
+
 
     /* ── Table ── */
     .tbl { width: 100%; border-collapse: collapse; }

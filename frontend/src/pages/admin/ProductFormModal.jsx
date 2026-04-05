@@ -445,7 +445,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         </div>
 
         {/* ── Scrollable body ──────────────────────── */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+        <div className="modal-body-scroll" style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
 
           {/* ════ TAB: BASIC INFO ════ */}
           {tab === "basic" && (
@@ -530,7 +530,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
               </Section>
 
               <Section title="Category">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className="grid-2-col">
                   <Field label="Category" required error={errors.category}>
                     <Select
                       value={form.category}
@@ -560,7 +560,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
               </Section>
 
               <Section title="Labels & Visibility">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                <div className="grid-2-col" style={{ marginBottom: 20 }}>
                   <Field label="Badge">
                     <Select value={form.badge} onChange={(e) => set("badge", e.target.value)}>
                       {BADGE_OPTIONS.map((b) => <option key={b} value={b}>{b || "None"}</option>)}
@@ -586,7 +586,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           {tab === "pricing" && (
             <div>
               <Section title="Pricing">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className="grid-2-col">
                   <Field label="Selling Price (USD)" required error={errors.price}>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: 15 }}>$</span>
