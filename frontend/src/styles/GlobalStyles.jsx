@@ -293,7 +293,7 @@ const GlobalStyles = () => (
       
       /* Mobile modals */
       .modal-box { max-width: 96vw !important; margin: 0 !important; padding: 20px !important; max-height: 88vh !important; border-radius: 10px !important; }
-      .modal-bg { padding: 12px !important; align-items: flex-start; padding-top: 60px !important; }
+      .modal-bg { padding: 12px !important; align-items: center; justify-content: center; }
       
       /* Mobile forms */
       .inp-wrap { margin-bottom: 16px; }
