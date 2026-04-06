@@ -446,7 +446,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         </div>
 
         {/* ── Scrollable body ──────────────────────── */}
-        <div className="modal-body-scroll" style={{ flex: 1, overflowY: "auto", padding: "28px 32px", minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div className="modal-body-scroll" style={{ flex: 1, overflowY: "auto", padding: "28px 32px", minHeight: 0 }}>
 
           {/* ════ TAB: BASIC INFO ════ */}
           {tab === "basic" && (
