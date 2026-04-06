@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { Avatar, Btn, Tag } from "../../components/UI";
-import { IoGridOutline, IoCubeOutline, IoReceiptOutline, IoPeopleOutline, IoTrendingUpOutline, IoImagesOutline, IoSettingsOutline, IoLockClosedOutline, IoArrowBack, IoListOutline, IoSearchOutline } from "react-icons/io5";
+import { IoGridOutline, IoCubeOutline, IoReceiptOutline, IoPeopleOutline, IoTrendingUpOutline, IoImagesOutline, IoSettingsOutline, IoLockClosedOutline, IoArrowBack, IoListOutline, IoSearchOutline, IoMenuOutline, IoCloseOutline } from "react-icons/io5";
 import {
   AdminDashboard,
   AdminProducts,
@@ -38,6 +38,7 @@ const AdminPanel = ({ navigate }) => {
   const { user } = useAuth();
   const toast = useToast();
   const [section, setSection] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   /* Access guard */
   if (!user?.isAdmin) {
@@ -72,14 +73,44 @@ const AdminPanel = ({ navigate }) => {
 
   return (
     <div
+      className="admin-layout"
       style={{
         display: "flex",
         height: "100vh",
-        overflow: "clip",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
+      {/* ── Mobile Header ──────────────────────────── */}
+      <div className="admin-mobile-header" style={{
+        position: "fixed", top: 0, left: 0, right: 0, height: 60,
+        background: "var(--surface)", borderBottom: "1px solid var(--border)",
+        display: "none", alignItems: "center", justifyContent: "space-between",
+        padding: "0 20px", zIndex: 1000
+      }}>
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          style={{ background: "none", border: "none", color: "var(--text)", cursor: "pointer" }}
+        >
+          <IoMenuOutline size={28} />
+        </button>
+        <span style={{ fontFamily: "Playfair Display", fontSize: 18, color: "var(--gold)" }}>Maison Élite</span>
+        <div style={{ width: 28 }} /> {/* spacer */}
+      </div>
+
+      {/* ── Overlay for Mobile Sidebar ─────────────── */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,.6)",
+            backdropFilter: "blur(4px)", zIndex: 8000
+          }}
+        />
+      )}
       {/* ── Sidebar ────────────────────────────────── */}
       <aside
+        className={`admin-sidebar${isSidebarOpen ? " open" : ""}`}
         style={{
           width: 240,
           background: "var(--surface)",
@@ -87,6 +118,7 @@ const AdminPanel = ({ navigate }) => {
           display: "flex",
           flexDirection: "column",
           flexShrink: 0,
+          zIndex: 8001
         }}
       >
         {/* User header */}
@@ -107,12 +139,21 @@ const AdminPanel = ({ navigate }) => {
           >
             Admin Console
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Avatar name={user.name} size={34} />
-            <div>
-              <p style={{ fontSize: 13, fontWeight: 500 }}>{user.name}</p>
-              <Tag color="gold">Admin</Tag>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Avatar name={user.name} size={34} />
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 500 }}>{user.name}</p>
+                <Tag color="gold">Admin</Tag>
+              </div>
             </div>
+            <button 
+              className="mobile-only"
+              onClick={() => setIsSidebarOpen(false)}
+              style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", display: "none" }}
+            >
+              <IoCloseOutline size={24} />
+            </button>
           </div>
         </div>
 

@@ -195,19 +195,19 @@ export const AdminBanners = () => {
   };
 
   return (
-    <>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-          <div>
-            <h1 className="section-title">Banners</h1>
-            <p className="section-sub">Manage your banners and sliders across different sections</p>
-          </div>
-          <Btn v="primary" onClick={() => setModal("add")}>+ Add Banner</Btn>
+    <div className="fu">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
+        <div>
+          <h1 className="section-title">Banners</h1>
+          <p className="section-sub">Manage your banners and sliders across different sections</p>
         </div>
+        <Btn v="primary" onClick={() => setModal("add")}>+ Add Banner</Btn>
+      </div>
 
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
-          <div className="tbl-wrap">
-            {loading ? <p style={{ color: "var(--dim)" }}>Loading banners...</p> : (
-            <table className="tbl">
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
+        <div className="tbl-wrap">
+          {loading ? <p style={{ color: "var(--dim)" }}>Loading banners...</p> : (
+          <table className="tbl">
             <thead>
               <tr><th>Title</th><th>Type</th><th>Section</th><th>Order</th><th>Status</th><th>Image</th><th>Actions</th></tr>
             </thead>
@@ -235,10 +235,10 @@ export const AdminBanners = () => {
                 </tr>
               ))}
             </tbody>
-            </table>
-            )}
-          </div>
+          </table>
+          )}
         </div>
+      </div>
 
       {modal && (
         <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
@@ -287,7 +287,7 @@ export const AdminBanners = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -351,20 +351,19 @@ export const AdminPages = () => {
   };
 
   return (
-    <>
-      <div className="fu">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-          <div>
-            <h1 className="section-title">Pages</h1>
-            <p className="section-sub">Manage dynamic web pages and content.</p>
-          </div>
-          <Btn v="primary" onClick={() => setModal("add")}>+ Add Page</Btn>
+    <div className="fu">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
+        <div>
+          <h1 className="section-title">Pages</h1>
+          <p className="section-sub">Manage dynamic web pages and content.</p>
         </div>
+        <Btn v="primary" onClick={() => setModal("add")}>+ Add Page</Btn>
+      </div>
 
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
-          <div className="tbl-wrap">
-            {loading ? <p style={{ color: "var(--dim)" }}>Loading pages...</p> : (
-            <table className="tbl">
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
+        <div className="tbl-wrap">
+          {loading ? <p style={{ color: "var(--dim)" }}>Loading pages...</p> : (
+          <table className="tbl">
             <thead>
               <tr><th>Title</th><th>Slug</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr>
             </thead>
@@ -385,11 +384,10 @@ export const AdminPages = () => {
                 </tr>
               ))}
             </tbody>
-            </table>
-            )}
+          </table>
+          )}
         </div>
       </div>
-    </div>
 
       {modal && (
         <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
@@ -430,7 +428,7 @@ export const AdminPages = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -542,53 +540,53 @@ export const AdminProducts = () => {
 
         <div className="tbl-wrap">
           <table className="tbl">
-          <thead>
-            <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
-          </thead>
-          <tbody>
-            {items.map((p) => (
-              <tr key={p._id}>
-                <td style={{ width: 60, padding: "10px" }}>
-                  <div style={{ width: 50, height: 50, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)" }}>
-                    <img src={p.images?.[0] || p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  </div>
-                </td>
-                <td style={{ fontWeight: 500 }}>{p.name}</td>
-                <td style={{ color: "var(--muted)" }}>{p.parentCategory?.name || "Uncategorized"}</td>
-                <td>
-                  <span style={{ color: "var(--gold2)", fontWeight: 600 }}>${p.price}</span>
-                  {p.orig && (
-                    <span style={{ fontSize: 11, color: "var(--dim)", textDecoration: "line-through", marginLeft: 6 }}>
-                      ${p.orig}
-                    </span>
-                  )}
-                </td>
-                <td>
-                  <IoStar size={12} color="var(--gold)" style={{ verticalAlign: "middle", marginRight: 2 }} /> {p.rating}
-                </td>
-                <td>
-                  {p.badge ? <StatusTag status={p.badge} /> : <span style={{ color: "var(--dim)", fontSize: 12 }}>—</span>}
-                </td>
-                <td>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      onClick={() => setModal(p)}
-                      style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif", transition: "all .2s" }}
-                      onMouseEnter={(e) => (e.target.style.borderColor = "var(--gold)")}
-                      onMouseLeave={(e) => (e.target.style.borderColor = "var(--border2)")}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p._id)}
-                      style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif" }}>
-                      Del
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+            <thead>
+              <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {items.map((p) => (
+                <tr key={p._id}>
+                  <td style={{ width: 60, padding: "10px" }}>
+                    <div style={{ width: 50, height: 50, borderRadius: 6, overflow: "hidden", background: "var(--lift)", border: "1px solid var(--border)" }}>
+                      <img src={p.images?.[0] || p.image?.url || p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  </td>
+                  <td style={{ fontWeight: 500 }}>{p.name}</td>
+                  <td style={{ color: "var(--muted)" }}>{p.parentCategory?.name || "Uncategorized"}</td>
+                  <td>
+                    <span style={{ color: "var(--gold2)", fontWeight: 600 }}>${p.price}</span>
+                    {p.orig && (
+                      <span style={{ fontSize: 11, color: "var(--dim)", textDecoration: "line-through", marginLeft: 6 }}>
+                        ${p.orig}
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    <IoStar size={12} color="var(--gold)" style={{ verticalAlign: "middle", marginRight: 2 }} /> {p.rating}
+                  </td>
+                  <td>
+                    {p.badge ? <StatusTag status={p.badge} /> : <span style={{ color: "var(--dim)", fontSize: 12 }}>—</span>}
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        onClick={() => setModal(p)}
+                        style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif", transition: "all .2s" }}
+                        onMouseEnter={(e) => (e.target.style.borderColor = "var(--gold)")}
+                        onMouseLeave={(e) => (e.target.style.borderColor = "var(--border2)")}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(p._id)}
+                        style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif" }}>
+                        Del
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
@@ -660,45 +658,47 @@ export const AdminCategories = () => {
         <Btn v="primary" onClick={() => setModal("add")}>+ Add Category</Btn>
       </div>
 
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
         {loading ? <p style={{ color: "var(--dim)" }}>Loading...</p> : (
-        <table className="tbl">
-          <thead>
-            <tr><th>Name</th><th>Slug</th><th>Banner</th><th>Description</th><th>Actions</th></tr>
-          </thead>
-          <tbody>
-            {categories.map((c) => (
-              <tr key={c._id}>
-                <td style={{ fontWeight: 600 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                     <IoFolderOutline style={{ color: "var(--gold)" }} size={16} /> {c.name}
-                  </div>
-                </td>
-                <td style={{ color: "var(--dim)", fontSize: 13 }}>/{c.slug}</td>
-                <td>
-                  {c.image ? (
-                    <div style={{ width: 44, height: 28, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
-                      <img src={c.image} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <div className="tbl-wrap">
+          <table className="tbl">
+            <thead>
+              <tr><th>Name</th><th>Slug</th><th>Banner</th><th>Description</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {categories.map((c) => (
+                <tr key={c._id}>
+                  <td style={{ fontWeight: 600 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                       <IoFolderOutline style={{ color: "var(--gold)" }} size={16} /> {c.name}
                     </div>
-                  ) : <span style={{ color: "var(--dim)" }}>—</span>}
-                </td>
-                <td style={{ color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {c.description || "—"}
-                </td>
-                <td>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button onClick={() => setModal(c)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, transition: "all .2s" }}>
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(c._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>
-                      Del
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td style={{ color: "var(--dim)", fontSize: 13 }}>/{c.slug}</td>
+                  <td>
+                    {c.image ? (
+                      <div style={{ width: 44, height: 28, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
+                        <img src={c.image} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    ) : <span style={{ color: "var(--dim)" }}>—</span>}
+                  </td>
+                  <td style={{ color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {c.description || "—"}
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => setModal(c)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, transition: "all .2s" }}>
+                        Edit
+                      </button>
+                      <button onClick={() => handleDelete(c._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>
+                        Del
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         )}
       </div>
     </div>
@@ -790,6 +790,7 @@ export const AdminOrders = () => {
             <p>No orders found for this category.</p>
           </div>
         ) : (
+        <div className="tbl-wrap">
           <table className="tbl">
             <thead>
               <tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr>
@@ -825,6 +826,7 @@ export const AdminOrders = () => {
               ))}
             </tbody>
           </table>
+        </div>
         )}
       </div>
     </div>
@@ -861,30 +863,32 @@ export const AdminCustomers = () => {
 
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
         {loading ? <p style={{ color: "var(--dim)" }}>Loading members...</p> : (
-        <table className="tbl">
-          <thead>
-            <tr><th>Customer</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Tier</th></tr>
-          </thead>
-          <tbody>
-            {customers.map((c) => (
-              <tr key={c._id}>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <Avatar name={c.name} size={34} />
-                    <span style={{ fontWeight: 500 }}>{c.name}</span>
-                  </div>
-                </td>
-                <td style={{ color: "var(--muted)" }}>{c.email}</td>
-                <td style={{ color: "var(--muted)" }}>
-                  {new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(c.joined))}
-                </td>
-                <td style={{ fontWeight: 600 }}>{c.orders}</td>
-                <td style={{ fontWeight: 700, color: "var(--gold2)" }}>${c.spent.toLocaleString()}</td>
-                <td><StatusTag status={c.tier} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="tbl-wrap">
+          <table className="tbl">
+            <thead>
+              <tr><th>Customer</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Tier</th></tr>
+            </thead>
+            <tbody>
+              {customers.map((c) => (
+                <tr key={c._id}>
+                  <td>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <Avatar name={c.name} size={34} />
+                      <span style={{ fontWeight: 500 }}>{c.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ color: "var(--muted)" }}>{c.email}</td>
+                  <td style={{ color: "var(--muted)" }}>
+                    {new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(c.joined))}
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{c.orders}</td>
+                  <td style={{ fontWeight: 700, color: "var(--gold2)" }}>${c.spent.toLocaleString()}</td>
+                  <td><StatusTag status={c.tier} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         )}
       </div>
     </div>

@@ -7,25 +7,25 @@ import { Btn, Inp, Spinner, StatusTag } from "../../components/UI";
 export const CATEGORIES = ["Dresses", "Outerwear", "Tops", "Bottoms", "Shoes", "Accessories"];
 
 export const SIZE_OPTIONS = {
-  Dresses:     ["XS", "S", "M", "L", "XL", "XXL"],
-  Outerwear:   ["XS", "S", "M", "L", "XL", "XXL"],
-  Tops:        ["XS", "S", "M", "L", "XL", "XXL"],
-  Bottoms:     ["XS", "S", "M", "L", "XL", "XXL"],
-  Shoes:       ["35", "36", "37", "38", "39", "40", "41", "42"],
+  Dresses: ["XS", "S", "M", "L", "XL", "XXL"],
+  Outerwear: ["XS", "S", "M", "L", "XL", "XXL"],
+  Tops: ["XS", "S", "M", "L", "XL", "XXL"],
+  Bottoms: ["XS", "S", "M", "L", "XL", "XXL"],
+  Shoes: ["35", "36", "37", "38", "39", "40", "41", "42"],
   Accessories: ["One Size"],
 };
 
 export const COLOR_OPTIONS = [
-  { label: "Black",       hex: "#1a1a1a" },
-  { label: "White",       hex: "#f5f0e8" },
-  { label: "Ivory",       hex: "#fffff0" },
-  { label: "Camel",       hex: "#c19a6b" },
-  { label: "Blush",       hex: "#ffb6c1" },
-  { label: "Burgundy",    hex: "#800020" },
-  { label: "Navy",        hex: "#001f5b" },
-  { label: "Olive",       hex: "#6b7c45" },
-  { label: "Charcoal",    hex: "#36454f" },
-  { label: "Gold",        hex: "#c9a84c" },
+  { label: "Black", hex: "#1a1a1a" },
+  { label: "White", hex: "#f5f0e8" },
+  { label: "Ivory", hex: "#fffff0" },
+  { label: "Camel", hex: "#c19a6b" },
+  { label: "Blush", hex: "#ffb6c1" },
+  { label: "Burgundy", hex: "#800020" },
+  { label: "Navy", hex: "#001f5b" },
+  { label: "Olive", hex: "#6b7c45" },
+  { label: "Charcoal", hex: "#36454f" },
+  { label: "Gold", hex: "#c9a84c" },
 ];
 
 export const BADGE_OPTIONS = ["", "New", "Bestseller", "Sale", "Limited", "Exclusive"];
@@ -34,22 +34,22 @@ export const STATUS_OPTIONS = ["draft", "active", "archived"];
 
 /* ── Empty product form state ───────────────────── */
 export const EMPTY_PRODUCT = {
-  name:             "",
-  description:      "",
+  name: "",
+  description: "",
   shortDescription: "",
-  category:         "",
-  subCategory:      "",
-  price:            "",
-  compareAtPrice:   "",
-  badge:            "",
-  status:           "draft",
-  isFeatured:       false,
-  isNewArrival:     false,
-  materials:        "",
+  category: "",
+  subCategory: "",
+  price: "",
+  compareAtPrice: "",
+  badge: "",
+  status: "draft",
+  isFeatured: false,
+  isNewArrival: false,
+  materials: "",
   careInstructions: "",
-  madeIn:           "",
-  tags:             "",
-  image:            "", // Product image URL
+  madeIn: "",
+  tags: "",
+  image: "", // Product image URL
   // sizes: array of { size, stock } — built by SizeStock component
   sizes: [],
   // colors: array of selected color labels
@@ -59,16 +59,16 @@ export const EMPTY_PRODUCT = {
 /* ── Validation ─────────────────────────────────── */
 export const validateProduct = (form) => {
   const errors = {};
-  if (!form.name.trim())             errors.name     = "Product name is required";
-  if (!form.description.trim())      errors.description = "Description is required";
-  if (!form.category)                errors.category = "Please select a category";
+  if (!form.name.trim()) errors.name = "Product name is required";
+  if (!form.description.trim()) errors.description = "Description is required";
+  if (!form.category) errors.category = "Please select a category";
   if (!form.price || isNaN(form.price) || Number(form.price) <= 0)
-                                     errors.price    = "Valid price is required";
+    errors.price = "Valid price is required";
   if (form.compareAtPrice && Number(form.compareAtPrice) <= Number(form.price))
-                                     errors.compareAtPrice = "Must be greater than selling price";
+    errors.compareAtPrice = "Must be greater than selling price";
   if (!form.image && !form.imageFile) errors.image = "Product image is required";
-  if (form.sizes.length === 0)       errors.sizes    = "Add at least one size";
-  if (form.colors.length === 0)      errors.colors   = "Select at least one color";
+  if (form.sizes.length === 0) errors.sizes = "Add at least one size";
+  if (form.colors.length === 0) errors.colors = "Select at least one color";
   return errors;
 };
 
@@ -78,30 +78,33 @@ export const validateProduct = (form) => {
 
 /* ── Section wrapper ────────────────────────────── */
 const Section = ({ title, children }) => (
-  <div style={{ marginBottom: 28 }}>
+  <div style={{ marginBottom: 32, animation: "fadeIn .4s ease both" }}>
     <p style={{
-      fontSize: 10, letterSpacing: ".25em", textTransform: "uppercase",
-      color: "var(--gold)", marginBottom: 16, paddingBottom: 10,
-      borderBottom: "1px solid var(--border)",
+      fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase",
+      color: "var(--gold)", marginBottom: 20, paddingBottom: 10,
+      borderBottom: "1px solid var(--border2)", fontWeight: 500
     }}>
       {title}
     </p>
-    {children}
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {children}
+    </div>
   </div>
 );
 
-/* ── Field row (label + input side-by-side) ─────── */
+/* ── Field row ──────────────────────────────────── */
 const Field = ({ label, required, error, children }) => (
-  <div style={{ marginBottom: 18 }}>
+  <div style={{ width: "100%" }}>
     <label style={{
-      display: "block", fontSize: 11, letterSpacing: ".12em",
+      display: "block", fontSize: 11, letterSpacing: ".1em",
       textTransform: "uppercase", color: "var(--muted)", marginBottom: 8,
+      fontWeight: 500
     }}>
       {label} {required && <span style={{ color: "var(--rose)" }}>*</span>}
     </label>
     {children}
     {error && (
-      <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 5 }}>⚠ {error}</p>
+      <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 6, fontWeight: 500 }}>⚠ {error}</p>
     )}
   </div>
 );
@@ -296,26 +299,26 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
   const [form, setForm] = useState(
     product
       ? {
-          ...product,
-          price:          String(product.price),
-          compareAtPrice: String(product.compareAtPrice ?? ""),
-          category:       product.category?._id || product.category || "",
-          badge:          product.badge || "",
-          status:         product.isActive ? "active" : "draft",
-          description:    product.description || "",
-          shortDescription: product.shortDescription || "",
-          subCategory:    product.subCategory || "",
-          materials:      product.materials || "",
-          careInstructions: product.careInstructions || "",
-          madeIn:         product.madeIn || "",
-          tags:           Array.isArray(product.tags) ? product.tags.join(", ") : (product.tags || ""),
-          isFeatured:     product.isFeatured || false,
-          isNewArrival:   product.badge === "New",
-          sizes:          product.sizes || [],
-          colors:         product.colors || [],
-          image:          product.images?.[0] || product.image?.url || product.image || "",
-          imageFile:      null,
-        }
+        ...product,
+        price: String(product.price),
+        compareAtPrice: String(product.compareAtPrice ?? ""),
+        category: product.category?._id || product.category || "",
+        badge: product.badge || "",
+        status: product.isActive ? "active" : "draft",
+        description: product.description || "",
+        shortDescription: product.shortDescription || "",
+        subCategory: product.subCategory || "",
+        materials: product.materials || "",
+        careInstructions: product.careInstructions || "",
+        madeIn: product.madeIn || "",
+        tags: Array.isArray(product.tags) ? product.tags.join(", ") : (product.tags || ""),
+        isFeatured: product.isFeatured || false,
+        isNewArrival: product.badge === "New",
+        sizes: product.sizes || [],
+        colors: product.colors || [],
+        image: product.images?.[0] || product.image?.url || product.image || "",
+        imageFile: null,
+      }
       : { ...EMPTY_PRODUCT, imageFile: null }
   );
 
@@ -330,9 +333,9 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
     };
   }, [imagePreview]);
 
-  const [errors,  setErrors]  = useState({});
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [tab,     setTab]     = useState("basic");
+  const [tab, setTab] = useState("basic");
 
   const set = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
@@ -347,11 +350,11 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
     try {
       const formData = new FormData();
       if (product?._id) formData.append("_id", product._id);
-      
+
       // Append fields
       Object.keys(form).forEach(key => {
         if (["_id", "id", "__v", "createdAt", "updatedAt"].includes(key)) return;
-        
+
         if (key === "imageFile") {
           if (form.imageFile) formData.append("image", form.imageFile);
         } else if (key === "sizes" || key === "colors") {
@@ -377,22 +380,23 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
   };
 
   const TABS = [
-    { id: "basic",    label: "Basic Info" },
-    { id: "pricing",  label: "Pricing" },
+    { id: "basic", label: "Basic Info" },
+    { id: "pricing", label: "Pricing" },
     { id: "variants", label: "Sizes & Colors" },
-    { id: "details",  label: "Details" },
+    { id: "details", label: "Details" },
   ];
 
   return (
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         className="modal-box"
-        style={{ maxWidth: 780, display: "flex", flexDirection: "column", maxHeight: "90vh", overflow: "hidden" }}
+        style={{ width: "95%", maxWidth: 780, display: "flex", flexDirection: "column", maxHeight: "92vh", overflow: "hidden", background: "var(--surface)", margin: "0 auto", padding: 0 }}
       >
         {/* ── Header ──────────────────────────────── */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "24px 32px", borderBottom: "1px solid var(--border)", flexShrink: 0,
+          flexWrap: "wrap", gap: 16
         }}>
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 300, fontSize: 26 }}>
@@ -404,7 +408,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           </div>
           <button
             onClick={onClose}
-            style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 26, cursor: "pointer", transition: "color .2s", lineHeight: 1 }}
+            style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 26, cursor: "pointer", transition: "color .2s", lineHeight: 1, marginLeft: "auto" }}
             onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
             onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
           >
@@ -413,11 +417,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         </div>
 
         {/* ── Tab bar ─────────────────────────────── */}
-        <div style={{
-          display: "flex", gap: 0,
-          borderBottom: "1px solid var(--border)",
-          padding: "0 32px", flexShrink: 0,
-        }}>
+        <div className="modal-tabs" style={{ padding: "0 32px", marginBottom: 0 }}>
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -429,23 +429,24 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                 fontSize: 12, letterSpacing: ".1em", textTransform: "uppercase",
                 cursor: "pointer", fontFamily: "'Jost', sans-serif",
                 transition: "all .2s", marginBottom: -1,
+                flexShrink: 0
               }}
             >
               {t.label}
               {/* Error dot */}
               {(
-                (t.id === "basic"    && (errors.name || errors.description || errors.category)) ||
-                (t.id === "pricing"  && errors.price) ||
+                (t.id === "basic" && (errors.name || errors.description || errors.category)) ||
+                (t.id === "pricing" && errors.price) ||
                 (t.id === "variants" && (errors.sizes || errors.colors))
               ) && (
-                <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "var(--rose)", marginLeft: 6, verticalAlign: "middle" }} />
-              )}
+                  <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "var(--rose)", marginLeft: 6, verticalAlign: "middle" }} />
+                )}
             </button>
           ))}
         </div>
 
         {/* ── Scrollable body ──────────────────────── */}
-        <div className="modal-body-scroll" style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
+        <div className="modal-body-scroll" style={{ flex: 1, overflowY: "auto", padding: "28px 32px", minHeight: 0, display: "flex", flexDirection: "column" }}>
 
           {/* ════ TAB: BASIC INFO ════ */}
           {tab === "basic" && (
@@ -534,11 +535,11 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                   <Field label="Category" required error={errors.category}>
                     <Select
                       value={form.category}
-                      onChange={(e) => { 
+                      onChange={(e) => {
                         const newCat = e.target.value;
                         if (newCat !== form.category) {
-                          set("category", newCat); 
-                          set("sizes", []); 
+                          set("category", newCat);
+                          set("sizes", []);
                         }
                       }}
                       error={errors.category}
@@ -575,8 +576,8 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                 </div>
 
                 <div style={{ display: "flex", gap: 32 }}>
-                  <Toggle checked={form.isFeatured}   onChange={() => set("isFeatured", !form.isFeatured)}   label="Featured Product" />
-                  <Toggle checked={form.isNewArrival}  onChange={() => set("isNewArrival", !form.isNewArrival)} label="New Arrival" />
+                  <Toggle checked={form.isFeatured} onChange={() => set("isFeatured", !form.isFeatured)} label="Featured Product" />
+                  <Toggle checked={form.isNewArrival} onChange={() => set("isNewArrival", !form.isNewArrival)} label="New Arrival" />
                 </div>
               </Section>
             </div>
@@ -720,12 +721,8 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         </div>
 
         {/* ── Footer actions ───────────────────────── */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "20px 32px", borderTop: "1px solid var(--border)", flexShrink: 0,
-          background: "var(--surface)",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div className="modal-footer" style={{ padding: "20px 32px", borderTop: "1px solid var(--border)", flexShrink: 0, background: "var(--surface)", marginTop: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: "auto" }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: form.status === "active" ? "var(--emerald)" : form.status === "draft" ? "var(--gold)" : "var(--dim)" }} />
             <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "capitalize" }}>{form.status}</span>
           </div>
