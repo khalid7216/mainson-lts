@@ -31,7 +31,7 @@ connectDB();
 
 /* ── CORS (manual – works on Vercel serverless) ── */
 const allowedOrigins = [
-  "https://mainson-frontend.vercel.app",
+  "https://www.khalidsanawer.online",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
