@@ -143,14 +143,10 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
 
         {/* Hero text */}
         <div
-          className="hero-text-wrap"
+          className="hero-text-wrap container"
           style={{
-            maxWidth: 1320,
-            margin: "0 auto",
-            padding: "0 clamp(20px, 6vw, 60px)",
             position: "relative",
             zIndex: 1,
-            width: "100%",
           }}
         >
           <p
@@ -303,8 +299,8 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       </section>
 
       {/* ── Featured Section Title ───────────────────── */}
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "64px clamp(20px, 5vw, 32px) 20px" }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 300, textAlign: "center" }}>
+      <div className="container py-global">
+        <h2 className="section-title" style={{ textAlign: "center" }}>
           Trending Latest Arrivals
         </h2>
         <p style={{ textAlign: "center", color: "var(--muted)", marginTop: 12, letterSpacing: ".05em" }}>
@@ -313,13 +309,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       </div>
 
       {/* ── Product Grid ─────────────────────────────── */}
-      <div
-        style={{
-          maxWidth: 1320,
-          margin: "0 auto",
-          padding: "24px clamp(16px, 5vw, 32px) 80px",
-        }}
-      >
+      <div className="container pb-global">
         <div
           className="prod-grid-mobile"
           style={{
@@ -356,11 +346,13 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
 
       {/* ── Editorial Banner ─────────────────────────── */}
       <div
+        className="py-global"
         style={{
           background: "var(--card)",
           borderTop: "1px solid var(--border)",
           borderBottom: "1px solid var(--border)",
-          padding: "80px clamp(24px, 8vw, 60px)",
+          paddingLeft: "clamp(24px, 8vw, 60px)",
+          paddingRight: "clamp(24px, 8vw, 60px)",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",

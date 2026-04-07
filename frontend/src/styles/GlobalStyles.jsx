@@ -297,13 +297,47 @@ const GlobalStyles = () => (
     }
     .prod-card:hover .prod-overlay { transform: translateY(0); }
 
-    /* ── Responsive ── */
+    /* ── Responsive Utilities ── */
+
+    /* Global Containers & Padding */
+    .container {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding-left: clamp(16px, 5vw, 60px);
+      padding-right: clamp(16px, 5vw, 60px);
+    }
+
+    .py-global { padding-top: clamp(40px, 8vw, 80px); padding-bottom: clamp(40px, 8vw, 80px); }
+    .pt-global { padding-top: clamp(40px, 8vw, 80px); }
+    .pb-global { padding-bottom: clamp(40px, 8vw, 80px); }
+
+    /* Flex Responsive Utilities */
+    .flex-responsive {
+      display: flex;
+      flex-direction: row;
+      gap: 24px;
+    }
+
+    /* Tablet (1024px) */
+    @media (max-width: 1024px) {
+      .hide-tablet { display: none !important; }
+      .flex-responsive { flex-wrap: wrap; }
+      .grid-3-col { grid-template-columns: 1fr 1fr !important; gap: 20px; }
+      .hero-title { font-size: clamp(56px, 8vw, 90px) !important; }
+      .section-title { font-size: 38px; }
+    }
+
+    /* Phone (768px) */
     @media (max-width: 768px) {
       :root { --nav-height: 64px; }
       .hide-mobile, .desktop-only { display: none !important; }
       .mobile-only { display: flex !important; }
+      .flex-responsive { flex-direction: column !important; }
       .grid-1-mobile { grid-template-columns: 1fr !important; }
+      .grid-2-col { grid-template-columns: 1fr !important; gap: 16px; }
       .hero-title { font-size: clamp(40px, 12vw, 80px) !important; }
+      .section-title { font-size: 32px !important; }
       
       /* Mobile nav adjustments */
       nav { height: 64px !important; }
@@ -334,7 +368,7 @@ const GlobalStyles = () => (
         height: 100vh !important;
       }
       .admin-sidebar.open { transform: translateX(0) !important; }
-      .mobile-only { display: block !important; }
+      
       main { padding: 80px 16px 36px !important; } /* Push down for header */
       
       /* Mobile forms */
@@ -345,6 +379,20 @@ const GlobalStyles = () => (
       
       /* Mobile footer */
       footer { padding: 48px 24px 84px !important; } /* Extra bottom padding for mobile nav */
+    }
+
+    /* Small Phone (480px) */
+    @media (max-width: 480px) {
+      .grid-3-col, .grid-2-col, .prod-grid-mobile { grid-template-columns: 1fr !important; }
+      h1 { font-size: 36px !important; }
+      .hero-title { font-size: clamp(32px, 12vw, 50px) !important; }
+      .section-title { font-size: 26px !important; }
+      .btn-lg { padding: 12px 24px !important; font-size: 10px !important; width: 100%; justify-content: center; }
+      .prod-img { height: 320px !important; }
+      
+      /* Optimize padding for small screens */
+      .container { padding-left: 16px; padding-right: 16px; }
+      .py-global { padding-top: 32px; padding-bottom: 32px; }
     }
     
     /* ── Bottom Navbar Mobile ── */
@@ -381,16 +429,6 @@ const GlobalStyles = () => (
     }
     .mobile-nav-item.active {
       color: var(--gold);
-    }
-    
-    @media (max-width: 900px) {
-      .grid-2-col { grid-template-columns: 1fr 1fr !important; }
-    }
-    
-    @media (max-width: 480px) {
-      .grid-2-col { grid-template-columns: 1fr !important; }
-      h1 { font-size: 28px !important; }
-      .section-title { font-size: 26px !important; }
     }
   `}</style>
 );
