@@ -81,9 +81,9 @@ export const AdminDashboard = () => {
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 20 }}>Recent Orders</h3>
           {loading ? (
-             <p style={{ color: "var(--dim)", fontSize: 13 }}>Loading recent orders...</p>
+            <p style={{ color: "var(--dim)", fontSize: 13 }}>Loading recent orders...</p>
           ) : recentOrders.length === 0 ? (
-             <p style={{ color: "var(--dim)", fontSize: 13 }}>No recent orders.</p>
+            <p style={{ color: "var(--dim)", fontSize: 13 }}>No recent orders.</p>
           ) : (
             <table className="tbl">
               <thead>
@@ -114,9 +114,9 @@ export const AdminDashboard = () => {
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 20 }}>Top Sellers</h3>
           {loading ? (
-             <p style={{ color: "var(--dim)", fontSize: 13 }}>Loading products...</p>
+            <p style={{ color: "var(--dim)", fontSize: 13 }}>Loading products...</p>
           ) : topProducts.length === 0 ? (
-             <p style={{ color: "var(--dim)", fontSize: 13 }}>No products found.</p>
+            <p style={{ color: "var(--dim)", fontSize: 13 }}>No products found.</p>
           ) : (
             topProducts.map((p, i) => (
               <div key={p._id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
@@ -180,7 +180,7 @@ export const AdminBanners = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
-    
+
     try {
       if (modal && modal !== "add") {
         await bannerAPI.update(modal._id, payload);
@@ -207,42 +207,42 @@ export const AdminBanners = () => {
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
         <div className="tbl-wrap">
           {loading ? <p style={{ color: "var(--dim)" }}>Loading banners...</p> : (
-          <table className="tbl">
-            <thead>
-              <tr><th>Title</th><th>Type</th><th>Section</th><th>Order</th><th>Status</th><th>Image</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              {banners.map(b => (
-                <tr key={b._id}>
-                  <td style={{ fontWeight: 500 }}>{b.title}</td>
-                  <td style={{ color: "var(--muted)" }}>{b.type}</td>
-                  <td style={{ color: "var(--dim)", fontSize: 13 }}>
-                    <span style={{ padding: "4px 8px", background: "rgba(46,204,113,.1)", color: "var(--emerald)", borderRadius: 4 }}>{b.section}</span>
-                  </td>
-                  <td style={{ fontWeight: 600 }}>{b.order}</td>
-                  <td><StatusTag status={b.status} /></td>
-                  <td>
-                    <div style={{ width: 60, height: 30, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
-                      {b.image?.url ? <img src={b.image.url} alt="banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ color: "var(--dim)", fontSize: 10, paddingLeft: 4 }}>None</span>}
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => setModal(b)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
-                      <button onClick={() => handleDelete(b._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <table className="tbl">
+              <thead>
+                <tr><th>Title</th><th>Type</th><th>Section</th><th>Order</th><th>Status</th><th>Image</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {banners.map(b => (
+                  <tr key={b._id}>
+                    <td style={{ fontWeight: 500 }}>{b.title}</td>
+                    <td style={{ color: "var(--muted)" }}>{b.type}</td>
+                    <td style={{ color: "var(--dim)", fontSize: 13 }}>
+                      <span style={{ padding: "4px 8px", background: "rgba(46,204,113,.1)", color: "var(--emerald)", borderRadius: 4 }}>{b.section}</span>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{b.order}</td>
+                    <td><StatusTag status={b.status} /></td>
+                    <td>
+                      <div style={{ width: 60, height: 30, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
+                        {b.image?.url ? <img src={b.image.url} alt="banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ color: "var(--dim)", fontSize: 10, paddingLeft: 4 }}>None</span>}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button onClick={() => setModal(b)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
+                        <button onClick={() => handleDelete(b._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
 
       {modal && (
         <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
-          <div className="modal-box" style={{ maxWidth: 500 }}>
+          <div className="modal-box" style={{ maxWidth: 500, padding: 32, margin: "40px auto", maxHeight: "none", height: "auto", overflow: "visible" }}>
             <h2 style={{ marginBottom: 20 }}>{modal === "add" ? "Create Banner" : "Edit Banner"}</h2>
             <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
@@ -330,12 +330,12 @@ export const AdminPages = () => {
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
     payload.content = editorContent; // Use rich editor content
-    
+
     if (!payload.content || payload.content === "<br>") {
       alert("Please add some content to the page.");
       return;
     }
-    
+
     try {
       if (modal && modal !== "add") {
         await pageAPI.update(modal._id, payload);
@@ -363,64 +363,77 @@ export const AdminPages = () => {
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
         <div className="tbl-wrap">
           {loading ? <p style={{ color: "var(--dim)" }}>Loading pages...</p> : (
-          <table className="tbl">
-            <thead>
-              <tr><th>Title</th><th>Slug</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              {pages.map(p => (
-                <tr key={p._id}>
-                  <td style={{ fontWeight: 500 }}>{p.title}</td>
-                  <td style={{ color: "var(--dim)", fontSize: 13 }}>/page/{p.slug}</td>
-                  <td><StatusTag status={p.status} /></td>
-                  <td style={{ color: "var(--muted)", fontSize: 12 }}>{new Date(p.updatedAt).toLocaleDateString()}</td>
-                  <td>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => window.open(`/page/${p.slug}`, '_blank')} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--gold)", cursor: "pointer", fontSize: 11 }}>View</button>
-                      <button onClick={() => setModal(p)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
-                      <button onClick={() => handleDelete(p._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <table className="tbl">
+              <thead>
+                <tr><th>Title</th><th>Slug</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {pages.map(p => (
+                  <tr key={p._id}>
+                    <td style={{ fontWeight: 500 }}>{p.title}</td>
+                    <td style={{ color: "var(--dim)", fontSize: 13 }}>/page/{p.slug}</td>
+                    <td><StatusTag status={p.status} /></td>
+                    <td style={{ color: "var(--muted)", fontSize: 12 }}>{new Date(p.updatedAt).toLocaleDateString()}</td>
+                    <td>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button onClick={() => window.open(`/page/${p.slug}`, '_blank')} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--gold)", cursor: "pointer", fontSize: 11 }}>View</button>
+                        <button onClick={() => setModal(p)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
+                        <button onClick={() => handleDelete(p._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
 
       {modal && (
-        <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && setModal(null)}>
-          <div className="modal-box" style={{ maxWidth: 800 }}>
-            <h2 style={{ marginBottom: 20 }}>{modal === "add" ? "Create Page" : "Edit Page"}</h2>
-            <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-                <div style={{ flex: 1, minWidth: 200 }}>
+        <div className="fixed inset-0 w-screen h-screen z-50 flex flex-col bg-black/90 p-4 sm:p-8 box-border overflow-y-auto" onClick={(e) => e.target === e.currentTarget && setModal(null)} style={{ margin: 0 }}>
+          <div className="w-full flex-1 flex flex-col box-border bg-[#18181b] rounded-xl relative" onClick={(e) => e.stopPropagation()} style={{ padding: "32px", background: "var(--surface)" }}>
+            
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h2 style={{ margin: 0 }}>{modal === "add" ? "Create Page" : "Edit Page"}</h2>
+              <button type="button" onClick={() => setModal(null)} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 32, cursor: "pointer", position: "absolute", top: 24, right: 24, lineHeight: 1 }}>×</button>
+            </div>
+
+            <form onSubmit={handleSave} className="flex flex-col gap-6 flex-1 w-full box-border">
+              
+              {/* Responsive Input Row */}
+              <div className="grid-3-col w-full box-border">
+                <div className="w-full box-border">
                   <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Title</label>
-                  <input name="title" defaultValue={modal?.title} required style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+                  <input name="title" defaultValue={modal?.title} required className="w-full box-border" style={{ padding: 12, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 6 }} />
                 </div>
-                <div style={{ flex: 1, minWidth: 200 }}>
+                <div className="w-full box-border">
                   <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Slug (auto if empty)</label>
-                  <input name="slug" defaultValue={modal?.slug} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }} />
+                  <input name="slug" defaultValue={modal?.slug} className="w-full box-border" style={{ padding: 12, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 6 }} />
                 </div>
-                <div style={{ minWidth: 130 }}>
+                <div className="w-full box-border">
                   <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Status</label>
-                  <select name="status" defaultValue={modal?.status || "active"} style={{ width: "100%", padding: 10, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }}>
+                  <select name="status" defaultValue={modal?.status || "active"} className="w-full box-border" style={{ padding: 12, background: "var(--lift)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 6 }}>
                     <option value="active">Active</option>
                     <option value="draft">Draft</option>
                   </select>
                 </div>
               </div>
-              <div>
+
+              {/* Responsive Editor Content */}
+              <div className="flex-1 flex flex-col w-full box-border">
                 <label style={{ display: "block", fontSize: 12, marginBottom: 6, color: "var(--muted)" }}>Content</label>
-                <RichTextEditor
-                  key={modal?._id || "new"}
-                  defaultValue={modal !== "add" ? modal?.content || "" : ""}
-                  onChange={(html) => setEditorContent(html)}
-                  placeholder="Start writing your page content..."
-                />
+                <div className="w-full flex-1 box-border" style={{ minHeight: "400px" }}>
+                  <RichTextEditor
+                    key={modal?._id || "new"}
+                    defaultValue={modal !== "add" ? modal?.content || "" : ""}
+                    onChange={(html) => setEditorContent(html)}
+                    placeholder="Start writing your page content..."
+                  />
+                </div>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 24 }}>
                 <Btn v="ghost" type="button" onClick={() => setModal(null)}>Cancel</Btn>
                 <Btn v="primary" type="submit">Save Page</Btn>
               </div>
@@ -436,12 +449,12 @@ export const AdminPages = () => {
    PRODUCTS
 ═══════════════════════════════════════════════════ */
 export const AdminProducts = () => {
-  const [query,   setQuery]   = useState("");
+  const [query, setQuery] = useState("");
   const [selectedCat, setSelectedCat] = useState("All Categories");
-  const [modal,   setModal]   = useState(null); // null | "add" | product object (edit)
+  const [modal, setModal] = useState(null); // null | "add" | product object (edit)
   const [allProds, setAllProds] = useState([]);
-  const [cats,     setCats]     = useState([]);
-  const [loading,  setLoading]  = useState(true);
+  const [cats, setCats] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
     try {
@@ -527,7 +540,7 @@ export const AdminProducts = () => {
             placeholder="Search products…"
             style={{ flex: 1, minWidth: 200, maxWidth: 320, padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 13 }}
           />
-          <select 
+          <select
             value={selectedCat}
             onChange={(e) => setSelectedCat(e.target.value)}
             style={{ padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 12 }}>
@@ -660,45 +673,45 @@ export const AdminCategories = () => {
 
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 24px" }}>
         {loading ? <p style={{ color: "var(--dim)" }}>Loading...</p> : (
-        <div className="tbl-wrap">
-          <table className="tbl">
-            <thead>
-              <tr><th>Name</th><th>Slug</th><th>Banner</th><th>Description</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              {categories.map((c) => (
-                <tr key={c._id}>
-                  <td style={{ fontWeight: 600 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                       <IoFolderOutline style={{ color: "var(--gold)" }} size={16} /> {c.name}
-                    </div>
-                  </td>
-                  <td style={{ color: "var(--dim)", fontSize: 13 }}>/{c.slug}</td>
-                  <td>
-                    {c.image ? (
-                      <div style={{ width: 44, height: 28, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
-                        <img src={c.image} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr><th>Name</th><th>Slug</th><th>Banner</th><th>Description</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {categories.map((c) => (
+                  <tr key={c._id}>
+                    <td style={{ fontWeight: 600 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <IoFolderOutline style={{ color: "var(--gold)" }} size={16} /> {c.name}
                       </div>
-                    ) : <span style={{ color: "var(--dim)" }}>—</span>}
-                  </td>
-                  <td style={{ color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {c.description || "—"}
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => setModal(c)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, transition: "all .2s" }}>
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(c._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>
-                        Del
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                    <td style={{ color: "var(--dim)", fontSize: 13 }}>/{c.slug}</td>
+                    <td>
+                      {c.image ? (
+                        <div style={{ width: 44, height: 28, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
+                          <img src={c.image} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </div>
+                      ) : <span style={{ color: "var(--dim)" }}>—</span>}
+                    </td>
+                    <td style={{ color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {c.description || "—"}
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button onClick={() => setModal(c)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11, transition: "all .2s" }}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleDelete(c._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>
+                          Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
@@ -731,19 +744,12 @@ export const AdminOrders = () => {
     fetchOrders();
   }, [filter]);
 
-  const handleStatusChange = async (id, currentStatus) => {
-    // Basic cyclic status update for demo/action button
-    const sequence = ["pending", "processing", "shipped", "delivered"];
-    if (currentStatus === "cancelled") return;
-    const currentIndex = sequence.indexOf(currentStatus);
-    if (currentIndex === -1 || currentIndex === sequence.length - 1) return; // already delivered or unknown
-    const nextStatus = sequence[currentIndex + 1];
-
+  const handleStatusChange = async (id, newStatus) => {
     try {
       setUpdatingId(id);
-      await orderAPI.updateOrderStatus(id, nextStatus);
+      await orderAPI.updateOrderStatus(id, newStatus);
       // Optimistic UI update — only update the changed order in state, no full refetch/reload
-      setOrders(prev => prev.map(o => o._id === id ? { ...o, status: nextStatus } : o));
+      setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
     } catch (err) {
       alert("Status update failed: " + err.message);
     } finally {
@@ -790,43 +796,46 @@ export const AdminOrders = () => {
             <p>No orders found for this category.</p>
           </div>
         ) : (
-        <div className="tbl-wrap">
-          <table className="tbl">
-            <thead>
-              <tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o._id}>
-                  <td style={{ fontWeight: 700, color: "var(--gold2)", fontSize: 12 }}>{o.orderId}</td>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <Avatar name={o.user?.name || "Unknown"} size={30} />
-                      {o.user?.name || "Unknown"}
-                    </div>
-                  </td>
-                  <td style={{ color: "var(--muted)" }}>
-                    {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(o.createdAt))}
-                  </td>
-                  <td>{o.items?.length || 0}</td>
-                  <td style={{ fontWeight: 700, fontSize: 14 }}>${o.totalAmount}</td>
-                  <td><StatusTag status={o.status} /></td>
-                  <td>
-                    <button
-                      disabled={updatingId === o._id || o.status === "cancelled" || o.status === "delivered"}
-                      onClick={() => handleStatusChange(o._id, o.status)}
-                      style={{ padding: "5px 14px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: (updatingId === o._id || o.status === "cancelled" || o.status === "delivered") ? "not-allowed" : "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif", transition: "all .2s", opacity: (o.status === "cancelled" || o.status === "delivered") ? 0.5 : 1 }}
-                      onMouseEnter={(e) => { if (!e.target.disabled) e.target.style.borderColor = "var(--gold)"; }}
-                      onMouseLeave={(e) => { if (!e.target.disabled) e.target.style.borderColor = "var(--border2)"; }}
-                    >
-                      {updatingId === o._id ? "Updating..." : (o.status === "delivered" || o.status === "cancelled" ? "View" : "Advance")}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o._id}>
+                    <td style={{ fontWeight: 700, color: "var(--gold2)", fontSize: 12 }}>{o.orderId}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <Avatar name={o.user?.name || "Unknown"} size={30} />
+                        {o.user?.name || "Unknown"}
+                      </div>
+                    </td>
+                    <td style={{ color: "var(--muted)" }}>
+                      {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(o.createdAt))}
+                    </td>
+                    <td>{o.items?.length || 0}</td>
+                    <td style={{ fontWeight: 700, fontSize: 14 }}>${o.totalAmount}</td>
+                    <td><StatusTag status={o.status} /></td>
+                    <td>
+                      <select
+                        disabled={updatingId === o._id}
+                        value={o.status?.toLowerCase() || "pending"}
+                        onChange={(e) => handleStatusChange(o._id, e.target.value)}
+                        style={{ padding: "5px 10px", borderRadius: 5, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", cursor: updatingId === o._id ? "not-allowed" : "pointer", fontSize: 11, fontFamily: "'Jost', sans-serif" }}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
@@ -863,32 +872,32 @@ export const AdminCustomers = () => {
 
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
         {loading ? <p style={{ color: "var(--dim)" }}>Loading members...</p> : (
-        <div className="tbl-wrap">
-          <table className="tbl">
-            <thead>
-              <tr><th>Customer</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Tier</th></tr>
-            </thead>
-            <tbody>
-              {customers.map((c) => (
-                <tr key={c._id}>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <Avatar name={c.name} size={34} />
-                      <span style={{ fontWeight: 500 }}>{c.name}</span>
-                    </div>
-                  </td>
-                  <td style={{ color: "var(--muted)" }}>{c.email}</td>
-                  <td style={{ color: "var(--muted)" }}>
-                    {new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(c.joined))}
-                  </td>
-                  <td style={{ fontWeight: 600 }}>{c.orders}</td>
-                  <td style={{ fontWeight: 700, color: "var(--gold2)" }}>${c.spent.toLocaleString()}</td>
-                  <td><StatusTag status={c.tier} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr><th>Customer</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Tier</th></tr>
+              </thead>
+              <tbody>
+                {customers.map((c) => (
+                  <tr key={c._id}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <Avatar name={c.name} size={34} />
+                        <span style={{ fontWeight: 500 }}>{c.name}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: "var(--muted)" }}>{c.email}</td>
+                    <td style={{ color: "var(--muted)" }}>
+                      {new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(c.joined))}
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{c.orders}</td>
+                    <td style={{ fontWeight: 700, color: "var(--gold2)" }}>${c.spent.toLocaleString()}</td>
+                    <td><StatusTag status={c.tier} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
@@ -931,8 +940,8 @@ export const AdminAnalytics = () => {
       {/* KPI row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, marginBottom: 28 }}>
         <StatCard icon={<IoCashOutline size={26} />} label="Total Revenue" value={`$${analytics.totalRevenue.toLocaleString()}`} delta="Live" />
-        <StatCard icon={<IoBagOutline size={26} />} label="Total Orders"  value={analytics.totalOrders} delta="Live" />
-        <StatCard icon={<IoPersonOutline size={26} />}  label="Avg. Order" value={`$${analytics.avgOrder}`} delta="Live"  />
+        <StatCard icon={<IoBagOutline size={26} />} label="Total Orders" value={analytics.totalOrders} delta="Live" />
+        <StatCard icon={<IoPersonOutline size={26} />} label="Avg. Order" value={`$${analytics.avgOrder}`} delta="Live" />
       </div>
 
       {/* Revenue bar chart */}
@@ -991,11 +1000,11 @@ export const AdminAnalytics = () => {
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 22 }}>Sales by Category</h3>
           {[
-            ["Dresses",     38, "var(--gold)"],
-            ["Outerwear",   27, "var(--text)"],
-            ["Tops",        18, "#8b7355"],
-            ["Shoes",       11, "#6b9dd9"],
-            ["Accessories",  6, "var(--dim)"],
+            ["Dresses", 38, "var(--gold)"],
+            ["Outerwear", 27, "var(--text)"],
+            ["Tops", 18, "#8b7355"],
+            ["Shoes", 11, "#6b9dd9"],
+            ["Accessories", 6, "var(--dim)"],
           ].map(([cat, pct, color]) => (
             <div key={cat} style={{ marginBottom: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 7 }}>
@@ -1013,12 +1022,12 @@ export const AdminAnalytics = () => {
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 22 }}>Key Metrics</h3>
           {[
-            ["Cart Abandonment",  "68.3%", "-2.1%", false],
-            ["Return Rate",       "4.2%",  "-0.8%", false],
-            ["Customer LTV",      "$842",  "+$63",  true],
-            ["Repeat Purchase",   "34.5%", "+5.2%", true],
-            ["Email Open Rate",   "42.8%", "+3.4%", true],
-            ["Mobile Conv.",      "3.2%",  "+0.6%", true],
+            ["Cart Abandonment", "68.3%", "-2.1%", false],
+            ["Return Rate", "4.2%", "-0.8%", false],
+            ["Customer LTV", "$842", "+$63", true],
+            ["Repeat Purchase", "34.5%", "+5.2%", true],
+            ["Email Open Rate", "42.8%", "+3.4%", true],
+            ["Mobile Conv.", "3.2%", "+0.6%", true],
           ].map(([k, v, d, pos]) => (
             <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
               <span style={{ fontSize: 13, color: "var(--muted)" }}>{k}</span>
@@ -1040,8 +1049,8 @@ export const AdminAnalytics = () => {
 export const AdminSettings = ({ toast }) => {
   const SECTIONS = [
     { title: "Store Information", fields: [["Store Name", "Maison Élite"], ["Store Email", "hello@maisonelite.com"], ["Support Phone", "+33 1 42 86 98 00"], ["Currency", "USD"]] },
-    { title: "Shipping Policy",   fields: [["Free Shipping Threshold", "$200"], ["Standard Rate", "$15"], ["Express Rate", "$35"], ["Delivery Window", "3-5 business days"]] },
-    { title: "Notifications",     fields: [["New Order Email", "Enabled"], ["Low Stock Alert", "Enabled"], ["Weekly Report", "Enabled"]] },
+    { title: "Shipping Policy", fields: [["Free Shipping Threshold", "$200"], ["Standard Rate", "$15"], ["Express Rate", "$35"], ["Delivery Window", "3-5 business days"]] },
+    { title: "Notifications", fields: [["New Order Email", "Enabled"], ["Low Stock Alert", "Enabled"], ["Weekly Report", "Enabled"]] },
   ];
 
   return (
@@ -1076,25 +1085,25 @@ export const AdminSettings = ({ toast }) => {
    MEDIA LIBRARY
 ═══════════════════════════════════════════════════ */
 export const AdminMedia = () => {
-  const [mediaList,  setMediaList]  = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [uploading,  setUploading]  = useState(false);
-  const [filter,     setFilter]     = useState("all");
-  const [search,     setSearch]     = useState("");
-  const [sort,       setSort]       = useState("newest");
-  const [viewMode,   setViewMode]   = useState("grid");
-  const [selected,   setSelected]   = useState(new Set());
-  const [dragging,   setDragging]   = useState(false);
-  const [drawer,     setDrawer]     = useState(null);  // null | media item
-  const [copied,     setCopied]     = useState(null);
+  const [mediaList, setMediaList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [viewMode, setViewMode] = useState("grid");
+  const [selected, setSelected] = useState(new Set());
+  const [dragging, setDragging] = useState(false);
+  const [drawer, setDrawer] = useState(null);  // null | media item
+  const [copied, setCopied] = useState(null);
   const fileInputRef = useRef(null);
 
   const [categories, setCategories] = useState([]);
-  const [uploadCat,  setUploadCat]  = useState("");
-  const [filterCat,  setFilterCat]  = useState("All");
+  const [uploadCat, setUploadCat] = useState("");
+  const [filterCat, setFilterCat] = useState("All");
 
   useEffect(() => {
-    categoryAPI.getCategories().then(res => setCategories(res.categories || [])).catch(() => {});
+    categoryAPI.getCategories().then(res => setCategories(res.categories || [])).catch(() => { });
   }, []);
 
   /* ── Fetch ─────────────────────────────────────── */
@@ -1166,9 +1175,9 @@ export const AdminMedia = () => {
   };
 
   /* ── Drag & Drop handlers ──────────────────────── */
-  const onDragOver  = (e) => { e.preventDefault(); setDragging(true); };
-  const onDragLeave = ()  => setDragging(false);
-  const onDrop      = (e) => { e.preventDefault(); setDragging(false); handleUpload(e.dataTransfer.files); };
+  const onDragOver = (e) => { e.preventDefault(); setDragging(true); };
+  const onDragLeave = () => setDragging(false);
+  const onDrop = (e) => { e.preventDefault(); setDragging(false); handleUpload(e.dataTransfer.files); };
 
   const libraryCount = mediaList.filter((m) => m.source === "library").length;
   const productCount = mediaList.filter((m) => m.source === "product").length;
@@ -1201,79 +1210,93 @@ export const AdminMedia = () => {
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h1 className="section-title">Media Library</h1>
           <p className="section-sub">{mediaList.length} total · {libraryCount} uploaded · {productCount} from products</p>
         </div>
-        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <select value={uploadCat} onChange={e => setUploadCat(e.target.value)} style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)", background:"var(--lift)", color:"var(--text)", fontSize:12, fontFamily:"'Jost',sans-serif" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <select value={uploadCat} onChange={e => setUploadCat(e.target.value)} style={{ padding: "9px 12px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 12, fontFamily: "'Jost',sans-serif" }}>
             <option value="">(No Category) Upload Folder</option>
             {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
           <input type="file" accept="image/*" multiple ref={fileInputRef}
-            onChange={(e) => handleUpload(e.target.files)} style={{ display:"none" }} />
+            onChange={(e) => handleUpload(e.target.files)} style={{ display: "none" }} />
           <button onClick={() => fileInputRef.current?.click()}
-            style={{ padding:"9px 20px", background:"var(--gold)", color:"#000", border:"none",
-              borderRadius:6, cursor:"pointer", fontSize:12, fontWeight:700,
-              fontFamily:"'Jost',sans-serif", letterSpacing:".08em", transition:"opacity .2s",
-              opacity: uploading ? .6 : 1 }}>
+            style={{
+              padding: "9px 20px", background: "var(--gold)", color: "#000", border: "none",
+              borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 700,
+              fontFamily: "'Jost',sans-serif", letterSpacing: ".08em", transition: "opacity .2s",
+              opacity: uploading ? .6 : 1
+            }}>
             {uploading ? "Uploading…" : "+ Upload"}
           </button>
         </div>
       </div>
 
       {/* ── Toolbar (Search · Sort · View Toggle) ── */}
-      <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap", alignItems:"center" }}>
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
         {/* Search */}
-        <div style={{ position:"relative", flex:1, minWidth:180 }}>
-          <span style={{ position:"absolute", left:11, top:"50%", transform:"translateY(-50%)",
-            color:"var(--muted)", fontSize:13, pointerEvents:"none", display:"flex" }}><IoSearchOutline size={14} /></span>
+        <div style={{ position: "relative", flex: 1, minWidth: 180 }}>
+          <span style={{
+            position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)",
+            color: "var(--muted)", fontSize: 13, pointerEvents: "none", display: "flex"
+          }}><IoSearchOutline size={14} /></span>
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search images…"
-            style={{ width:"100%", padding:"9px 12px 9px 32px", borderRadius:6,
-              border:"1px solid var(--border2)", background:"var(--lift)",
-              color:"var(--text)", fontSize:12, fontFamily:"'Jost',sans-serif",
-              boxSizing:"border-box" }} />
+            style={{
+              width: "100%", padding: "9px 12px 9px 32px", borderRadius: 6,
+              border: "1px solid var(--border2)", background: "var(--lift)",
+              color: "var(--text)", fontSize: 12, fontFamily: "'Jost',sans-serif",
+              boxSizing: "border-box"
+            }} />
         </div>
         {/* Category Filter */}
         <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
-          style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)",
-            background:"var(--lift)", color:"var(--text)", fontSize:12,
-            fontFamily:"'Jost',sans-serif", cursor:"pointer" }}>
+          style={{
+            padding: "9px 12px", borderRadius: 6, border: "1px solid var(--border2)",
+            background: "var(--lift)", color: "var(--text)", fontSize: 12,
+            fontFamily: "'Jost',sans-serif", cursor: "pointer"
+          }}>
           <option value="All">All Categories</option>
           {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
         </select>
         {/* Sort */}
         <select value={sort} onChange={(e) => setSort(e.target.value)}
-          style={{ padding:"9px 12px", borderRadius:6, border:"1px solid var(--border2)",
-            background:"var(--lift)", color:"var(--text)", fontSize:12,
-            fontFamily:"'Jost',sans-serif", cursor:"pointer" }}>
+          style={{
+            padding: "9px 12px", borderRadius: 6, border: "1px solid var(--border2)",
+            background: "var(--lift)", color: "var(--text)", fontSize: 12,
+            fontFamily: "'Jost',sans-serif", cursor: "pointer"
+          }}>
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
           <option value="name">Name A–Z</option>
           <option value="size">Largest First</option>
         </select>
         {/* View toggle */}
-        <div style={{ display:"flex", border:"1px solid var(--border)", borderRadius:6, overflow:"hidden" }}>
-          {[["grid",<IoGridOutline size={16} />],["list",<IoListOutline size={16} />]].map(([mode, icon]) => (
+        <div style={{ display: "flex", border: "1px solid var(--border)", borderRadius: 6, overflow: "hidden" }}>
+          {[["grid", <IoGridOutline size={16} />], ["list", <IoListOutline size={16} />]].map(([mode, icon]) => (
             <button key={mode} onClick={() => setViewMode(mode)}
-              style={{ padding:"8px 14px", border:"none", cursor:"pointer", fontSize:15,
+              style={{
+                padding: "8px 14px", border: "none", cursor: "pointer", fontSize: 15,
                 background: viewMode === mode ? "rgba(201,168,76,.18)" : "none",
                 color: viewMode === mode ? "var(--gold2)" : "var(--muted)",
-                transition:"all .18s" }}>
+                transition: "all .18s"
+              }}>
               {icon}
             </button>
           ))}
         </div>
         {/* Filter tabs */}
-        {[["all","All"],["library","Uploaded"],["product","Products"]].map(([val, label]) => (
+        {[["all", "All"], ["library", "Uploaded"], ["product", "Products"]].map(([val, label]) => (
           <button key={val} onClick={() => setFilter(val)}
-            style={{ padding:"8px 16px", borderRadius:100, cursor:"pointer",
-              border:`1px solid ${filter===val ? "var(--gold)" : "var(--border)"}`,
-              background: filter===val ? "rgba(201,168,76,.12)" : "none",
-              color: filter===val ? "var(--gold2)" : "var(--muted)",
-              fontSize:11, letterSpacing:".08em", fontFamily:"'Jost',sans-serif", transition:"all .2s" }}>
+            style={{
+              padding: "8px 16px", borderRadius: 100, cursor: "pointer",
+              border: `1px solid ${filter === val ? "var(--gold)" : "var(--border)"}`,
+              background: filter === val ? "rgba(201,168,76,.12)" : "none",
+              color: filter === val ? "var(--gold2)" : "var(--muted)",
+              fontSize: 11, letterSpacing: ".08em", fontFamily: "'Jost',sans-serif", transition: "all .2s"
+            }}>
             {label}
           </button>
         ))}
@@ -1282,44 +1305,50 @@ export const AdminMedia = () => {
       {/* ── Drag & Drop Zone ── */}
       <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
-        style={{ border:`2px dashed ${dragging ? "var(--gold)" : "var(--border2)"}`,
-          borderRadius:10, padding:"22px 0", textAlign:"center", marginBottom:20,
+        style={{
+          border: `2px dashed ${dragging ? "var(--gold)" : "var(--border2)"}`,
+          borderRadius: 10, padding: "22px 0", textAlign: "center", marginBottom: 20,
           background: dragging ? "rgba(201,168,76,.06)" : "var(--lift)",
-          cursor:"pointer", transition:"all .2s",
-          boxShadow: dragging ? "0 0 0 3px rgba(201,168,76,.15)" : "none" }}>
-        <p style={{ fontSize:24, marginBottom:6, opacity:.7, display:"flex", justifyContent:"center" }}><IoCloudUploadOutline size={28} /></p>
-        <p style={{ fontSize:13, color:"var(--muted)", lineHeight:1.6 }}>
+          cursor: "pointer", transition: "all .2s",
+          boxShadow: dragging ? "0 0 0 3px rgba(201,168,76,.15)" : "none"
+        }}>
+        <p style={{ fontSize: 24, marginBottom: 6, opacity: .7, display: "flex", justifyContent: "center" }}><IoCloudUploadOutline size={28} /></p>
+        <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>
           {dragging ? "Drop to upload!" : "Drag & drop images here, or click to browse"}
         </p>
-        <p style={{ fontSize:10, color:"var(--dim)", marginTop:4 }}>Supports JPG · PNG · WEBP · multiple files at once</p>
+        <p style={{ fontSize: 10, color: "var(--dim)", marginTop: 4 }}>Supports JPG · PNG · WEBP · multiple files at once</p>
       </div>
 
       {/* ── GRID / LIST ── */}
-      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:24, minHeight:300 }}>
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 24, minHeight: 300 }}>
         {loading ? (
-          <p style={{ color:"var(--dim)" }}>Loading media…</p>
+          <p style={{ color: "var(--dim)" }}>Loading media…</p>
         ) : mediaList.length === 0 ? (
-          <div style={{ textAlign:"center", padding:"50px 0", color:"var(--muted)" }}>
-            <p style={{ fontSize:36, marginBottom:14, display:"flex", justifyContent:"center" }}><IoImagesOutline size={40} /></p>
+          <div style={{ textAlign: "center", padding: "50px 0", color: "var(--muted)" }}>
+            <p style={{ fontSize: 36, marginBottom: 14, display: "flex", justifyContent: "center" }}><IoImagesOutline size={40} /></p>
             <p>No images found. Upload your first image to get started.</p>
           </div>
         ) : viewMode === "grid" ? (
           /* ── Grid ── */
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px,1fr))", gap:18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px,1fr))", gap: 18 }}>
             {mediaList.map((m) => {
               const isSelected = selected.has(String(m._id));
               return (
                 <div key={m._id + m.source} className={`mc${isSelected ? " sel" : ""}`}
-                  style={{ border:`1px solid ${isSelected ? "var(--gold)" : "var(--border)"}`,
-                    borderRadius:8, overflow:"hidden", background:"var(--lift)", position:"relative",
-                    cursor:"pointer", transition:"border-color .2s",
-                    boxShadow: isSelected ? "0 0 0 2px rgba(201,168,76,.25)" : "none" }}>
+                  style={{
+                    border: `1px solid ${isSelected ? "var(--gold)" : "var(--border)"}`,
+                    borderRadius: 8, overflow: "hidden", background: "var(--lift)", position: "relative",
+                    cursor: "pointer", transition: "border-color .2s",
+                    boxShadow: isSelected ? "0 0 0 2px rgba(201,168,76,.25)" : "none"
+                  }}>
                   {/* Source badge */}
-                  <div style={{ position:"absolute", top:8, left:8, zIndex:5, padding:"2px 7px",
-                    borderRadius:4, fontSize:9, fontWeight:700, letterSpacing:".08em",
-                    textTransform:"uppercase",
+                  <div style={{
+                    position: "absolute", top: 8, left: 8, zIndex: 5, padding: "2px 7px",
+                    borderRadius: 4, fontSize: 9, fontWeight: 700, letterSpacing: ".08em",
+                    textTransform: "uppercase",
                     background: m.source === "product" ? "rgba(107,157,217,.9)" : "rgba(201,168,76,.9)",
-                    color: m.source === "product" ? "#fff" : "#000" }}>
+                    color: m.source === "product" ? "#fff" : "#000"
+                  }}>
                     {m.source === "product" ? "Product" : "Library"}
                   </div>
                   {/* Checkbox */}
@@ -1329,34 +1358,40 @@ export const AdminMedia = () => {
                     </div>
                   )}
                   {/* Image */}
-                  <div style={{ width:"100%", aspectRatio:"1/1", position:"relative" }}
+                  <div style={{ width: "100%", aspectRatio: "1/1", position: "relative" }}
                     onClick={() => setDrawer(m)}>
                     <img src={m.url} alt={m.productName || "media"}
-                      style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     <div className="ov">
                       <button onClick={(e) => { e.stopPropagation(); copyURL(m.url, m._id); }}
-                        style={{ padding:"7px 14px", background:"var(--gold)", color:"#000",
-                          border:"none", borderRadius:4, cursor:"pointer", fontSize:11, fontWeight:700 }}>
+                        style={{
+                          padding: "7px 14px", background: "var(--gold)", color: "#000",
+                          border: "none", borderRadius: 4, cursor: "pointer", fontSize: 11, fontWeight: 700
+                        }}>
                         {copied === m._id ? <><IoCheckmarkOutline size={12} /> Copied!</> : "Copy URL"}
                       </button>
                       {m.source !== "product" && (
                         <button onClick={(e) => { e.stopPropagation(); handleDelete(m._id); }}
-                          style={{ padding:"7px 14px", background:"var(--rose)", color:"#fff",
-                            border:"none", borderRadius:4, cursor:"pointer", fontSize:11, fontWeight:500 }}>
+                          style={{
+                            padding: "7px 14px", background: "var(--rose)", color: "#fff",
+                            border: "none", borderRadius: 4, cursor: "pointer", fontSize: 11, fontWeight: 500
+                          }}>
                           Delete
                         </button>
                       )}
                     </div>
                   </div>
                   {/* Footer */}
-                  <div style={{ padding:"8px 10px", borderTop:"1px solid var(--border)" }}
+                  <div style={{ padding: "8px 10px", borderTop: "1px solid var(--border)" }}
                     onClick={() => setDrawer(m)}>
-                    <p style={{ fontSize:11, color:"var(--text)", fontWeight:500,
-                      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    <p style={{
+                      fontSize: 11, color: "var(--text)", fontWeight: 500,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                    }}>
                       {m.productName || (m.public_id ? m.public_id.split("/").pop() : "media")}
                     </p>
-                    <p style={{ fontSize:9, color:"var(--muted)", marginTop:3 }}>
-                      {m.size ? (m.size/1024).toFixed(1)+"KB · " : ""}{(m.format||"IMG").toUpperCase()}
+                    <p style={{ fontSize: 9, color: "var(--muted)", marginTop: 3 }}>
+                      {m.size ? (m.size / 1024).toFixed(1) + "KB · " : ""}{(m.format || "IMG").toUpperCase()}
                     </p>
                   </div>
                 </div>
@@ -1365,10 +1400,10 @@ export const AdminMedia = () => {
           </div>
         ) : (
           /* ── List ── */
-          <table className="tbl" style={{ width:"100%" }}>
+          <table className="tbl" style={{ width: "100%" }}>
             <thead>
               <tr>
-                <th style={{ width:40 }}></th>
+                <th style={{ width: 40 }}></th>
                 <th></th>
                 <th>Name</th>
                 <th>Source</th>
@@ -1382,57 +1417,69 @@ export const AdminMedia = () => {
                 const isSelected = selected.has(String(m._id));
                 return (
                   <tr key={m._id + m.source}
-                    style={{ background: isSelected ? "rgba(201,168,76,.06)" : "none", cursor:"pointer" }}>
+                    style={{ background: isSelected ? "rgba(201,168,76,.06)" : "none", cursor: "pointer" }}>
                     {/* Checkbox */}
                     <td onClick={(e) => e.stopPropagation()}>
                       {m.source !== "product" && (
                         <div onClick={() => toggleSelect(String(m._id), m.source)}
-                          style={{ width:18, height:18, borderRadius:"50%", border:"2px solid var(--border2)",
+                          style={{
+                            width: 18, height: 18, borderRadius: "50%", border: "2px solid var(--border2)",
                             background: isSelected ? "var(--gold)" : "none",
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            cursor:"pointer", fontSize:10, color:"#000", transition:".15s" }}>
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            cursor: "pointer", fontSize: 10, color: "#000", transition: ".15s"
+                          }}>
                           {isSelected ? <IoCheckmarkOutline size={11} /> : ""}
                         </div>
                       )}
                     </td>
                     {/* Thumb */}
                     <td onClick={() => setDrawer(m)}>
-                      <div style={{ width:44, height:44, borderRadius:5, overflow:"hidden",
-                        background:"var(--lift)", border:"1px solid var(--border)", flexShrink:0 }}>
-                        <img src={m.url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 5, overflow: "hidden",
+                        background: "var(--lift)", border: "1px solid var(--border)", flexShrink: 0
+                      }}>
+                        <img src={m.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       </div>
                     </td>
-                    <td onClick={() => setDrawer(m)} style={{ fontSize:12, fontWeight:500, maxWidth:200,
-                      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    <td onClick={() => setDrawer(m)} style={{
+                      fontSize: 12, fontWeight: 500, maxWidth: 200,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                    }}>
                       {m.productName || (m.public_id ? m.public_id.split("/").pop() : "media")}
                     </td>
                     <td>
-                      <span style={{ padding:"2px 8px", borderRadius:4, fontSize:9, fontWeight:700,
-                        background: m.source==="product" ? "rgba(107,157,217,.2)" : "rgba(201,168,76,.2)",
-                        color: m.source==="product" ? "#6b9dd9" : "var(--gold2)" }}>
+                      <span style={{
+                        padding: "2px 8px", borderRadius: 4, fontSize: 9, fontWeight: 700,
+                        background: m.source === "product" ? "rgba(107,157,217,.2)" : "rgba(201,168,76,.2)",
+                        color: m.source === "product" ? "#6b9dd9" : "var(--gold2)"
+                      }}>
                         {m.source === "product" ? "Product" : "Library"}
                       </span>
                     </td>
-                    <td style={{ fontSize:11, color:"var(--muted)" }}>
-                      {m.size ? (m.size/1024).toFixed(1)+" KB" : "—"}
+                    <td style={{ fontSize: 11, color: "var(--muted)" }}>
+                      {m.size ? (m.size / 1024).toFixed(1) + " KB" : "—"}
                     </td>
-                    <td style={{ fontSize:11, color:"var(--muted)" }}>
-                      {(m.format||"IMG").toUpperCase()}
+                    <td style={{ fontSize: 11, color: "var(--muted)" }}>
+                      {(m.format || "IMG").toUpperCase()}
                     </td>
                     <td>
-                      <div style={{ display:"flex", gap:6 }}>
+                      <div style={{ display: "flex", gap: 6 }}>
                         <button onClick={() => copyURL(m.url, m._id)}
-                          style={{ padding:"4px 10px", borderRadius:4, border:"1px solid var(--border2)",
-                            background:"none", color: copied===m._id ? "var(--gold2)" : "var(--text)",
-                            cursor:"pointer", fontSize:10, fontFamily:"'Jost',sans-serif" }}>
-                          {copied===m._id ? <><IoCheckmarkOutline size={11} /> Copied</> : "Copy URL"}
+                          style={{
+                            padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border2)",
+                            background: "none", color: copied === m._id ? "var(--gold2)" : "var(--text)",
+                            cursor: "pointer", fontSize: 10, fontFamily: "'Jost',sans-serif"
+                          }}>
+                          {copied === m._id ? <><IoCheckmarkOutline size={11} /> Copied</> : "Copy URL"}
                         </button>
                         {m.source !== "product" && (
                           <button onClick={() => handleDelete(m._id)}
-                            style={{ padding:"4px 10px", borderRadius:4,
-                              border:"1px solid rgba(192,57,43,.3)",
-                              background:"none", color:"var(--rose)",
-                              cursor:"pointer", fontSize:10, fontFamily:"'Jost',sans-serif" }}>
+                            style={{
+                              padding: "4px 10px", borderRadius: 4,
+                              border: "1px solid rgba(192,57,43,.3)",
+                              background: "none", color: "var(--rose)",
+                              cursor: "pointer", fontSize: 10, fontFamily: "'Jost',sans-serif"
+                            }}>
                             Del
                           </button>
                         )}
@@ -1449,18 +1496,22 @@ export const AdminMedia = () => {
       {/* ── Bulk Action Bar ── */}
       {selected.size > 0 && (
         <div className="bulk-bar">
-          <span style={{ fontSize:12, color:"var(--gold2)", fontWeight:600 }}>
+          <span style={{ fontSize: 12, color: "var(--gold2)", fontWeight: 600 }}>
             {selected.size} selected
           </span>
           <button onClick={handleBulkDelete}
-            style={{ padding:"6px 16px", borderRadius:100, background:"var(--rose)",
-              color:"#fff", border:"none", cursor:"pointer", fontSize:11,
-              fontFamily:"'Jost',sans-serif", fontWeight:600 }}>
+            style={{
+              padding: "6px 16px", borderRadius: 100, background: "var(--rose)",
+              color: "#fff", border: "none", cursor: "pointer", fontSize: 11,
+              fontFamily: "'Jost',sans-serif", fontWeight: 600
+            }}>
             Delete Selected
           </button>
           <button onClick={() => setSelected(new Set())}
-            style={{ background:"none", border:"none", color:"var(--muted)",
-              cursor:"pointer", fontSize:16, lineHeight:1 }}>
+            style={{
+              background: "none", border: "none", color: "var(--muted)",
+              cursor: "pointer", fontSize: 16, lineHeight: 1
+            }}>
             ×
           </button>
         </div>
@@ -1472,61 +1523,75 @@ export const AdminMedia = () => {
           <div className="drawer-overlay" onClick={() => setDrawer(null)} />
           <div className="drawer">
             {/* Preview */}
-            <div style={{ width:"100%", aspectRatio:"1/1", background:"#000" }}>
+            <div style={{ width: "100%", aspectRatio: "1/1", background: "#000" }}>
               <img src={drawer.url} alt="preview"
-                style={{ width:"100%", height:"100%", objectFit:"contain" }} />
+                style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
             {/* Info */}
-            <div style={{ padding:20, flex:1 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18 }}>
-                <p style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:400, flex:1 }}>
+            <div style={{ padding: 20, flex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 400, flex: 1 }}>
                   {drawer.productName || (drawer.public_id ? drawer.public_id.split("/").pop() : "media")}
                 </p>
                 <button onClick={() => setDrawer(null)}
-                  style={{ background:"none", border:"none", color:"var(--muted)",
-                    cursor:"pointer", fontSize:20, lineHeight:1, flexShrink:0 }}>×</button>
+                  style={{
+                    background: "none", border: "none", color: "var(--muted)",
+                    cursor: "pointer", fontSize: 20, lineHeight: 1, flexShrink: 0
+                  }}>×</button>
               </div>
               {/* Meta rows */}
               {[
-                ["Source",  drawer.source === "product" ? "Product Image" : "Library Upload"],
-                ["Format",  (drawer.format || "Unknown").toUpperCase()],
-                ["Size",    drawer.size ? (drawer.size/1024).toFixed(1)+" KB" : "—"],
-                ["Uploaded", drawer.createdAt ? new Date(drawer.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" }) : "—"],
+                ["Source", drawer.source === "product" ? "Product Image" : "Library Upload"],
+                ["Format", (drawer.format || "Unknown").toUpperCase()],
+                ["Size", drawer.size ? (drawer.size / 1024).toFixed(1) + " KB" : "—"],
+                ["Uploaded", drawer.createdAt ? new Date(drawer.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"],
                 ...(drawer.productName ? [["Product", drawer.productName]] : []),
               ].map(([k, v]) => (
-                <div key={k} style={{ display:"flex", justifyContent:"space-between",
-                  padding:"9px 0", borderBottom:"1px solid var(--border)", fontSize:12 }}>
-                  <span style={{ color:"var(--muted)" }}>{k}</span>
-                  <span style={{ fontWeight:500, textAlign:"right", maxWidth:"60%",
-                    overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{v}</span>
+                <div key={k} style={{
+                  display: "flex", justifyContent: "space-between",
+                  padding: "9px 0", borderBottom: "1px solid var(--border)", fontSize: 12
+                }}>
+                  <span style={{ color: "var(--muted)" }}>{k}</span>
+                  <span style={{
+                    fontWeight: 500, textAlign: "right", maxWidth: "60%",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                  }}>{v}</span>
                 </div>
               ))}
               {/* URL copy */}
-              <div style={{ marginTop:20 }}>
-                <p style={{ fontSize:10, color:"var(--muted)", letterSpacing:".1em",
-                  textTransform:"uppercase", marginBottom:8 }}>Image URL</p>
-                <div style={{ display:"flex", gap:8 }}>
+              <div style={{ marginTop: 20 }}>
+                <p style={{
+                  fontSize: 10, color: "var(--muted)", letterSpacing: ".1em",
+                  textTransform: "uppercase", marginBottom: 8
+                }}>Image URL</p>
+                <div style={{ display: "flex", gap: 8 }}>
                   <input readOnly value={drawer.url}
                     onClick={(e) => e.target.select()}
-                    style={{ flex:1, padding:"8px 10px", borderRadius:5,
-                      border:"1px solid var(--border2)", background:"var(--lift)",
-                      color:"var(--dim)", fontSize:10, overflow:"hidden",
-                      textOverflow:"ellipsis" }} />
+                    style={{
+                      flex: 1, padding: "8px 10px", borderRadius: 5,
+                      border: "1px solid var(--border2)", background: "var(--lift)",
+                      color: "var(--dim)", fontSize: 10, overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    }} />
                   <button onClick={() => copyURL(drawer.url, drawer._id)}
-                    style={{ padding:"8px 14px", background:"var(--gold)", color:"#000",
-                      border:"none", borderRadius:5, cursor:"pointer",
-                      fontSize:11, fontWeight:700, whiteSpace:"nowrap" }}>
+                    style={{
+                      padding: "8px 14px", background: "var(--gold)", color: "#000",
+                      border: "none", borderRadius: 5, cursor: "pointer",
+                      fontSize: 11, fontWeight: 700, whiteSpace: "nowrap"
+                    }}>
                     {copied === drawer._id ? <IoCheckmarkOutline size={12} /> : "Copy"}
                   </button>
                 </div>
               </div>
               {/* Delete */}
               {drawer.source !== "product" && (
-                <button onClick={() => handleDelete(drawer._id)} style={{ marginTop:18,
-                  width:"100%", padding:"10px", borderRadius:6,
-                  border:"1px solid rgba(192,57,43,.4)", background:"none",
-                  color:"var(--rose)", cursor:"pointer", fontSize:12,
-                  fontFamily:"'Jost',sans-serif", fontWeight:500 }}>
+                <button onClick={() => handleDelete(drawer._id)} style={{
+                  marginTop: 18,
+                  width: "100%", padding: "10px", borderRadius: 6,
+                  border: "1px solid rgba(192,57,43,.4)", background: "none",
+                  color: "var(--rose)", cursor: "pointer", fontSize: 12,
+                  fontFamily: "'Jost',sans-serif", fontWeight: 500
+                }}>
                   Delete from Library
                 </button>
               )}
@@ -1543,22 +1608,22 @@ export const AdminMedia = () => {
 ═══════════════════════════════════════════════════ */
 export const AdminSeo = () => {
   const PAGES = [
-    { key: "home",     label: "Home Page" },
-    { key: "shop",     label: "Shop / Collection" },
-    { key: "product",  label: "Product Pages (default)" },
-    { key: "cart",     label: "Cart" },
+    { key: "home", label: "Home Page" },
+    { key: "shop", label: "Shop / Collection" },
+    { key: "product", label: "Product Pages (default)" },
+    { key: "cart", label: "Cart" },
     { key: "checkout", label: "Checkout" },
-    { key: "profile",  label: "Profile" },
-    { key: "about",    label: "About Us" },
-    { key: "contact",  label: "Contact" },
+    { key: "profile", label: "Profile" },
+    { key: "about", label: "About Us" },
+    { key: "contact", label: "Contact" },
   ];
 
   const [selectedPage, setSelectedPage] = useState("home");
   const [form, setForm] = useState({ title: "", description: "", keywords: "", ogImage: "", canonical: "", noIndex: false });
-  const [loading, setLoading]   = useState(false);
-  const [saving,  setSaving]    = useState(false);
-  const [saved,   setSaved]     = useState(false);
-  const [error,   setError]     = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const [allConfigs, setAllConfigs] = useState([]);
 
   /* Fetch existing SEO when page changes */
@@ -1571,12 +1636,12 @@ export const AdminSeo = () => {
       .then(res => {
         const s = res.seo;
         setForm({
-          title:       s.title       || "",
+          title: s.title || "",
           description: s.description || "",
-          keywords:    Array.isArray(s.keywords) ? s.keywords.join(", ") : (s.keywords || ""),
-          ogImage:     s.ogImage     || "",
-          canonical:   s.canonical   || "",
-          noIndex:     s.noIndex     || false,
+          keywords: Array.isArray(s.keywords) ? s.keywords.join(", ") : (s.keywords || ""),
+          ogImage: s.ogImage || "",
+          canonical: s.canonical || "",
+          noIndex: s.noIndex || false,
         });
       })
       .catch(() => setForm({ title: "", description: "", keywords: "", ogImage: "", canonical: "", noIndex: false }))
@@ -1585,7 +1650,7 @@ export const AdminSeo = () => {
 
   /* Also load all configs for the table */
   const fetchAllConfigs = () => {
-    seoAPI.getAll().then(res => setAllConfigs(res.configs || [])).catch(() => {});
+    seoAPI.getAll().then(res => setAllConfigs(res.configs || [])).catch(() => { });
   };
   useEffect(() => { fetchAllConfigs(); }, []);
 
@@ -1609,9 +1674,9 @@ export const AdminSeo = () => {
   };
 
   const titleLen = form.title.length;
-  const descLen  = form.description.length;
+  const descLen = form.description.length;
   const titleColor = titleLen > 60 ? "var(--rose)" : titleLen > 50 ? "var(--gold)" : "var(--emerald)";
-  const descColor  = descLen  > 160 ? "var(--rose)" : descLen > 140 ? "var(--gold)" : "var(--emerald)";
+  const descColor = descLen > 160 ? "var(--rose)" : descLen > 140 ? "var(--gold)" : "var(--emerald)";
 
   const inputStyle = {
     width: "100%", padding: "10px 14px",
@@ -1651,94 +1716,94 @@ export const AdminSeo = () => {
             <p style={{ color: "var(--dim)", fontSize: 13, textAlign: "center", padding: "20px 0" }}>Loading current SEO data...</p>
           ) : (<>
 
-          {/* Meta Title */}
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Meta Title</label>
-              <span style={{ fontSize: 11, color: titleColor, fontVariantNumeric: "tabular-nums" }}>
-                {titleLen} / 60
-              </span>
+            {/* Meta Title */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Meta Title</label>
+                <span style={{ fontSize: 11, color: titleColor, fontVariantNumeric: "tabular-nums" }}>
+                  {titleLen} / 60
+                </span>
+              </div>
+              <input
+                style={{ ...inputStyle, borderColor: titleLen > 60 ? "var(--rose)" : "var(--border)" }}
+                value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. Maison Élite — Luxury Fashion House"
+                maxLength={70}
+                required
+              />
+              <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 5 }}>
+                Google shows the first 55–60 characters in search results.
+              </p>
             </div>
-            <input
-              style={{ ...inputStyle, borderColor: titleLen > 60 ? "var(--rose)" : "var(--border)" }}
-              value={form.title}
-              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="e.g. Maison Élite — Luxury Fashion House"
-              maxLength={70}
-              required
-            />
-            <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 5 }}>
-              Google shows the first 55–60 characters in search results.
-            </p>
-          </div>
 
-          {/* Meta Description */}
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Meta Description</label>
-              <span style={{ fontSize: 11, color: descColor, fontVariantNumeric: "tabular-nums" }}>
-                {descLen} / 160
-              </span>
+            {/* Meta Description */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Meta Description</label>
+                <span style={{ fontSize: 11, color: descColor, fontVariantNumeric: "tabular-nums" }}>
+                  {descLen} / 160
+                </span>
+              </div>
+              <textarea
+                style={{ ...inputStyle, resize: "vertical", minHeight: 80, borderColor: descLen > 160 ? "var(--rose)" : "var(--border)" }}
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="A brief, compelling description that appears in Google results…"
+                rows={3}
+                maxLength={170}
+                required
+              />
+              <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 5 }}>
+                Keep between 120–160 characters for best visibility.
+              </p>
             </div>
-            <textarea
-              style={{ ...inputStyle, resize: "vertical", minHeight: 80, borderColor: descLen > 160 ? "var(--rose)" : "var(--border)" }}
-              value={form.description}
-              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              placeholder="A brief, compelling description that appears in Google results…"
-              rows={3}
-              maxLength={170}
-              required
-            />
-            <p style={{ fontSize: 11, color: "var(--dim)", marginTop: 5 }}>
-              Keep between 120–160 characters for best visibility.
-            </p>
-          </div>
 
-          {/* Keywords */}
-          <div>
-            <label style={labelStyle}>Keywords (comma-separated)</label>
-            <input
-              style={inputStyle}
-              value={form.keywords}
-              onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))}
-              placeholder="luxury fashion, maison elite, designer clothing"
-            />
-          </div>
+            {/* Keywords */}
+            <div>
+              <label style={labelStyle}>Keywords (comma-separated)</label>
+              <input
+                style={inputStyle}
+                value={form.keywords}
+                onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))}
+                placeholder="luxury fashion, maison elite, designer clothing"
+              />
+            </div>
 
-          {/* OG Image */}
-          <div>
-            <label style={labelStyle}>OG Image URL (for WhatsApp / social preview)</label>
-            <input
-              style={inputStyle}
-              value={form.ogImage}
-              onChange={e => setForm(f => ({ ...f, ogImage: e.target.value }))}
-              placeholder="https://yoursite.com/og-image.jpg  (1200×630 recommended)"
-            />
-          </div>
+            {/* OG Image */}
+            <div>
+              <label style={labelStyle}>OG Image URL (for WhatsApp / social preview)</label>
+              <input
+                style={inputStyle}
+                value={form.ogImage}
+                onChange={e => setForm(f => ({ ...f, ogImage: e.target.value }))}
+                placeholder="https://yoursite.com/og-image.jpg  (1200×630 recommended)"
+              />
+            </div>
 
-          {/* noIndex toggle */}
-          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
-            <input
-              type="checkbox"
-              checked={form.noIndex}
-              onChange={e => setForm(f => ({ ...f, noIndex: e.target.checked }))}
-              style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
-            />
-            <span style={{ fontSize: 13, color: "var(--muted)" }}>
-              <strong style={{ color: "var(--text)" }}>noindex</strong> — tell Google NOT to index this page
-            </span>
-          </label>
+            {/* noIndex toggle */}
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
+              <input
+                type="checkbox"
+                checked={form.noIndex}
+                onChange={e => setForm(f => ({ ...f, noIndex: e.target.checked }))}
+                style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
+              />
+              <span style={{ fontSize: 13, color: "var(--muted)" }}>
+                <strong style={{ color: "var(--text)" }}>noindex</strong> — tell Google NOT to index this page
+              </span>
+            </label>
 
-          {/* Error / success */}
-          {error && <p style={{ background: "rgba(192,57,43,.1)", border: "1px solid rgba(192,57,43,.3)", color: "var(--rose)", padding: "10px 14px", borderRadius: 6, fontSize: 12 }}>{error}</p>}
-          {saved && <p style={{ background: "rgba(46,204,113,.1)", border: "1px solid rgba(46,204,113,.3)", color: "var(--emerald)", padding: "10px 14px", borderRadius: 6, fontSize: 12 }}>✓ SEO config saved successfully!</p>}
+            {/* Error / success */}
+            {error && <p style={{ background: "rgba(192,57,43,.1)", border: "1px solid rgba(192,57,43,.3)", color: "var(--rose)", padding: "10px 14px", borderRadius: 6, fontSize: 12 }}>{error}</p>}
+            {saved && <p style={{ background: "rgba(46,204,113,.1)", border: "1px solid rgba(46,204,113,.3)", color: "var(--emerald)", padding: "10px 14px", borderRadius: 6, fontSize: 12 }}>✓ SEO config saved successfully!</p>}
 
-          {/* Submit */}
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Btn v="primary" type="submit" disabled={saving}>
-              {saving ? "Saving…" : "Save SEO Config"}
-            </Btn>
-          </div>
+            {/* Submit */}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Btn v="primary" type="submit" disabled={saving}>
+                {saving ? "Saving…" : "Save SEO Config"}
+              </Btn>
+            </div>
 
           </>)}
         </form>
@@ -1838,4 +1903,5 @@ export const AdminSeo = () => {
     </div>
   );
 };
-
+
+

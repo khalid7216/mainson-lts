@@ -140,7 +140,11 @@ const GlobalStyles = () => (
       box-shadow: 0 40px 120px rgba(0,0,0,.8);
     }
     .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 768px) { .grid-2-col { grid-template-columns: 1fr !important; } }
+    .grid-3-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 768px) { 
+      .grid-2-col { grid-template-columns: 1fr !important; } 
+      .grid-3-col { grid-template-columns: 1fr !important; } 
+    }
 
     .modal-tabs {
       display: flex; gap: 0; padding: 0 32px; flex-shrink: 0;
