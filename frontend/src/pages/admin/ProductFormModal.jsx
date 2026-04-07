@@ -78,15 +78,15 @@ export const validateProduct = (form) => {
 
 /* ── Section wrapper ────────────────────────────── */
 const Section = ({ title, children }) => (
-  <div style={{ marginBottom: 32, animation: "fadeIn .4s ease both" }}>
+  <div style={{ marginBottom: 16, animation: "fadeIn .4s ease both" }}>
     <p style={{
       fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase",
-      color: "var(--gold)", marginBottom: 20, paddingBottom: 10,
+      color: "var(--gold)", marginBottom: 10, paddingBottom: 6,
       borderBottom: "1px solid var(--border2)", fontWeight: 500
     }}>
       {title}
     </p>
-    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {children}
     </div>
   </div>
@@ -97,14 +97,14 @@ const Field = ({ label, required, error, children }) => (
   <div style={{ width: "100%" }}>
     <label style={{
       display: "block", fontSize: 11, letterSpacing: ".1em",
-      textTransform: "uppercase", color: "var(--muted)", marginBottom: 8,
+      textTransform: "uppercase", color: "var(--muted)", marginBottom: 4,
       fontWeight: 500
     }}>
       {label} {required && <span style={{ color: "var(--rose)" }}>*</span>}
     </label>
     {children}
     {error && (
-      <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 6, fontWeight: 500 }}>⚠ {error}</p>
+      <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 4, fontWeight: 500 }}>⚠ {error}</p>
     )}
   </div>
 );
@@ -390,13 +390,13 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         className="modal-box"
-        style={{ width: "95%", maxWidth: 780, display: "flex", flexDirection: "column", maxHeight: "92vh", overflow: "hidden", background: "var(--surface)", margin: "0 auto", padding: 0 }}
+        style={{ width: "95%", maxWidth: 1000, display: "flex", flexDirection: "column", height: "auto", overflow: "visible", background: "var(--surface)", margin: "40px auto", padding: 0, maxHeight: "none" }}
       >
         {/* ── Header ──────────────────────────────── */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "24px 32px", borderBottom: "1px solid var(--border)", flexShrink: 0,
-          flexWrap: "wrap", gap: 16
+          padding: "16px 24px", borderBottom: "1px solid var(--border)", flexShrink: 0,
+          flexWrap: "wrap", gap: 10
         }}>
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 300, fontSize: 26 }}>
@@ -423,7 +423,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
               key={t.id}
               onClick={() => setTab(t.id)}
               style={{
-                padding: "14px 20px", background: "none",
+                padding: "8px 16px", background: "none",
                 border: "none", borderBottom: `2px solid ${tab === t.id ? "var(--gold)" : "transparent"}`,
                 color: tab === t.id ? "var(--gold2)" : "var(--muted)",
                 fontSize: 12, letterSpacing: ".1em", textTransform: "uppercase",
@@ -446,140 +446,146 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         </div>
 
         {/* ── Scrollable body ──────────────────────── */}
-        <div className="modal-body-scroll" style={{ flex: 1, overflowY: "auto", padding: "28px 32px", minHeight: 0 }}>
+        <div className="modal-body-scroll" style={{ flex: 1, overflow: "visible", padding: "16px 24px", minHeight: 0, height: "auto" }}>
 
           {/* ════ TAB: BASIC INFO ════ */}
           {tab === "basic" && (
-            <div>
-              <Section title="Identity">
-                <Field label="Product Name" required error={errors.name}>
-                  <input
-                    value={form.name}
-                    onChange={(e) => set("name", e.target.value)}
-                    placeholder="e.g. Obsidian Slip Dress"
-                    style={{
-                      width: "100%", padding: "12px 14px", borderRadius: 6,
-                      border: `1px solid ${errors.name ? "var(--rose)" : "var(--border2)"}`,
-                      background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
-                    }}
-                  />
-                </Field>
-
-                <Field label="Short Description">
-                  <Textarea
-                    value={form.shortDescription}
-                    onChange={(e) => set("shortDescription", e.target.value)}
-                    placeholder="One-line tagline shown on product card (optional)"
-                    rows={2}
-                  />
-                </Field>
-
-                <Field label="Full Description" required error={errors.description}>
-                  <Textarea
-                    value={form.description}
-                    onChange={(e) => set("description", e.target.value)}
-                    placeholder="Describe the product, fabric, fit, and design details…"
-                    rows={5}
-                    error={errors.description}
-                  />
-                </Field>
-              </Section>
-
-              <Section title="Product Image">
-                <Field label="Upload Image" required error={errors.image}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        set("imageFile", file);
-                        set("image", "uploaded");
-                        setImagePreview(URL.createObjectURL(file));
-                      }
-                    }}
-                    style={{
-                      width: "100%", padding: "8px", borderRadius: 6,
-                      border: `1px solid ${errors.image ? "var(--rose)" : "var(--border2)"}`,
-                      background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
-                    }}
-                  />
-                </Field>
-
-                {/* Image preview */}
-                {imagePreview && (
-                  <div style={{ marginTop: 14 }}>
-                    <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>Preview</p>
-                    <div style={{
-                      width: "100%", maxWidth: 300, height: 200,
-                      borderRadius: 8, overflow: "hidden",
-                      border: "1px solid var(--border)",
-                      background: "var(--lift)", display: "flex", alignItems: "center", justifyContent: "center"
-                    }}>
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        style={{
-                          width: "100%", height: "100%",
-                          objectFit: "cover",
-                          objectPosition: "center",
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </Section>
-
-              <Section title="Category">
-                <div className="grid-2-col">
-                  <Field label="Category" required error={errors.category}>
-                    <Select
-                      value={form.category}
-                      onChange={(e) => {
-                        const newCat = e.target.value;
-                        if (newCat !== form.category) {
-                          set("category", newCat);
-                          set("sizes", []);
-                        }
-                      }}
-                      error={errors.category}
-                    >
-                      <option value="">— Select category —</option>
-                      {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
-                    </Select>
-                  </Field>
-
-                  <Field label="Sub-Category">
+            <div className="grid-2-col" style={{ gap: "32px" }}>
+              {/* Left Column */}
+              <div>
+                <Section title="Identity">
+                  <Field label="Product Name" required error={errors.name}>
                     <input
-                      value={form.subCategory}
-                      onChange={(e) => set("subCategory", e.target.value)}
-                      placeholder="e.g. Midi Dresses, Blazers…"
-                      style={{ width: "100%", padding: "12px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 13 }}
+                      value={form.name}
+                      onChange={(e) => set("name", e.target.value)}
+                      placeholder="e.g. Obsidian Slip Dress"
+                      style={{
+                        width: "100%", padding: "12px 14px", borderRadius: 6,
+                        border: `1px solid ${errors.name ? "var(--rose)" : "var(--border2)"}`,
+                        background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
+                      }}
                     />
                   </Field>
-                </div>
-              </Section>
 
-              <Section title="Labels & Visibility">
-                <div className="grid-2-col" style={{ marginBottom: 20 }}>
-                  <Field label="Badge">
-                    <Select value={form.badge} onChange={(e) => set("badge", e.target.value)}>
-                      {BADGE_OPTIONS.map((b) => <option key={b} value={b}>{b || "None"}</option>)}
-                    </Select>
+                  <Field label="Short Description">
+                    <Textarea
+                      value={form.shortDescription}
+                      onChange={(e) => set("shortDescription", e.target.value)}
+                      placeholder="One-line tagline shown on product card (optional)"
+                      rows={1}
+                    />
                   </Field>
 
-                  <Field label="Status">
-                    <Select value={form.status} onChange={(e) => set("status", e.target.value)}>
-                      {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                    </Select>
+                  <Field label="Full Description" required error={errors.description}>
+                    <Textarea
+                      value={form.description}
+                      onChange={(e) => set("description", e.target.value)}
+                      placeholder="Describe the product, fabric, fit, and design details…"
+                      rows={2}
+                      error={errors.description}
+                    />
                   </Field>
-                </div>
+                </Section>
 
-                <div style={{ display: "flex", gap: 32 }}>
-                  <Toggle checked={form.isFeatured} onChange={() => set("isFeatured", !form.isFeatured)} label="Featured Product" />
-                  <Toggle checked={form.isNewArrival} onChange={() => set("isNewArrival", !form.isNewArrival)} label="New Arrival" />
-                </div>
-              </Section>
+                <Section title="Product Image">
+                  <Field label="Upload Image" required error={errors.image}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          set("imageFile", file);
+                          set("image", "uploaded");
+                          setImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
+                      style={{
+                        width: "100%", padding: "8px", borderRadius: 6,
+                        border: `1px solid ${errors.image ? "var(--rose)" : "var(--border2)"}`,
+                        background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
+                      }}
+                    />
+                  </Field>
+
+                  {/* Image preview */}
+                  {imagePreview && (
+                    <div style={{ marginTop: 14 }}>
+                      <p style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>Preview</p>
+                      <div style={{
+                        width: 140, height: 100,
+                        borderRadius: 8, overflow: "hidden",
+                        border: "1px solid var(--border)",
+                        background: "var(--lift)", display: "flex", alignItems: "center", justifyContent: "center"
+                      }}>
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          style={{
+                            width: "100%", height: "100%",
+                            objectFit: "cover",
+                            objectPosition: "center",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Section>
+              </div>
+
+              {/* Right Column */}
+              <div>
+                <Section title="Category">
+                  <div className="grid-2-col">
+                    <Field label="Category" required error={errors.category}>
+                      <Select
+                        value={form.category}
+                        onChange={(e) => {
+                          const newCat = e.target.value;
+                          if (newCat !== form.category) {
+                            set("category", newCat);
+                            set("sizes", []);
+                          }
+                        }}
+                        error={errors.category}
+                      >
+                        <option value="">— Select category —</option>
+                        {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+                      </Select>
+                    </Field>
+
+                    <Field label="Sub-Category">
+                      <input
+                        value={form.subCategory}
+                        onChange={(e) => set("subCategory", e.target.value)}
+                        placeholder="e.g. Midi Dresses, Blazers…"
+                        style={{ width: "100%", padding: "12px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 13 }}
+                      />
+                    </Field>
+                  </div>
+                </Section>
+
+                <Section title="Labels & Visibility">
+                  <div className="grid-2-col" style={{ marginBottom: 20 }}>
+                    <Field label="Badge">
+                      <Select value={form.badge} onChange={(e) => set("badge", e.target.value)}>
+                        {BADGE_OPTIONS.map((b) => <option key={b} value={b}>{b || "None"}</option>)}
+                      </Select>
+                    </Field>
+
+                    <Field label="Status">
+                      <Select value={form.status} onChange={(e) => set("status", e.target.value)}>
+                        {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                      </Select>
+                    </Field>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 32 }}>
+                    <Toggle checked={form.isFeatured} onChange={() => set("isFeatured", !form.isFeatured)} label="Featured Product" />
+                    <Toggle checked={form.isNewArrival} onChange={() => set("isNewArrival", !form.isNewArrival)} label="New Arrival" />
+                  </div>
+                </Section>
+              </div>
             </div>
           )}
 
@@ -721,7 +727,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         </div>
 
         {/* ── Footer actions ───────────────────────── */}
-        <div className="modal-footer" style={{ padding: "20px 32px", borderTop: "1px solid var(--border)", flexShrink: 0, background: "var(--surface)", marginTop: 0 }}>
+        <div className="modal-footer" style={{ padding: "12px 24px", borderTop: "1px solid var(--border)", flexShrink: 0, background: "var(--surface)", marginTop: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: "auto" }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: form.status === "active" ? "var(--emerald)" : form.status === "draft" ? "var(--gold)" : "var(--dim)" }} />
             <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "capitalize" }}>{form.status}</span>

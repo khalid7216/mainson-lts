@@ -1,6 +1,6 @@
 // frontend/src/pages/admin/AdminPanel.jsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { Avatar, Btn, Tag } from "../../components/UI";
@@ -18,15 +18,15 @@ import {
   AdminPages,
   AdminSeo,
 } from "./AdminSections";
-import { PRODUCTS, ORDERS, CUSTOMERS } from "../../data/mockData";
+import { productAPI, orderAPI, authAPI } from "../../services/api";
 
 const NAV_ITEMS = [
   { id: "dashboard",  icon: <IoGridOutline size={16} />, label: "Dashboard" },
   { id: "categories", icon: <IoGridOutline size={16} />, label: "Categories" },
-  { id: "products",   icon: <IoCubeOutline size={16} />, label: "Products",  badge: PRODUCTS.length },
+  { id: "products",   icon: <IoCubeOutline size={16} />, label: "Products",  badgeKey: "products" },
   { id: "pages",      icon: <IoListOutline size={16} />, label: "Pages" },
-  { id: "orders",     icon: <IoReceiptOutline size={16} />, label: "Orders",    badge: ORDERS.length },
-  { id: "customers",  icon: <IoPeopleOutline size={16} />, label: "Customers", badge: CUSTOMERS.length },
+  { id: "orders",     icon: <IoReceiptOutline size={16} />, label: "Orders",    badgeKey: "orders" },
+  { id: "customers",  icon: <IoPeopleOutline size={16} />, label: "Customers", badgeKey: "customers" },
   { id: "banners",    icon: <IoImagesOutline size={16} />, label: "Banners" },
   { id: "analytics", icon: <IoTrendingUpOutline size={16} />, label: "Analytics" },
   { id: "media",     icon: <IoImagesOutline size={16} />, label: "Media" },
@@ -39,6 +39,31 @@ const AdminPanel = ({ navigate }) => {
   const toast = useToast();
   const [section, setSection] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [counts, setCounts] = useState({ products: 0, orders: 0, customers: 0 });
+
+  const fetchDynamicCounts = async () => {
+    if (!user?.isAdmin) return;
+    try {
+      const [pRes, oRes, cRes] = await Promise.all([
+        productAPI.getProducts({ limit: 1 }).catch(() => ({ total: 0 })),
+        orderAPI.getAllOrders("All").catch(() => ({ total: 0 })),
+        authAPI.getCustomers().catch(() => ({ users: [] }))
+      ]);
+      setCounts({
+        products: pRes.total || pRes.products?.length || 0,
+        orders: oRes.total || oRes.orders?.length || 0,
+        customers: cRes.users?.length || cRes?.length || 0
+      });
+    } catch (err) {
+      console.warn("Could not fetch sidebar counts");
+    }
+  };
+
+  useEffect(() => {
+    fetchDynamicCounts();
+    const interval = setInterval(fetchDynamicCounts, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   /* Access guard */
   if (!user?.isAdmin) {
@@ -169,7 +194,7 @@ const AdminPanel = ({ navigate }) => {
                 {n.icon}
               </span>
               <span style={{ flex: 1 }}>{n.label}</span>
-              {n.badge !== undefined && (
+              {n.badgeKey && counts[n.badgeKey] !== undefined && (
                 <span
                   style={{
                     fontSize: 10,
@@ -179,7 +204,7 @@ const AdminPanel = ({ navigate }) => {
                     borderRadius: 10,
                   }}
                 >
-                  {n.badge}
+                  {counts[n.badgeKey]}
                 </span>
               )}
             </button>

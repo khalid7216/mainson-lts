@@ -134,7 +134,7 @@ const GlobalStyles = () => (
     }
     .modal-box {
       background: var(--surface); border: 1px solid var(--border2); border-radius: 12px;
-      max-width: 960px; width: 100%; max-height: 92vh; overflow: hidden;
+      max-width: 960px; width: 100%; height: auto; overflow: visible;
       padding: 0; display: flex; flex-direction: column;
       animation: modalIn .4s cubic-bezier(.16,1,.3,1);
       box-shadow: 0 40px 120px rgba(0,0,0,.8);
@@ -319,7 +319,7 @@ const GlobalStyles = () => (
       .prod-card h3 { font-size: 13px !important; }
       
       /* Mobile modals */
-      .modal-box { max-width: 96vw !important; margin: 10px auto !important; padding: 0 !important; max-height: 96vh !important; border-radius: 10px !important; }
+      .modal-box { max-width: 96vw !important; margin: 10px auto !important; padding: 0 !important; height: auto !important; border-radius: 10px !important; }
       .modal-bg { padding: 10px !important; align-items: flex-start; justify-content: center; }
       
       /* Mobile admin specific */
