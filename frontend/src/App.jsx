@@ -19,6 +19,7 @@ import AdminPanel from "./pages/admin/AdminPanel";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import DynamicPage from "./pages/DynamicPage";
+import TrackOrderPage from "./pages/TrackOrderPage";
 import { LoginPage, SignupPage, ForgotPage } from "./pages/AuthPages";
 
 /* ── Stripe setup ──────────────────────────────── */
@@ -154,6 +155,10 @@ const AppContent = () => {
                       toggleWishlist={toggleWishlist}
                     />
                   }
+                />
+                <Route
+                  path="/track-order"
+                  element={<TrackOrderPage />}
                 />
                 <Route
                   path="/cart"

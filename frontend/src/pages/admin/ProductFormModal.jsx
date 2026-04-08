@@ -4,15 +4,14 @@ import { Btn, Inp, Spinner, StatusTag } from "../../components/UI";
 /* ══════════════════════════════════════════════════════
    SCHEMA CONSTANTS — dropdown options
 ══════════════════════════════════════════════════════ */
-export const CATEGORIES = ["Dresses", "Outerwear", "Tops", "Bottoms", "Shoes", "Accessories"];
+export const CATEGORIES = ["Men", "Women", "Kids", "Accessories"];
 
 export const SIZE_OPTIONS = {
-  Dresses: ["XS", "S", "M", "L", "XL", "XXL"],
-  Outerwear: ["XS", "S", "M", "L", "XL", "XXL"],
-  Tops: ["XS", "S", "M", "L", "XL", "XXL"],
-  Bottoms: ["XS", "S", "M", "L", "XL", "XXL"],
-  Shoes: ["35", "36", "37", "38", "39", "40", "41", "42"],
+  Men: ["XS", "S", "M", "L", "XL", "XXL"],
+  Women: ["XS", "S", "M", "L", "XL", "XXL"],
+  Kids: ["2T", "3T", "4T", "5T", "6", "8", "10", "12", "14"],
   Accessories: ["One Size"],
+  Tops: ["XS", "S", "M", "L", "XL", "XXL"], // Fallback
 };
 
 export const COLOR_OPTIONS = [

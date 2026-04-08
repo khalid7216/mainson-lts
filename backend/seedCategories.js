@@ -1,21 +1,21 @@
-// backend/seedCategories.js
 require("dotenv").config();
 const mongoose = require("mongoose");
 const Category = require("./models/Category");
 const connectDB = require("./config/db");
 
 const categories = [
-  { name: "Dresses", slug: "dresses" },
-  { name: "Outerwear", slug: "outerwear" },
-  { name: "Tops", slug: "tops" },
-  { name: "Bottoms", slug: "bottoms" },
-  { name: "Shoes", slug: "shoes" },
+  { name: "Men", slug: "men" },
+  { name: "Women", slug: "women" },
+  { name: "Kids", slug: "kids" },
   { name: "Accessories", slug: "accessories" },
 ];
 
 const seed = async () => {
   try {
     await connectDB();
+    
+    // Optional: delete old categories
+    // await Category.deleteMany({});
     
     for (const cat of categories) {
       await Category.findOneAndUpdate(
@@ -25,7 +25,7 @@ const seed = async () => {
       );
     }
     
-    console.log("✦ Categories seeded successfully");
+    console.log("? Categories seeded successfully: Men, Women, Kids, Accessories");
     process.exit(0);
   } catch (err) {
     console.error("Error seeding categories:", err.message);

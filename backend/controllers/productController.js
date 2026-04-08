@@ -10,7 +10,20 @@ exports.getProducts = async (req, res) => {
     const { category, badge, sort, page = 1, limit = 20, search } = req.query;
     const filter = { isActive: true };
 
-    if (category && category !== "All") filter.parentCategory = category;
+    if (category && category !== "All") {
+      const mongoose = require("mongoose");
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        filter.parentCategory = category;
+      } else {
+        const Category = require("../models/Category");
+        const foundCat = await Category.findOne({ name: new RegExp('^' + category + '$', 'i') });
+        if (foundCat) {
+          filter.parentCategory = foundCat._id;
+        } else {
+          return res.json({ products: [], page: 1, pages: 1, total: 0 });
+        }
+      }
+    }
     if (badge)    filter.badge = badge;
     
     if (search) {

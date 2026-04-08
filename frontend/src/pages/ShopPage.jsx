@@ -14,6 +14,7 @@ const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
   const cat = searchParams.get("category") || "All";
   const sort = searchParams.get("sort") || "Featured";
   const search = searchParams.get("search") || "";
+  const badge = searchParams.get("badge") || "";
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   const [qv, setQv] = useState(null);
@@ -32,12 +33,16 @@ const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         if (sort === "Price High") apiSort = "price_desc";
         if (sort === "Rating") apiSort = "rating";
         
-        const data = await productAPI.getProducts({ 
+        const queryProps = {
           page, 
           limit: 12, // Show more products per page in the shop
           sort: apiSort,
           search
-        });
+        };
+        if (cat !== "All") queryProps.category = cat;
+        if (badge) queryProps.badge = badge;
+
+        const data = await productAPI.getProducts(queryProps);
         const formattedProducts = data.products.map((p) => ({
           id: p._id,
           name: p.name,
@@ -60,8 +65,7 @@ const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
       }
     };
     fetchProducts();
-  }, [page, sort, cat, search]);
-
+    }, [page, sort, cat, search, badge]);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page, cat]);
@@ -351,11 +355,11 @@ const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
               {
                 t: "Shop",
                 l: [
-                  { label: "New Arrivals", to: "/shop" },
-                  { label: "Dresses", to: "/shop?category=Dresses" },
-                  { label: "Outerwear", to: "/shop?category=Outerwear" },
+                  { label: "New Arrivals", to: "/shop?badge=New" },
+                  { label: "Dresses", to: "/shop?search=Dresses" },
+                  { label: "Outerwear", to: "/shop?search=Outerwear" },
                   { label: "Accessories", to: "/shop?category=Accessories" },
-                  { label: "Sale", to: "/shop" },
+                  { label: "Sale", to: "/shop?badge=Sale" },
                 ],
               },
               {
@@ -363,7 +367,7 @@ const ShopPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                 l: [
                   { label: "Sizing Guide", to: "/page/sizing-guide" },
                   { label: "Returns", to: "/page/returns" },
-                  { label: "Shipping", to: "/page/shipping" },
+                  { label: "Shipping", to: "/page/shipping" },{ label: "Track Order", to: "/track-order" },
                   { label: "Gift Cards", to: "/page/gift-cards" },
                   { label: "Contact", to: "/page/contact" },
                 ],

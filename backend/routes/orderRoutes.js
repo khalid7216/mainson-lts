@@ -10,7 +10,11 @@ const {
   updateOrderStatus,
   rollbackOrder,
   getAdminAnalytics,
+  trackOrderPublic,
 } = require("../controllers/orderController");
+
+// Public Tracking Route (Must be before protect)
+router.get("/track", trackOrderPublic);
 
 router.use(protect);
 

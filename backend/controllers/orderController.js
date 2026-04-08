@@ -243,22 +243,77 @@ exports.getAllOrders = async (req, res) => {
 /* ── PUT /api/orders/admin/:id/status (Admin) ───── */
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true, runValidators: true }
-    );
+    const { status, trackingNumber, courierName, description } = req.body;
+    
+    // Find order first to access existing tracking array properly
+    const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Update base fields
+    if (status) order.status = status;
+    if (trackingNumber !== undefined) order.trackingNumber = trackingNumber;
+    if (courierName !== undefined) order.courierName = courierName;
+
+    // Optional: Only push history if it's a status change or explicit tracking update
+    if (status || description) {
+      order.trackingHistory.push({
+        status: status || order.status,
+        description: description || `Status updated to ${status || order.status}`,
+        date: new Date()
+      });
+    }
+
+    await order.save();
 
     await Notification.create({
       user:    order.user,
       type:    "order_update",
       title:   "Order Updated",
-      message: `Your order ${order.orderId} status is now: ${status}.`,
+      message: `Your order ${order.orderId} status is now: ${order.status}.`,
     }).catch(() => {});
 
     res.json({ order });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ── GET /api/orders/track (Public) ─────────────── */
+exports.trackOrderPublic = async (req, res) => {
+  try {
+    const { orderId, email } = req.query;
+    if (!orderId) {
+      return res.status(400).json({ message: "Order ID or Tracking Number is required" });
+    }
+
+    // Try finding by internal orderId or the courier tracking number
+    const order = await Order.findOne({
+      $or: [{ orderId: orderId.toUpperCase() }, { trackingNumber: orderId }]
+    }).populate("user", "email");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found. Please double-check your tracking ID." });
+    }
+
+    // Basic security: if email is provided, ensure it matches user's email if possible
+    if (email && order.user && order.user.email.toLowerCase() !== email.toLowerCase()) {
+      return res.status(403).json({ message: "Email does not match our records for this order." });
+    }
+
+    res.json({
+      orderId: order.orderId,
+      status: order.status,
+      trackingNumber: order.trackingNumber,
+      courierName: order.courierName,
+      trackingHistory: order.trackingHistory,
+      createdAt: order.createdAt,
+      items: order.items.map(item => ({
+        name: item.name,
+        qty: item.qty,
+        image: item.image
+      })),
+      shippingAddress: order.shippingAddress.city + ", " + order.shippingAddress.country
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

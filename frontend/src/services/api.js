@@ -127,12 +127,23 @@ export const orderAPI = {
   },
 
   /* Update order status (Admin) */
-  updateOrderStatus: async (id, status) => {
-    return await request(`/orders/admin/${id}/status`, {
-      method: "PUT",
-      body: JSON.stringify({ status }),
-    });
-  },
+    updateOrderStatus: async (id, status, trackingNumber, courierName, description) => {
+      const payload = { status };
+      if (trackingNumber !== undefined) payload.trackingNumber = trackingNumber;
+      if (courierName !== undefined) payload.courierName = courierName;
+      if (description !== undefined) payload.description = description;
+
+      return await request(`/orders/admin/${id}/status`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+    },
+
+    /* Track public order */
+    trackOrder: async (orderId, email = "") => {
+      const params = new URLSearchParams({ orderId });
+      if (email) params.append("email", email);
+      return await request(`/orders/track?${params.toString()}`);
 
   /* Get analytics (Admin) */
   getAnalytics: async () => {

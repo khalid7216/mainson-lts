@@ -746,9 +746,17 @@ export const AdminOrders = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
+      let trackingNumber, courierName;
+      if (newStatus === "shipped") {
+        trackingNumber = window.prompt("Enter Tracking Number (Optional):");
+        if (trackingNumber) {
+          courierName = window.prompt("Enter Courier Name (e.g. TCS, Leopard, Optional):");
+        }
+      }
+
       setUpdatingId(id);
-      await orderAPI.updateOrderStatus(id, newStatus);
-      // Optimistic UI update — only update the changed order in state, no full refetch/reload
+      await orderAPI.updateOrderStatus(id, newStatus, trackingNumber || undefined, courierName || undefined, "Status updated to " + newStatus);
+      // Optimistic UI update — only update the changed order in state
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
     } catch (err) {
       alert("Status update failed: " + err.message);

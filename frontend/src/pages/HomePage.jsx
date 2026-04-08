@@ -479,11 +479,11 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
               {
                 t: "Shop",
                 l: [
-                  { label: "New Arrivals", to: "/shop" },
-                  { label: "Dresses", to: "/shop?category=Dresses" },
-                  { label: "Outerwear", to: "/shop?category=Outerwear" },
+                  { label: "New Arrivals", to: "/shop?badge=New" },
+                  { label: "Dresses", to: "/shop?search=Dresses" },
+                  { label: "Outerwear", to: "/shop?search=Outerwear" },
                   { label: "Accessories", to: "/shop?category=Accessories" },
-                  { label: "Sale", to: "/shop" },
+                  { label: "Sale", to: "/shop?badge=Sale" },
                 ],
               },
               {
@@ -491,7 +491,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                 l: [
                   { label: "Sizing Guide", to: "/page/sizing-guide" },
                   { label: "Returns", to: "/page/returns" },
-                  { label: "Shipping", to: "/page/shipping" },
+                  { label: "Shipping", to: "/page/shipping" },{ label: "Track Order", to: "/track-order" },
                   { label: "Gift Cards", to: "/page/gift-cards" },
                   { label: "Contact", to: "/page/contact" },
                 ],
