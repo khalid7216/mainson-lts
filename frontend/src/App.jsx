@@ -21,6 +21,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import DynamicPage from "./pages/DynamicPage";
 import TrackOrderPage from "./pages/TrackOrderPage";
 import { LoginPage, SignupPage, ForgotPage } from "./pages/AuthPages";
+import ChatWidget from "./components/ChatWidget";
 
 /* ── Stripe setup ──────────────────────────────── */
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
@@ -116,6 +117,7 @@ const AppContent = () => {
   return (
     <>
       <GlobalStyles />
+      <ChatWidget />
 
       <Routes>
         {/* Auth routes (full-screen, no navbar) */}

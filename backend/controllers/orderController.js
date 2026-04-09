@@ -6,6 +6,7 @@ const Product      = require("../models/Product");
 const Notification = require("../models/Notification");
 const ActivityLog  = require("../models/ActivityLog");
 const Payment      = require("../models/Payment");
+const Coupon       = require("../models/Coupon");
 
 /* ── GET /api/orders (user's orders) ────────────── */
 exports.getMyOrders = async (req, res) => {
@@ -97,9 +98,39 @@ exports.createOrder = async (req, res) => {
 
     /* ── 3. Calculate totals ───────────────────── */
     const subtotal     = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const tax          = Math.round(subtotal * 0.08 * 100) / 100;
+    let tax            = Math.round(subtotal * 0.08 * 100) / 100;
     const shippingCost = subtotal > 200 ? 0 : 15;
-    const totalAmount  = Math.round((subtotal + tax + shippingCost) * 100) / 100;
+    
+    let discountAmount = 0;
+    let couponCodeUsed = "";
+
+    const { couponCode } = req.body;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
+      if (coupon && !coupon.isExpired() && !coupon.isLimitReached()) {
+        if (subtotal >= coupon.minOrderValue) {
+          if (coupon.type === "percentage") {
+            discountAmount = (subtotal * coupon.discountValue) / 100;
+            if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+              discountAmount = coupon.maxDiscount;
+            }
+          } else if (coupon.type === "fixed") {
+            discountAmount = coupon.discountValue;
+          } else if (coupon.type === "giftcard") {
+            discountAmount = Math.min(coupon.balance, subtotal);
+            coupon.balance -= discountAmount;
+          }
+          
+          coupon.usedCount += 1;
+          await coupon.save({ session });
+          couponCodeUsed = coupon.code;
+        }
+      }
+    }
+
+    const netAmount = Math.max(0, subtotal - discountAmount);
+    tax = Math.round(netAmount * 0.08 * 100) / 100;
+    const totalAmount = Math.round((netAmount + tax + shippingCost) * 100) / 100;
 
     /* ── 4. Create order (within session) ──────── */
     const [order] = await Order.create([{
@@ -109,6 +140,8 @@ exports.createOrder = async (req, res) => {
       tax,
       shippingCost,
       totalAmount,
+      discountAmount,
+      couponCode: couponCodeUsed,
       shippingAddress,
       notes,
       status: "pending"

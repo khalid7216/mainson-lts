@@ -144,6 +144,7 @@ export const orderAPI = {
       const params = new URLSearchParams({ orderId });
       if (email) params.append("email", email);
       return await request(`/orders/track?${params.toString()}`);
+    },
 
   /* Get analytics (Admin) */
   getAnalytics: async () => {
@@ -351,4 +352,16 @@ export const pageAPI = {
   delete: async (id) => {
     return await request(`/pages/${id}`, { method: "DELETE" });
   },
+};
+
+export const couponAPI = {
+  validate: (data) => request("/coupons/validate", { method: "POST", body: JSON.stringify(data) }),
+  getAll: () => request("/coupons"),
+  create: (data) => request("/coupons", { method: "POST", body: JSON.stringify(data) }),
+  toggleStatus: (id) => request(`/coupons/${id}/toggle`, { method: "PATCH" }),
+  delete: (id) => request(`/coupons/${id}`, { method: "DELETE" })
+};
+
+export const chatbotAPI = {
+  chat: (message, history = []) => request("/chatbot", { method: "POST", body: JSON.stringify({ message, history }) })
 };

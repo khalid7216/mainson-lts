@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { Btn, StatusTag } from "../components/UI";
-import { productAPI } from "../services/api";
+import { productAPI, couponAPI } from "../services/api";
 import { HiStar, HiHeart, HiShoppingBag, HiCheck } from "react-icons/hi";
 import { IoArrowBack } from "react-icons/io5";
 import Breadcrumbs from "../components/Breadcrumbs";
@@ -29,6 +29,12 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
   
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+
+  // Promo Code State
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMessage, setPromoMessage] = useState("");
+  const [discountValue, setDiscountValue] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -193,8 +199,33 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
       toast("This variant is currently out of stock", "err");
       return;
     }
-    addToCart({ ...product, selectedColor, selectedSize, price: currentPrice });
+    addToCart({ ...product, selectedColor, selectedSize, price: Math.max(0, currentPrice - (discountValue || 0)) });
     toast(`${product.name} added to cart`, "ok");
+  };
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return setPromoMessage({text: "Enter a code", type: "err"});
+    setPromoLoading(true);
+    try {
+      // Import couponAPI dynamically if needed or define in api.js
+      
+      const res = await couponAPI.validate({ code: promoCode, productId: product._id || product.id });
+      if (res.data.success) {
+        let discount = 0;
+        if (res.data.type === "percentage") discount = (currentPrice * res.data.discountValue) / 100;
+        else discount = res.data.discountValue;
+        
+        if (res.data.maxDiscount && discount > res.data.maxDiscount) discount = res.data.maxDiscount;
+        
+        setDiscountValue(discount);
+        setPromoMessage({text: `Promo code applied! Saves $${discount.toFixed(2)}`, type: "ok"});
+      }
+    } catch (err) {
+      setDiscountValue(0);
+      setPromoMessage({text: err.response?.data?.message || "Invalid or expired code", type: "err"});
+    } finally {
+      setPromoLoading(false);
+    }
   };
 
   return (
@@ -342,12 +373,12 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                 style={{
                   fontSize: 32,
                   fontWeight: 600,
-                  color: "var(--gold2)",
+                  color: discountValue > 0 ? "var(--rose)" : "var(--gold2)",
                 }}
               >
-                ${currentPrice}
+                ${Math.max(0, currentPrice - discountValue).toFixed(2)}
               </span>
-              {product.orig && (
+              {(product.orig || discountValue > 0) && (
                 <span
                   style={{
                     fontSize: 20,
@@ -355,10 +386,11 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                     textDecoration: "line-through",
                   }}
                 >
-                  ${product.orig}
+                  ${currentPrice.toFixed(2)}
                 </span>
               )}
               {product.badge && <StatusTag status={product.badge} />}
+              {discountValue > 0 && <StatusTag status="DISCOUNT APPLIED" />}
             </div>
 
             {/* Description */}
@@ -498,7 +530,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
+            <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
               <Btn
                 v="primary"
                 full
@@ -527,6 +559,28 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
               >
                 <HiHeart size={22} />
               </button>
+            </div>
+
+            {/* Promo Code Checker */}
+            <div style={{ marginBottom: 32, padding: "16px", borderRadius: "12px", border: "1px dashed var(--border)", background: "rgba(255,255,255,0.02)" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 12, color: "var(--text)" }}>Gift Card or Promo Code</p>
+              <div style={{ display: "flex", gap: 10 }}>
+                <input 
+                  type="text" 
+                  placeholder="Enter code" 
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  style={{ flex: 1, padding: "12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--lift)", color: "var(--text)", outline: "none", fontSize: 13 }}
+                />
+                <Btn v="secondary" onClick={applyPromoCode} disabled={promoLoading}>
+                  {promoLoading ? "..." : "Apply"}
+                </Btn>
+              </div>
+              {promoMessage && (
+                <p style={{ marginTop: 10, fontSize: 12, color: promoMessage.type === "err" ? "var(--rose)" : "var(--gold)" }}>
+                  {promoMessage.text}
+                </p>
+              )}
             </div>
 
             {/* Features */}

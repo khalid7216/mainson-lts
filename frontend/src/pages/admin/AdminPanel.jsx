@@ -17,6 +17,7 @@ import {
   AdminBanners,
   AdminPages,
   AdminSeo,
+  AdminCoupons,
 } from "./AdminSections";
 import { productAPI, orderAPI, authAPI } from "../../services/api";
 
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { id: "orders",     icon: <IoReceiptOutline size={16} />, label: "Orders",    badgeKey: "orders" },
   { id: "customers",  icon: <IoPeopleOutline size={16} />, label: "Customers", badgeKey: "customers" },
   { id: "banners",    icon: <IoImagesOutline size={16} />, label: "Banners" },
+  { id: "coupons", icon: <IoReceiptOutline size={16} />, label: "Coupons & Gifts" },
   { id: "analytics", icon: <IoTrendingUpOutline size={16} />, label: "Analytics" },
   { id: "media",     icon: <IoImagesOutline size={16} />, label: "Media" },
   { id: "seo",      icon: <IoSearchOutline size={16} />, label: "SEO" },
@@ -262,6 +264,7 @@ const AdminPanel = ({ navigate }) => {
         { section === "analytics" && <AdminAnalytics /> }
         { section === "media"     && <AdminMedia /> }
         { section === "banners"   && <AdminBanners /> }
+        { section === "coupons"   && <AdminCoupons /> }
         { section === "pages"     && <AdminPages /> }
         { section === "seo"       && <AdminSeo /> }
         { section === "settings"  && <AdminSettings toast={toast} /> }

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { Avatar, Btn, StatusTag } from "../../components/UI";
+import { Avatar, Btn, StatusTag, Inp } from "../../components/UI";
+import { useToast } from "../../context/ToastContext";
 import { PRODUCTS, ORDERS, CUSTOMERS, REV_DATA, REV_LABELS } from "../../data/mockData";
-import { productAPI, categoryAPI, mediaAPI, orderAPI, authAPI, bannerAPI, pageAPI, seoAPI } from "../../services/api";
+import { productAPI, categoryAPI, mediaAPI, orderAPI, authAPI, bannerAPI, pageAPI, seoAPI, couponAPI } from "../../services/api";
 import ProductFormModal from "./ProductFormModal";
 import CategoryFormModal from "./CategoryFormModal";
 import RichTextEditor from "./RichTextEditor";
@@ -1913,3 +1914,135 @@ export const AdminSeo = () => {
 };
 
 
+
+// === COUPON SECTION ===
+export const AdminCoupons = () => {
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [formData, setFormData] = useState({
+    code: "", type: "percentage", discountValue: "", balance: "", minOrderValue: 0, maxDiscount: "", usageLimit: 1, expiryDate: ""
+  });
+  const toast = useToast();
+  
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await couponAPI.getAll();
+      setCoupons(res.data.coupons || []);
+    } catch (e) {
+      console.error("Fetch coupons error:", e);
+      toast(e.message || "Failed to load coupons", "err");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchCoupons(); }, []);
+
+  const handleToggle = async (id) => {
+    try {
+      await couponAPI.toggleStatus(id);
+      fetchCoupons();
+      toast("Coupon status updated", "ok");
+    } catch {
+      toast("Failed to update status", "err");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this coupon?")) return;
+    try {
+      await couponAPI.delete(id);
+      fetchCoupons();
+      toast("Coupon deleted", "info");
+    } catch {
+      toast("Failed to delete coupon", "err");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.code || !formData.discountValue || !formData.expiryDate) {
+      return toast("Fill all required fields", "err");
+    }
+    if (formData.type === "giftcard" && !formData.balance) formData.balance = formData.discountValue;
+    try {
+      await couponAPI.create(formData);
+      setAdding(false);
+      setFormData({ code: "", type: "percentage", discountValue: "", balance: "", minOrderValue: 0, maxDiscount: "", usageLimit: 1, expiryDate: "" });
+      fetchCoupons();
+      toast("Coupon created successfully", "ok");
+    } catch (err) {
+      toast(err.response?.data?.message || "Failed to create coupon", "err");
+    }
+  };
+
+  if (loading) return <div style={{ padding: 40, textAlign: "center" }}>Loading coupons...</div>;
+
+  return (
+    <div style={{ animation: "fadeIn .4s ease" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 32 }}>
+        <div>
+          <h2 style={{ fontSize: 24, fontWeight: 500, marginBottom: 8 }}>Coupons & Gift Cards</h2>
+          <p style={{ color: "var(--muted)", fontSize: 14 }}>Create and manage promo codes.</p>
+        </div>
+        <Btn v="primary" onClick={() => setAdding(!adding)}>{adding ? "Cancel" : "+ New Code"}</Btn>
+      </div>
+
+      {adding && (
+        <form onSubmit={handleSubmit} style={{ background: "var(--surface)", padding: 24, borderRadius: 12, marginBottom: 32, border: "1px solid var(--border)" }}>
+          <div className="grid-2-col" style={{ gap: 20 }}>
+             <Inp label="Code (e.g. SUMMER50)" value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})} required />
+             <div>
+                <label style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--muted)", marginBottom: 8, display: "block" }}>Type</label>
+                <select 
+                  style={{ width: "100%", padding: "14px 16px", borderRadius: 8, border: "1px solid var(--border)", background: "rgba(255,255,255,0.02)", color: "var(--text)" }} 
+                  value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})}
+                >
+                  <option value="percentage">Percentage Discount</option>
+                  <option value="fixed">Fixed Amount</option>
+                  <option value="giftcard">Gift Card</option>
+                </select>
+             </div>
+             <Inp label="Discount Value / initial balance ($ or %)" type="number" value={formData.discountValue} onChange={(e) => setFormData({...formData, discountValue: e.target.value})} required />
+             <Inp label="Usage Limit (Per user / Total)" type="number" value={formData.usageLimit} onChange={(e) => setFormData({...formData, usageLimit: e.target.value})} />
+             <Inp label="Expiry Date" type="date" value={formData.expiryDate} onChange={(e) => setFormData({...formData, expiryDate: e.target.value})} required />
+          </div>
+          <Btn v="primary" type="submit" style={{ marginTop: 24 }}>Save Code</Btn>
+        </form>
+      )}
+
+      <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)", overflow: "hidden" }}>
+        <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "rgba(255,255,255,0.02)", borderBottom: "1px solid var(--border)" }}>
+              <th style={{ padding: "16px 20px", fontSize: 11, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".1em" }}>Code</th>
+              <th style={{ padding: "16px 20px", fontSize: 11, color: "var(--muted)" }}>Type</th>
+              <th style={{ padding: "16px 20px", fontSize: 11, color: "var(--muted)" }}>Value</th>
+              <th style={{ padding: "16px 20px", fontSize: 11, color: "var(--muted)" }}>Expiry</th>
+              <th style={{ padding: "16px 20px", fontSize: 11, color: "var(--muted)" }}>Status</th>
+              <th style={{ padding: "16px 20px", fontSize: 11, textAlign: "right" }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coupons.map((c) => (
+              <tr key={c._id} style={{ borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.01)" }}>
+                <td style={{ padding: "16px 20px", fontWeight: 600 }}>{c.code}</td>
+                <td style={{ padding: "16px 20px", color: "var(--gold)", textTransform: "capitalize" }}>{c.type}</td>
+                <td style={{ padding: "16px 20px" }}>{c.type === "percentage" ? `${c.discountValue}%` : `$${c.discountValue}`}</td>
+                <td style={{ padding: "16px 20px" }}>{new Date(c.expiryDate).toLocaleDateString()}</td>
+                <td style={{ padding: "16px 20px" }}><StatusTag status={c.isActive ? "ACTIVE" : "INACTIVE"} /></td>
+                <td style={{ padding: "16px 20px", display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                   <Btn v="secondary" onClick={() => handleToggle(c._id)}>{c.isActive ? "Deactivate" : "Activate"}</Btn>
+                   <button onClick={() => handleDelete(c._id)} style={{ background: "none", border: "none", color: "var(--rose)", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>Delete</button>
+                </td>
+              </tr>
+            ))}
+            {coupons.length === 0 && <tr><td colSpan={6} style={{ padding: 30, textAlign: "center", color: "var(--muted)" }}>No coupons found.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};

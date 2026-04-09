@@ -32,10 +32,10 @@ const TrackOrderPage = () => {
   };
 
   return (
-    <div style={{ paddingTop: 90, minHeight: "80vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div style={{ paddingTop: 90, minHeight: "80vh" }}>
       <SEO pageName="Track Order" />
-      <div className="container" style={{ maxWidth: 800 }}>
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+      <div className="container" style={{ maxWidth: 800, margin: "0 auto" }}>
+        <div style={{ textAlign: "left", marginBottom: 40 }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 300, color: "var(--text)", marginBottom: 12 }}>
             Track Your Order
           </h1>
@@ -72,7 +72,7 @@ const TrackOrderPage = () => {
             
             {error && <div style={{ padding: "12px 16px", background: "rgba(224, 108, 117, 0.1)", border: "1px solid rgba(224, 108, 117, 0.3)", color: "var(--rose)", borderRadius: 6, fontSize: 14 }}>? {error}</div>}
 
-            <Btn type="submit" disabled={loading} style={{ alignSelf: "center", minWidth: 200, padding: "16px 24px" }}>
+            <Btn type="submit" disabled={loading} style={{ alignSelf: "flex-start", minWidth: 200, padding: "16px 24px" }}>
               {loading ? "Locating..." : "Track Package"}
             </Btn>
           </form>

@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { orderAPI, paymentAPI } from "../services/api";
+import { orderAPI, paymentAPI, couponAPI } from "../services/api";
 import { Btn } from "../components/UI";
 import { IoArrowBack, IoCheckmarkCircle, IoCloseCircle, IoWalletOutline, IoFlaskOutline } from "react-icons/io5";
 
@@ -30,6 +30,12 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
   const [orderResult, setOrderResult] = useState(null);
   const [errorMsg, setErrorMsg]   = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card"); // card | cod
+  
+  // Coupon State
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   // Ref to track a pending order so we can rollback if user leaves
   const pendingOrderId = useRef(null);
@@ -76,9 +82,41 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
   });
 
   const subtotal     = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const tax          = Math.round(subtotal * 0.08 * 100) / 100;
+  
+  // Calculate discount
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === "percentage") {
+      discountAmount = (subtotal * appliedCoupon.discountValue) / 100;
+      if (appliedCoupon.maxDiscount && discountAmount > appliedCoupon.maxDiscount) {
+        discountAmount = appliedCoupon.maxDiscount;
+      }
+    } else {
+      discountAmount = appliedCoupon.discountValue;
+    }
+  }
+
+  const tax          = Math.round((subtotal - discountAmount) * 0.08 * 100) / 100;
   const shippingCost = subtotal > 200 ? 0 : 15;
-  const total        = Math.round((subtotal + tax + shippingCost) * 100) / 100;
+  const total        = Math.round((subtotal - discountAmount + tax + shippingCost) * 100) / 100;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res = await couponAPI.validate({ code: couponCode, cartTotal: subtotal });
+      if (res.data.success) {
+        setAppliedCoupon(res.data);
+        toast("Coupon applied successfully!", "ok");
+      }
+    } catch (err) {
+      setCouponError(err.message || "Invalid coupon");
+      setAppliedCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -121,6 +159,7 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
         cartItems,
         shippingAddress: address,
         notes: paymentMethod === "cod" ? "Cash on Delivery" : "",
+        couponCode: appliedCoupon?.code || "",
       });
 
       // Track pending order — rollback fires if user leaves now
@@ -433,11 +472,54 @@ const CheckoutPage = ({ cart, setCart, navigate }) => {
               ))}
             </div>
 
+            {/* Coupon Code Input */}
+            <div style={{ marginBottom: 24, padding: "16px 0", borderBottom: "1px solid var(--border)" }}>
+              <label style={{ display: "block", fontSize: 11, color: "var(--muted)", textTransform: "uppercase", marginBottom: 12, letterSpacing: ".05em" }}>
+                Promo Code
+              </label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input 
+                  type="text" 
+                  className="inp" 
+                  placeholder="Enter code" 
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  style={{ fontSize: 13, padding: "10px 14px" }}
+                />
+                <button 
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={couponLoading || !couponCode.trim()}
+                  style={{
+                    padding: "0 16px", borderRadius: 8, background: "var(--lift)", border: "1px solid var(--border2)",
+                    color: "var(--text)", fontSize: 12, fontWeight: 500, cursor: "pointer", transition: "all .2s"
+                  }}
+                  onMouseEnter={e => e.target.style.background = "var(--border2)"}
+                  onMouseLeave={e => e.target.style.background = "var(--lift)"}
+                >
+                  {couponLoading ? "..." : "Apply"}
+                </button>
+              </div>
+              {couponError && <p style={{ color: "var(--rose)", fontSize: 11, marginTop: 8 }}>{couponError}</p>}
+              {appliedCoupon && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, padding: "8px 12px", background: "rgba(201,168,76,.1)", borderRadius: 6 }}>
+                  <span style={{ fontSize: 12, color: "var(--gold2)", fontWeight: 500 }}>{appliedCoupon.code} Applied</span>
+                  <button onClick={() => setAppliedCoupon(null)} style={{ background: "none", border: "none", color: "var(--rose)", fontSize: 10, cursor: "pointer", textDecoration: "underline" }}>Remove</button>
+                </div>
+              )}
+            </div>
+
             {/* Totals */}
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: "var(--muted)" }}>Subtotal</span>
               <span style={{ fontSize: 13, fontWeight: 500 }}>${subtotal.toFixed(2)}</span>
             </div>
+            {discountAmount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ fontSize: 13, color: "var(--gold2)" }}>Discount</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "var(--gold2)" }}>-${discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: "var(--muted)" }}>Tax (8%)</span>
               <span style={{ fontSize: 13, fontWeight: 500 }}>${tax.toFixed(2)}</span>

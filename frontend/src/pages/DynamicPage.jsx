@@ -60,7 +60,7 @@ const DynamicPage = () => {
     <div style={{ paddingTop: 72 }}>
       <style>{`
         .dynamic-content {
-          text-align: center;
+          text-align: left;
         }
         .dynamic-content h1,
         .dynamic-content h2,
@@ -82,13 +82,12 @@ const DynamicPage = () => {
           margin-bottom: 1.2em;
           color: var(--muted);
           max-width: 700px;
-          margin-left: auto;
-          margin-right: auto;
+          line-height: 1.6;
         }
         .dynamic-content ul, .dynamic-content ol {
           text-align: left;
-          max-width: 600px;
-          margin: 1em auto 1.5em;
+          max-width: 700px;
+          margin: 1em 0 1.5em;
           padding-left: 1.5em;
         }
         .dynamic-content li {
@@ -111,7 +110,7 @@ const DynamicPage = () => {
         .dynamic-content blockquote {
           border-left: 3px solid var(--gold);
           padding: 16px 24px;
-          margin: 2em auto;
+          margin: 2em 0;
           max-width: 600px;
           background: rgba(201,168,76,.04);
           border-radius: 0 8px 8px 0;
@@ -122,20 +121,20 @@ const DynamicPage = () => {
         .dynamic-content img {
           max-width: 100%;
           border-radius: 12px;
-          margin: 2em auto;
+          margin: 2em 0;
           display: block;
         }
         .dynamic-content hr {
           border: none;
           height: 1px;
           background: var(--border);
-          margin: 3em auto;
+          margin: 3em 0;
           max-width: 200px;
         }
         .dynamic-content table {
           width: 100%;
           max-width: 700px;
-          margin: 2em auto;
+          margin: 2em 0;
           border-collapse: collapse;
           text-align: left;
         }
@@ -154,16 +153,18 @@ const DynamicPage = () => {
       {/* Page Header */}
       <section
         style={{
-          padding: "80px clamp(20px, 5vw, 60px) 40px",
-          textAlign: "center",
+          padding: "80px clamp(20px, 5vw, 40px) 40px",
+          textAlign: "left",
           position: "relative",
           overflow: "hidden",
+          maxWidth: 960,
+          margin: "0 auto"
         }}
       >
         {/* Background glow */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(201,168,76,.08) 0%, transparent 60%)",
+          backgroundImage: "radial-gradient(ellipse at 0% 0%, rgba(201,168,76,.08) 0%, transparent 60%)",
         }} />
         <p style={{
           fontSize: 10, letterSpacing: ".4em", textTransform: "uppercase",
@@ -185,17 +186,17 @@ const DynamicPage = () => {
         </h1>
         <div style={{
           width: 60, height: 1, background: "var(--gold)",
-          margin: "24px auto 0", opacity: 0.5,
+          margin: "24px 0 0", opacity: 0.5,
         }} />
       </section>
 
       {/* Page Content */}
       <div
-        className="fu"
+        className="fu dynamic-content"
         style={{
           maxWidth: 960,
           margin: "0 auto",
-          padding: "20px clamp(20px, 5vw, 40px) 80px",
+          padding: "0 clamp(20px, 5vw, 40px) 80px",
           minHeight: "40vh",
         }}
       >

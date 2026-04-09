@@ -23,6 +23,8 @@ const mediaRoutes          = require("./routes/mediaRoutes");
 const bannerRoutes         = require("./routes/bannerRoutes");
 const pageRoutes           = require("./routes/pageRoutes");
 const seoRoutes            = require("./routes/seoRoutes");
+const couponRoutes         = require("./routes/couponRoutes");
+const chatbotRoutes        = require("./routes/chatbotRoutes");
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
@@ -86,6 +88,8 @@ app.use("/api/media",          mediaRoutes);
 app.use("/api/banners",        bannerRoutes);
 app.use("/api/pages",          pageRoutes);
 app.use("/api/seo",            seoRoutes);
+app.use("/api/coupons",        couponRoutes);
+app.use("/api/chatbot",        chatbotRoutes);
 app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date() }));
 
 /* ── API 404 handler ────────────────────────────── */
