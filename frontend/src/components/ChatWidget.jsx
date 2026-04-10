@@ -38,7 +38,7 @@ const ChatWidget = () => {
         setMessages(prev => [...prev, { role: "bot", text: res.reply }]);
       }
     } catch (err) {
-      setMessages(prev => [...prev, { role: "bot", text: "I apologize, but I'm having trouble connecting. Please try again later." }]);
+      setMessages(prev => [...prev, { role: "bot", text: `Concierge: ${err.message || "I apologize, but I'm having trouble connecting. Please try again later."}` }]);
     } finally {
       setLoading(false);
     }

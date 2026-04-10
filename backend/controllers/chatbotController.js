@@ -1,9 +1,9 @@
 // backend/controllers/chatbotController.js
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Groq = require("groq-sdk");
 const Product = require("../models/Product");
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize Groq
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const SYSTEM_PROMPT = `
 You are the Maison Élite Virtual Concierge, a highly sophisticated, helpful, and luxury-oriented AI assistant for a high-end fashion brand. 
@@ -35,34 +35,37 @@ exports.handleChat = async (req, res) => {
       return res.status(400).json({ success: false, message: "Message is required" });
     }
 
-    // Fetch some featured products for context (optional but helps)
+    // Fetch some featured products for context
     const featuredProducts = await Product.find({ isActive: true }).limit(5).select("name price slug");
     const productContext = featuredProducts.map(p => `${p.name} ($${p.price})`).join(", ");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Prepare messages for Groq
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT + "\n\nCurrent Featured Products: " + productContext },
+      ...(history || []).map(h => ({
+        role: h.role === "user" ? "user" : "assistant",
+        content: h.text
+      })),
+      { role: "user", content: message }
+    ];
 
-    // Format history for Gemini
-    const chat = model.startChat({
-      history: [
-        { role: "user", parts: [{ text: SYSTEM_PROMPT + "\n\nCurrent Featured Products: " + productContext }] },
-        { role: "model", parts: [{ text: "Understood. I am the Maison Élite Virtual Concierge. I am ready to serve our distinguished guests with elegance and precision. How may I assist you today?" }] },
-        ...(history || []).map(h => ({
-          role: h.role === "user" ? "user" : "model",
-          parts: [{ text: h.text }]
-        }))
-      ],
+    const completion = await groq.chat.completions.create({
+      messages,
+      model: "llama3-70b-8192",
+      temperature: 0.7,
+      max_tokens: 1024,
+      top_p: 1,
+      stream: false,
     });
 
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
-    const text = response.text();
+    const reply = completion.choices[0]?.message?.content || "I apologize, but I am momentarily unable to assist. How else may I serve you?";
 
     res.status(200).json({
       success: true,
-      reply: text
+      reply
     });
   } catch (error) {
-    console.error("Chatbot Error:", error);
-    res.status(500).json({ success: false, message: "The concierge is currently unavailable. Please try again in a moment." });
+    console.error("Groq Chatbot Error:", error);
+    res.status(500).json({ success: false, message: "The concierge is currently resting. Please try again in a moment." });
   }
 };
