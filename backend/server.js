@@ -26,7 +26,7 @@ const seoRoutes            = require("./routes/seoRoutes");
 const couponRoutes         = require("./routes/couponRoutes");
 const chatbotRoutes        = require("./routes/chatbotRoutes");
 const app  = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 /* ── Connect DB ─────────────────────────────────── */
 connectDB();

@@ -1,71 +1,60 @@
-// backend/controllers/chatbotController.js
 const Groq = require("groq-sdk");
-const Product = require("../models/Product");
-
-// Initialize Groq
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-const SYSTEM_PROMPT = `
-You are the Maison Élite Virtual Concierge, a highly sophisticated, helpful, and luxury-oriented AI assistant for a high-end fashion brand. 
-Your goal is to assist customers with their shopping experience, provide product details, explain brand values, and help them with their orders.
-
-Tone: Elegant, professional, welcoming, and exclusive. Use words like "certainly", "absolutely", "my pleasure", and "magnificent".
-
-Knowledge Base:
-- Maison Élite is a luxury retail brand specializing in timeless fashion pieces.
-- Return Policy: 30-day complimentary returns for all orders.
-- Shipping: Free shipping on orders over $200. Standard shipping is $15.
-- Craftsmanship: We use only the finest materials (silk, cashmere, premium leather).
-
-Abilities:
-- You can provide information on any product in our catalog.
-- You can explain how to use a coupon (applied during checkout).
-- You can help users find products by category (Clothing, Accessories, Shoes, etc.).
-
-Crucial: If a user asks to "confirm my order" or "place order", inform them that you are ready to assist and they should proceed to the checkout page where you've ensured everything is set, or simply use the Checkout button. (In a future update, I will be able to process this directly).
-
-Don't use markdown like # or ##. Use bold text (**) for emphasis. Keep responses concise but delightful.
-`;
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.handleChat = async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { message, conversationHistory = [] } = req.body;
 
     if (!message) {
       return res.status(400).json({ success: false, message: "Message is required" });
     }
 
-    // Fetch some featured products for context
-    const featuredProducts = await Product.find({ isActive: true }).limit(5).select("name price slug");
-    const productContext = featuredProducts.map(p => `${p.name} ($${p.price})`).join(", ");
+    const systemPrompt = "You are a helpful assistant for Maison Élite, a luxury e-commerce store. Help users with product questions, orders, and general shopping queries. Be polite and professional.";
 
-    // Prepare messages for Groq
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT + "\n\nCurrent Featured Products: " + productContext },
-      ...(history || []).map(h => ({
-        role: h.role === "user" ? "user" : "assistant",
-        content: h.text
-      })),
-      { role: "user", content: message }
-    ];
+    if (process.env.GROQ_API_KEY) {
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...conversationHistory.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content || msg.text || ""
+        })),
+        { role: "user", content: message }
+      ];
 
-    const completion = await groq.chat.completions.create({
-      messages,
-      model: "llama3-70b-8192",
-      temperature: 0.7,
-      max_tokens: 1024,
-      top_p: 1,
-      stream: false,
-    });
+      const completion = await groq.chat.completions.create({
+        messages,
+        model: "llama-3.3-70b-versatile", // Fast and capable 
+      });
 
-    const reply = completion.choices[0]?.message?.content || "I apologize, but I am momentarily unable to assist. How else may I serve you?";
+      const reply = completion.choices[0]?.message?.content || "No reply generated.";
+      return res.status(200).json({ success: true, reply });
 
-    res.status(200).json({
-      success: true,
-      reply
-    });
+    } else if (process.env.GEMINI_API_KEY) {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+      const history = conversationHistory.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content || msg.text || "" }]
+      }));
+
+      const chat = model.startChat({ history });
+      // Prepend system prompt to the immediate message if there's no native system prompt parameter for gemini-pro
+      const promptToEnsureContext = history.length === 0 ? `System: ${systemPrompt}\nUser: ${message}` : `${message}`;
+
+      const result = await chat.sendMessage(promptToEnsureContext);
+      const response = await result.response;
+
+      return res.status(200).json({ success: true, reply: response.text() });
+
+    } else {
+      return res.status(503).json({ success: false, message: "Chatbot temporarily unavailable" });
+    }
+
   } catch (error) {
-    console.error("Groq Chatbot Error:", error);
-    res.status(500).json({ success: false, message: "The concierge is currently resting. Please try again in a moment." });
+    console.error("Chatbot API Error:", error);
+    return res.status(503).json({ success: false, message: "Chatbot temporarily unavailable" });
   }
 };

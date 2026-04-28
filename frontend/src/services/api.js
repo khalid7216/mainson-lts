@@ -362,6 +362,15 @@ export const couponAPI = {
   delete: (id) => request(`/coupons/${id}`, { method: "DELETE" })
 };
 
+/* ══════════════════════════════════════════════════
+   CHATBOT APIS
+══════════════════════════════════════════════════ */
 export const chatbotAPI = {
-  chat: (message, history = []) => request("/chatbot", { method: "POST", body: JSON.stringify({ message, history }) })
+  chat: async (message, history = []) => {
+    return await request("/chatbot", {
+      method: "POST",
+      body: JSON.stringify({ message, history }),
+    });
+  },
 };
+
