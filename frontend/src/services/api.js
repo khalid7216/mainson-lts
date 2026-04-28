@@ -367,7 +367,7 @@ export const couponAPI = {
 ══════════════════════════════════════════════════ */
 export const chatbotAPI = {
   chat: async (message, history = []) => {
-    return await request("/chatbot", {
+    return await request("/chatbot/message", {
       method: "POST",
       body: JSON.stringify({ message, history }),
     });
