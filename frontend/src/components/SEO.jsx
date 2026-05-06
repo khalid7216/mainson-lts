@@ -1,31 +1,31 @@
 // frontend/src/components/SEO.jsx
-// ══════════════════════════════════════════════════════════
-//  Reusable SEO component — fetches from DB, injects <head>
+// ==========================================================
+//  Reusable SEO component - fetches from DB, injects <head>
 //  Usage: <SEO pageName="home" />
 //         <SEO pageName="shop" />
 //         <SEO pageName="product" title="Override Title" />
-// ══════════════════════════════════════════════════════════
+// ==========================================================
 
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { seoAPI } from "../services/api";
 
-// ── Default fallback values (prevents flicker on first load)
+// -- Default fallback values (prevents flicker on first load)
 const DEFAULTS = {
-  title: "Maison Élite — Luxury Fashion",
+  title: "Maison Elite - Luxury Fashion",
   description:
-    "Discover Maison Élite's curated luxury fashion collections. Timeless elegance crafted from the finest materials.",
+    "Discover Maison Elite's curated luxury fashion collections. Timeless elegance crafted from the finest materials.",
   keywords: ["luxury fashion", "maison elite", "designer clothing"],
   ogImage: "",
   noIndex: false,
 };
 
-// ── Pages that search engines should NOT index
+// -- Pages that search engines should NOT index
 const NOINDEX_PAGES = ["cart", "checkout", "profile", "settings", "admin", "login", "signup"];
 
 const SEO = ({
   pageName,
-  // Optional overrides — useful for dynamic pages like products
+  // Optional overrides - useful for dynamic pages like products
   title: titleOverride,
   description: descOverride,
   ogImage: ogOverride,
@@ -46,7 +46,7 @@ const SEO = ({
     if (!pageName) return;
 
     // Quick local cache so navigating back doesn't re-fetch
-    const cacheKey = `seo_${pageName}`;
+    const cacheKey = 'seo_' + (pageName);
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       const parsed = JSON.parse(cached);
@@ -77,7 +77,7 @@ const SEO = ({
         });
       })
       .catch(() => {
-        // Silently keep defaults on failure — never crash user's page
+        // Silently keep defaults on failure - never crash user's page
       });
   }, [pageName, titleOverride, descOverride, ogOverride, canonicalOverride]);
 
@@ -89,39 +89,39 @@ const SEO = ({
 
   return (
     <Helmet>
-      {/* ── Primary ─────────────────────────────────── */}
+      {/* -- Primary ----------------------------------- */}
       <title>{seo.title}</title>
       <meta name="description" content={seo.description} />
       {seo.keywords?.length > 0 && (
         <meta name="keywords" content={seo.keywords.join(", ")} />
       )}
 
-      {/* ── Robots ──────────────────────────────────── */}
+      {/* -- Robots ------------------------------------ */}
       {seo.noIndex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
         <meta name="robots" content="index, follow" />
       )}
 
-      {/* ── Canonical ───────────────────────────────── */}
+      {/* -- Canonical --------------------------------- */}
       <link rel="canonical" href={seo.canonical || currentUrl} />
 
-      {/* ── Open Graph (Facebook, WhatsApp, LinkedIn) ─ */}
+      {/* -- Open Graph (Facebook, WhatsApp, LinkedIn) - */}
       <meta property="og:title" content={seo.title} />
       <meta property="og:description" content={seo.description} />
       <meta property="og:image" content={resolvedOgImage} />
       <meta property="og:url" content={currentUrl} />
       <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="Maison Élite" />
+      <meta property="og:site_name" content="Maison Elite" />
 
-      {/* ── Twitter Card ────────────────────────────── */}
+      {/* -- Twitter Card ------------------------------ */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={resolvedOgImage} />
 
-      {/* ── Extra ───────────────────────────────────── */}
-      <meta name="author" content="Maison Élite" />
+      {/* -- Extra ------------------------------------- */}
+      <meta name="author" content="Maison Elite" />
       <meta name="theme-color" content="#0a0a0a" />
     </Helmet>
   );

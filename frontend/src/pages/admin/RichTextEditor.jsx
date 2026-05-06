@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from "react";
 
-/* ── SVG Icons (inline, no dependency issues) ──── */
+/* -- SVG Icons (inline, no dependency issues) ---- */
 const IconBold = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6V4zm0 8h9a4 4 0 014 4 4 4 0 01-4 4H6v-8z"/></svg>;
 const IconItalic = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>;
 const IconUnderline = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3v7a6 6 0 0012 0V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>;
@@ -16,7 +16,7 @@ const IconAlignC = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="n
 const IconAlignR = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
 const IconClear = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="4" x2="20" y2="20"/><path d="M6 4h8l-3.5 7"/><line x1="12" y1="20" x2="8" y2="20"/></svg>;
 
-/* ── Toolbar Button ─────────────────────────────── */
+/* -- Toolbar Button ------------------------------- */
 const TBtn = ({ icon, label, active, onClick, children }) => (
   <button
     type="button"
@@ -46,7 +46,7 @@ const TBtn = ({ icon, label, active, onClick, children }) => (
   </button>
 );
 
-/* ── Divider ─────────────────────────────────────── */
+/* -- Divider --------------------------------------- */
 const Divider = () => (
   <div
     style={{
@@ -59,9 +59,9 @@ const Divider = () => (
   />
 );
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    RICH TEXT EDITOR
-═══════════════════════════════════════════════════ */
+=================================================== */
 const RichTextEditor = ({ defaultValue = "", onChange, placeholder = "Start writing your page content..." }) => {
   const editorRef = useRef(null);
   const isInitialized = useRef(false);
@@ -115,7 +115,7 @@ const RichTextEditor = ({ defaultValue = "", onChange, placeholder = "Start writ
         background: "var(--lift)",
       }}
     >
-      {/* ── Toolbar ───────────────────────────────── */}
+      {/* -- Toolbar --------------------------------- */}
       <div
         style={{
           display: "flex",
@@ -291,8 +291,7 @@ const RichTextEditor = ({ defaultValue = "", onChange, placeholder = "Start writ
         {/* Clear formatting */}
         <TBtn icon={<IconClear />} label="Clear Formatting" onClick={() => exec("removeFormat")} />
       </div>
-
-      {/* ── Editor Area ──────────────────────────── */}
+      {/* -- Editor Area ---------------------------- */}
       <div
         ref={editorRef}
         contentEditable
@@ -312,90 +311,8 @@ const RichTextEditor = ({ defaultValue = "", onChange, placeholder = "Start writ
           fontFamily: "'Jost', sans-serif",
         }}
       />
-
-      {/* ── Styles ───────────────────────────────── */}
-      <style>{`
-        [contenteditable][data-placeholder]:empty:before {
-          content: attr(data-placeholder);
-          color: var(--dim);
-          font-style: italic;
-          pointer-events: none;
-        }
-        [contenteditable] h1 {
-          font-family: 'Playfair Display', serif;
-          font-size: 28px;
-          font-weight: 400;
-          margin: 0.8em 0 0.4em;
-          color: var(--text);
-        }
-        [contenteditable] h2 {
-          font-family: 'Playfair Display', serif;
-          font-size: 22px;
-          font-weight: 400;
-          margin: 0.7em 0 0.3em;
-          color: var(--gold2);
-        }
-        [contenteditable] h3 {
-          font-family: 'Playfair Display', serif;
-          font-size: 18px;
-          font-weight: 500;
-          margin: 0.6em 0 0.3em;
-          color: var(--text);
-        }
-        [contenteditable] h4 {
-          font-size: 16px;
-          font-weight: 600;
-          margin: 0.5em 0 0.3em;
-          color: var(--text);
-        }
-        [contenteditable] p {
-          margin: 0 0 0.6em;
-        }
-        [contenteditable] blockquote {
-          border-left: 3px solid var(--gold);
-          padding: 8px 16px;
-          margin: 1em 0;
-          background: rgba(201,168,76,.04);
-          border-radius: 0 6px 6px 0;
-          font-style: italic;
-          color: var(--muted);
-        }
-        [contenteditable] pre {
-          background: rgba(0,0,0,.3);
-          padding: 12px 16px;
-          border-radius: 6px;
-          font-family: monospace;
-          font-size: 13px;
-          overflow-x: auto;
-        }
-        [contenteditable] ul, [contenteditable] ol {
-          padding-left: 1.5em;
-          margin: 0.5em 0;
-        }
-        [contenteditable] li {
-          margin-bottom: 0.3em;
-        }
-        [contenteditable] a {
-          color: var(--gold);
-          text-decoration: underline;
-        }
-        [contenteditable] hr {
-          border: none;
-          height: 1px;
-          background: var(--border);
-          margin: 1.5em 0;
-        }
-        [contenteditable]::-webkit-scrollbar {
-          width: 6px;
-        }
-        [contenteditable]::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        [contenteditable]::-webkit-scrollbar-thumb {
-          background: var(--border);
-          border-radius: 3px;
-        }
-      `}</style>
+      {/* -- Styles --------------------------------- */}
+      <style>{"\n        [contenteditable][data-placeholder]:empty:before {\n          content: attr(data-placeholder);\n          color: var(--dim);\n          font-style: italic;\n          pointer-events: none;\n        }\n        [contenteditable] h1 {\n          font-family: 'Playfair Display', serif;\n          font-size: 28px;\n          font-weight: 400;\n          margin: 0.8em 0 0.4em;\n          color: var(--text);\n        }\n        [contenteditable] h2 {\n          font-family: 'Playfair Display', serif;\n          font-size: 22px;\n          font-weight: 400;\n          margin: 0.7em 0 0.3em;\n          color: var(--gold2);\n        }\n        [contenteditable] h3 {\n          font-family: 'Playfair Display', serif;\n          font-size: 18px;\n          font-weight: 500;\n          margin: 0.6em 0 0.3em;\n          color: var(--text);\n        }\n        [contenteditable] h4 {\n          font-size: 16px;\n          font-weight: 600;\n          margin: 0.5em 0 0.3em;\n          color: var(--text);\n        }\n        [contenteditable] p {\n          margin: 0 0 0.6em;\n        }\n        [contenteditable] blockquote {\n          border-left: 3px solid var(--gold);\n          padding: 8px 16px;\n          margin: 1em 0;\n          background: rgba(201,168,76,.04);\n          border-radius: 0 6px 6px 0;\n          font-style: italic;\n          color: var(--muted);\n        }\n        [contenteditable] pre {\n          background: rgba(0,0,0,.3);\n          padding: 12px 16px;\n          border-radius: 6px;\n          font-family: monospace;\n          font-size: 13px;\n          overflow-x: auto;\n        }\n        [contenteditable] ul, [contenteditable] ol {\n          padding-left: 1.5em;\n          margin: 0.5em 0;\n        }\n        [contenteditable] li {\n          margin-bottom: 0.3em;\n        }\n        [contenteditable] a {\n          color: var(--gold);\n          text-decoration: underline;\n        }\n        [contenteditable] hr {\n          border: none;\n          height: 1px;\n          background: var(--border);\n          margin: 1.5em 0;\n        }\n        [contenteditable]::-webkit-scrollbar {\n          width: 6px;\n        }\n        [contenteditable]::-webkit-scrollbar-track {\n          background: transparent;\n        }\n        [contenteditable]::-webkit-scrollbar-thumb {\n          background: var(--border);\n          border-radius: 3px;\n        }\n      "}</style>
     </div>
   );
 };

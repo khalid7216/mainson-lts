@@ -1,7 +1,7 @@
 // frontend/src/pages/SettingsPage.jsx
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 //  NEW FILE: User settings - change password, update username
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -32,7 +32,7 @@ const SettingsPage = ({ navigate }) => {
   });
   const [passErrors, setPassErrors] = useState({});
 
-  /* ── Update Profile ────────────────────────────── */
+  /* -- Update Profile ------------------------------ */
   const handleUpdateProfile = async () => {
     const errors = {};
     if (!profileForm.name.trim()) errors.name = "Name is required";
@@ -48,12 +48,12 @@ const SettingsPage = ({ navigate }) => {
     try {
       // Call API to update user
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/auth/update-profile`,
+        (process.env.REACT_APP_API_URL || "http://localhost:5000/api") + '/auth/update-profile',
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: 'Bearer ' + (localStorage.getItem("token")),
           },
           body: JSON.stringify(profileForm),
         }
@@ -72,7 +72,7 @@ const SettingsPage = ({ navigate }) => {
     }
   };
 
-  /* ── Change Password ───────────────────────────── */
+  /* -- Change Password ----------------------------- */
   const handleChangePassword = async () => {
     const errors = {};
 
@@ -95,12 +95,12 @@ const SettingsPage = ({ navigate }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/auth/change-password`,
+        (process.env.REACT_APP_API_URL || "http://localhost:5000/api") + '/auth/change-password',
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: 'Bearer ' + (localStorage.getItem("token")),
           },
           body: JSON.stringify({
             currentPassword: passForm.current,
@@ -170,9 +170,7 @@ const SettingsPage = ({ navigate }) => {
               padding: "12px 20px",
               background: "none",
               border: "none",
-              borderBottom: `2px solid ${
-                tab === t.id ? "var(--gold)" : "transparent"
-              }`,
+              borderBottom: '2px solid ${\n                tab === t.id ? "var(--gold)" : "transparent"\n              }',
               color: tab === t.id ? "var(--gold2)" : "var(--muted)",
               fontSize: 13,
               letterSpacing: ".08em",
@@ -201,7 +199,7 @@ const SettingsPage = ({ navigate }) => {
           padding: 32,
         }}
       >
-        {/* ═══ PROFILE TAB ═══ */}
+        {/* === PROFILE TAB === */}
         {tab === "profile" && (
           <div>
             <h2
@@ -275,7 +273,7 @@ const SettingsPage = ({ navigate }) => {
           </div>
         )}
 
-        {/* ═══ PASSWORD TAB ═══ */}
+        {/* === PASSWORD TAB === */}
         {tab === "password" && (
           <div>
             <h2

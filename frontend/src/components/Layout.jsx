@@ -1,20 +1,20 @@
 // frontend/src/components/Layout.jsx
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 //  FIXED: Ticker positioned below navbar + AuthWrap updated
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 
 import React from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Add this import
 import { IoSparklesOutline } from "react-icons/io5";
 
-/* ── Announcement ticker ────────────────────────────── */
+/* -- Announcement ticker ------------------------------ */
 export const Ticker = () => {
   const items = [
     <><IoSparklesOutline style={{ marginRight: 6 }} /> Free Shipping on Orders Over $200</>,
     <><IoSparklesOutline style={{ marginRight: 6 }} /> New SS26 Collection Now Live</>,
     <><IoSparklesOutline style={{ marginRight: 6 }} /> Complimentary Returns Within 30 Days</>,
     <><IoSparklesOutline style={{ marginRight: 6 }} /> Exclusive Members: Early Access to Sales</>,
-    <><IoSparklesOutline style={{ marginRight: 6 }} /> Ethically Sourced · Sustainably Made</>,
+    <><IoSparklesOutline style={{ marginRight: 6 }} /> Ethically Sourced   Sustainably Made</>,
   ];
   
   // Since we are using JSX elements now instead of strings, 
@@ -62,7 +62,7 @@ export const Ticker = () => {
   );
 };
 
-/* ── Auth split-screen wrapper ──────────────────────── */
+/* -- Auth split-screen wrapper ------------------------ */
 export const AuthWrap = ({ title, subtitle, children }) => {
   const navigate = useNavigate(); // ✅ CHANGED: Use navigate instead of setPage
 
@@ -75,7 +75,7 @@ export const AuthWrap = ({ title, subtitle, children }) => {
       }}
       className="grid-1-mobile"
     >
-      {/* Left — decorative panel */}
+      {/* Left - decorative panel */}
       <div
         style={{
           background: "var(--surface)",
@@ -129,9 +129,9 @@ export const AuthWrap = ({ title, subtitle, children }) => {
             {Array.from({ length: 20 }).map((_, i) => (
               <line
                 key={i}
-                x1={`${i * 5.5}%`}
+                x1={i * 5.5 + "%"}
                 y1="0"
-                x2={`${i * 5.5 + 30}%`}
+                x2={i * 5.5 + 30 + "%"}
                 y2="100%"
                 stroke="var(--gold)"
                 strokeWidth="1"
@@ -168,7 +168,7 @@ export const AuthWrap = ({ title, subtitle, children }) => {
                 textTransform: "uppercase",
               }}
             >
-              MAISON<span className="gold-text">·ÉLITE</span>
+              MAISON<span className="gold-text"> ELITE</span>
             </span>
           </button>
 
@@ -214,7 +214,7 @@ export const AuthWrap = ({ title, subtitle, children }) => {
               color: "var(--gold)",
             }}
           >
-            — Giorgio Armani
+            - Giorgio Armani
           </p>
 
           {/* Stats row */}
@@ -251,8 +251,7 @@ export const AuthWrap = ({ title, subtitle, children }) => {
           </div>
         </div>
       </div>
-
-      {/* Right — form panel */}
+      {/* Right - form panel */}
       <div
         style={{
           background: "var(--void)",

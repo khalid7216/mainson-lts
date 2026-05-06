@@ -1,368 +1,78 @@
-// frontend/src/components/ProductCard.jsx
-// ═════════════════════════════════════════════════════════════
-//  UPDATED: Changed p.id to p.slug in navigate
-// ═════════════════════════════════════════════════════════════
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
+import { addToCart } from "../services/cartService";
+import { addToWishlist, removeFromWishlist } from "../services/wishlistService";
 import { Btn, StatusTag } from "./UI";
-import { IoCloseOutline, IoStar, IoHeartOutline, IoHeart, IoCheckmarkCircleOutline, IoCarOutline, IoSyncOutline } from "react-icons/io5";
+import { IoStar, IoHeartOutline, IoHeart, IoClose, IoSearchOutline } from "react-icons/io5";
 
-/* ── Quick-View Modal ───────────────────────────────── */
-export const QuickView = ({ product: p, onClose, addToCart }) => {
+const ProductCard = ({ product, delay = 0, onQuickView }) => {
+  const navigate = useNavigate();
   const toast = useToast();
-  const [size, setSize] = useState("M");
-  const [qty, setQty] = useState(1);
-  const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+  const { isAuthenticated } = useAuth();
+  
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const handleAdd = () => {
-    for (let i = 0; i < qty; i++) addToCart(p);
-    toast(`${p.name} added to bag`, "ok");
-    onClose();
+  const priceFormatted = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(product.price);
+
+  const outOfStock = product.stock === 0;
+
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) return navigate("/login");
+
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product._id, 1);
+      if (toast && typeof toast === "function") {
+        toast("Added to cart!", "ok");
+      }
+    } catch (err) {
+      if (toast && typeof toast === "function") {
+        toast(err.response?.data?.message || "Error adding to cart", "err");
+      }
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
-  return (
-    <div
-      className="modal-bg"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="modal-box">
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}
-          className="grid-1-mobile"
-        >
-          {/* Image panel */}
-          <div
-            style={{
-              height: 520,
-              background: "var(--lift)",
-              overflow: "hidden",
-              borderRadius: "12px 0 0 12px",
-              position: "relative",
-            }}
-          >
-            <img
-              src={p.image?.url || p.image}
-              alt={p.name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center",
-              }}
-            />
-            {p.badge && (
-              <div style={{ position: "absolute", top: 20, left: 20 }}>
-                <StatusTag status={p.badge} />
-              </div>
-            )}
-          </div>
+  const handleToggleWishlist = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) return navigate("/login");
 
-          {/* Info panel */}
-          <div
-            style={{
-              padding: "40px 36px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            {/* Close */}
-            <button
-              onClick={onClose}
-              style={{
-                alignSelf: "flex-end",
-                background: "none",
-                border: "none",
-                color: "var(--muted)",
-                fontSize: 26,
-                lineHeight: 1,
-                marginBottom: 20,
-                transition: "color .2s",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
-              onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
-            >
-              <IoCloseOutline size={28} />
-            </button>
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(product._id);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlist(product._id);
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      if (toast && typeof toast === "function") {
+        toast("Failed to update wishlist", "err");
+      }
+    }
+  };
 
-            <p
-              style={{
-                fontSize: 10,
-                letterSpacing: ".25em",
-                textTransform: "uppercase",
-                color: "var(--gold)",
-                marginBottom: 10,
-              }}
-            >
-              {p.cat}
-            </p>
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 300,
-                marginBottom: 16,
-                lineHeight: 1.2,
-              }}
-            >
-              {p.name}
-            </h2>
+  const imageUrl = Array.isArray(product.images) && product.images.length > 0 
+    ? product.images[0] 
+    : "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80";
 
-            {/* Stars */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 20,
-              }}
-            >
-              <div style={{ display: "flex", gap: 2 }}>
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <span
-                    key={s}
-                    style={{
-                      fontSize: 12,
-                      color:
-                        s <= Math.floor(p.rating) ? "var(--gold)" : "var(--dim)",
-                    }}
-                  >
-                    <IoStar size={12} />
-                  </span>
-                ))}
-              </div>
-              <span style={{ fontSize: 13, color: "var(--muted)" }}>
-                {p.rating} ({p.reviews} reviews)
-              </span>
-            </div>
-
-            {/* Price */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 12,
-                marginBottom: 28,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 32,
-                  fontFamily: "'Playfair Display', serif",
-                  fontWeight: 300,
-                }}
-              >
-                ${p.price}
-              </span>
-              {p.orig && (
-                <>
-                  <span
-                    style={{
-                      fontSize: 18,
-                      color: "var(--dim)",
-                      textDecoration: "line-through",
-                    }}
-                  >
-                    ${p.orig}
-                  </span>
-                  <StatusTag status="Sale" />
-                </>
-              )}
-            </div>
-
-            <p
-              style={{
-                fontSize: 13,
-                color: "var(--muted)",
-                lineHeight: 1.85,
-                marginBottom: 28,
-              }}
-            >
-              Crafted in our atelier from the finest materials. This piece
-              embodies effortless sophistication — designed to transcend seasons.
-            </p>
-
-            {/* Size selector */}
-            <div style={{ marginBottom: 24 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: 10,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: ".15em",
-                    textTransform: "uppercase",
-                    color: "var(--muted)",
-                  }}
-                >
-                  Size: {size}
-                </span>
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "var(--gold)",
-                    fontSize: 11,
-                    cursor: "pointer",
-                  }}
-                >
-                  Size Guide →
-                </button>
-              </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {SIZES.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 6,
-                      border: `1px solid ${
-                        size === s ? "var(--gold)" : "var(--border2)"
-                      }`,
-                      background:
-                        size === s ? "rgba(201,168,76,.15)" : "none",
-                      color: size === s ? "var(--gold2)" : "var(--muted)",
-                      fontSize: 12,
-                      transition: "all .2s",
-                      cursor: "pointer",
-                      fontFamily: "'Jost', sans-serif",
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Quantity */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 16,
-                marginBottom: 28,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 11,
-                  letterSpacing: ".15em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
-                }}
-              >
-                Qty
-              </span>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <button
-                  className="qty-btn"
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                >
-                  −
-                </button>
-                <span
-                  style={{
-                    fontSize: 16,
-                    minWidth: 28,
-                    textAlign: "center",
-                    fontWeight: 500,
-                  }}
-                >
-                  {qty}
-                </span>
-                <button className="qty-btn" onClick={() => setQty((q) => q + 1)}>
-                  +
-                </button>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div
-              style={{ display: "flex", gap: 12, marginTop: "auto" }}
-            >
-              <Btn v="primary" full onClick={handleAdd}>
-                Add to Bag — ${p.price * qty}
-              </Btn>
-              <button
-                style={{
-                  width: 48,
-                  height: 48,
-                  flexShrink: 0,
-                  border: "1px solid var(--border2)",
-                  borderRadius: 6,
-                  background: "none",
-                  color: "var(--muted)",
-                  fontSize: 20,
-                  cursor: "pointer",
-                  transition: "all .2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = "var(--gold)";
-                  e.target.style.color = "var(--gold)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = "var(--border2)";
-                  e.target.style.color = "var(--muted)";
-                }}
-              >
-                <IoHeartOutline size={20} />
-              </button>
-            </div>
-
-            {/* Trust badges */}
-            <div
-              style={{
-                display: "flex",
-                gap: 20,
-                marginTop: 20,
-                paddingTop: 20,
-                borderTop: "1px solid var(--border)",
-              }}
-            >
-              {[
-                { icon: <IoCarOutline size={14} style={{ marginRight: 4, verticalAlign: "middle" }} />, text: "Free Delivery" },
-                { icon: <IoSyncOutline size={14} style={{ marginRight: 4, verticalAlign: "middle" }} />, text: "Free Returns" },
-                { icon: <IoCheckmarkCircleOutline size={14} style={{ marginRight: 4, verticalAlign: "middle" }} />, text: "Authentic" }
-              ].map((t) => (
-                <span key={t.text} style={{ fontSize: 11, color: "var(--muted)", display: "flex", alignItems: "center" }}>
-                  {t.icon} {t.text}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ── Product Card ───────────────────────────────────── */
-const ProductCard = ({
-  product: p,
-  navigate,
-  addToCart,
-  wishlist,
-  toggleWishlist,
-  onQuickView,
-  delay = 0,
-}) => {
-  const toast = useToast();
-  const isWished = wishlist?.includes(p.id);
+  const ratingVal = product.ratings?.average || 0;
 
   return (
     <div
-      className="prod-card fu lift"
-      onClick={() => navigate(`/product/${p.slug}`)} // ✅ CHANGED: p.id → p.slug
+      className="prod-card lift"
+      onClick={() => navigate('/product/' + (product._id))}
       style={{
-        animationDelay: `${delay}s`,
+        animationDelay: (delay) + 's',
         animationFillMode: "both",
-        opacity: 0,
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
@@ -370,42 +80,31 @@ const ProductCard = ({
       }}
     >
       {/* Image box */}
-      <div
-        className="prod-img"
-        style={{
-          height: 340,
-          background: "var(--lift)",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
+      <div className="prod-img" style={{ height: 340, background: "var(--lift)", overflow: "hidden", position: "relative" }}>
         <img
-          src={p.image?.url || p.image}
-          alt={p.name}
+          src={imageUrl}
+          alt={product.name}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
             objectPosition: "center",
             transition: "transform .5s ease",
+            opacity: outOfStock ? 0.5 : 1
           }}
           onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
           onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
         />
 
-        {/* Badge */}
-        {p.badge && (
-          <div style={{ position: "absolute", top: 14, left: 14 }}>
-            <StatusTag status={p.badge} />
+        {outOfStock && (
+          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", background: "rgba(0,0,0,0.7)", color: "white", padding: "8px 16px", borderRadius: 4, fontWeight: "bold", zIndex: 2 }}>
+            OUT OF STOCK
           </div>
         )}
 
         {/* Wishlist toggle */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleWishlist(p.id);
-          }}
+          onClick={handleToggleWishlist}
           style={{
             position: "absolute",
             top: 14,
@@ -413,11 +112,9 @@ const ProductCard = ({
             width: 36,
             height: 36,
             borderRadius: "50%",
-            background: isWished
-              ? "rgba(201,168,76,.3)"
-              : "rgba(0,0,0,.5)",
-            border: `1px solid ${isWished ? "var(--gold)" : "var(--border)"}`,
-            color: isWished ? "var(--gold)" : "var(--muted)",
+            background: isWishlisted ? "rgba(201,168,76,.3)" : "rgba(0,0,0,.5)",
+            border: '1px solid ' + (isWishlisted ? "var(--gold)" : "rgba(255,255,255,0.2)"),
+            color: isWishlisted ? "var(--gold)" : "white",
             fontSize: 16,
             display: "flex",
             alignItems: "center",
@@ -425,180 +122,136 @@ const ProductCard = ({
             transition: "all .25s",
             backdropFilter: "blur(8px)",
             cursor: "pointer",
+            zIndex: 3
           }}
         >
-          {isWished ? <IoHeart size={18} /> : <IoHeartOutline size={18} />}
+          {isWishlisted ? <IoHeart size={18} /> : <IoHeartOutline size={18} />}
         </button>
 
-        {/* Hover overlay (Desktop only) */}
-        <div className="prod-overlay hide-mobile">
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onQuickView();
-              }}
-              style={{
-                flex: 1,
-                padding: "10px 0",
-                borderRadius: 6,
-                background: "rgba(255,255,255,.1)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255,255,255,.15)",
-                color: "var(--text)",
-                fontSize: 11,
-                letterSpacing: ".12em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                fontFamily: "'Jost', sans-serif",
-                transition: "all .2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.background = "rgba(255,255,255,.18)")
-              }
-              onMouseLeave={(e) =>
-                (e.target.style.background = "rgba(255,255,255,.1)")
-              }
-            >
-              Quick View
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(p);
-                toast(`${p.name} added!`, "ok");
-              }}
-              style={{
-                flex: 1,
-                padding: "10px 0",
-                borderRadius: 6,
-                background: "var(--gold)",
-                border: "none",
-                color: "#0d0b0a",
-                fontSize: 11,
-                letterSpacing: ".12em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                fontFamily: "'Jost', sans-serif",
-                fontWeight: 500,
-                transition: "all .2s",
-              }}
-              onMouseEnter={(e) => (e.target.style.background = "var(--gold2)")}
-              onMouseLeave={(e) => (e.target.style.background = "var(--gold)")}
-            >
-              Add to Bag
-            </button>
-          </div>
+        {/* Hover overlay for Add to Cart & Quick View */}
+        <div className="prod-overlay hide-mobile" style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 14, opacity: 0, transition: "0.3s", background: "linear-gradient(transparent, rgba(0,0,0,0.8))", display: "flex", gap: 8 }}>
+          <Btn 
+            v="primary" 
+            style={{ flex: 1 }}
+            onClick={handleAddToCart}
+            disabled={outOfStock || isAddingToCart}
+          >
+            {isAddingToCart ? "Adding..." : outOfStock ? "Out of Stock" : "Add to Cart"}
+          </Btn>
+          <button
+            onClick={(e) => { e.stopPropagation(); onQuickView(); }}
+            style={{
+              width: 44, height: 44, borderRadius: 8, background: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.2)", color: "white", display: "flex",
+              alignItems: "center", justifyContent: "center", cursor: "pointer", backdropFilter: "blur(4px)"
+            }}
+          >
+            <IoSearchOutline size={18} />
+          </button>
         </div>
       </div>
 
-      {/* Info row */}
-      <div 
-        style={{ 
-          padding: "16px 4px 6px", 
-          display: "flex", 
-          flexDirection: "column", 
-          flexGrow: 1 
-        }}
-      >
-        <p
-          style={{
-            fontSize: 10,
-            letterSpacing: ".22em",
-            textTransform: "uppercase",
-            color: "var(--gold)",
-            marginBottom: 6,
-          }}
-        >
-          {p.cat}
+      {/* Info box */}
+      <div style={{ padding: "20px 0 10px", display: "flex", flexDirection: "column", flex: 1 }}>
+        <p style={{ fontSize: 10, letterSpacing: ".15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>
+          {product.category?.name || product.category || "Uncategorized"}
         </p>
         
-        <h3
-          style={{
-            fontSize: 16,
-            fontWeight: 300,
-            color: "var(--text)",
-            lineHeight: 1.3,
-            marginBottom: 8,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {p.name}
+        <h3 style={{ fontSize: 16, fontWeight: 400, marginBottom: 8, lineHeight: 1.4 }}>
+          {product.name}
         </h3>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: "auto",
-            marginBottom: 16,
-          }}
-        >
-          <div>
-            <span style={{ fontSize: 16, fontWeight: 500 }}>${p.price}</span>
-            {p.orig && (
-              <span
-                style={{
-                  fontSize: 13,
-                  color: "var(--dim)",
-                  textDecoration: "line-through",
-                  marginLeft: 6,
-                }}
-              >
-                ${p.orig}
-              </span>
-            )}
-          </div>
-          
+        {/* Price & Rating */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
+          <span style={{ fontSize: 15, fontWeight: 500, fontFamily: "'Jost', sans-serif" }}>
+            {priceFormatted}
+          </span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "var(--gold)", fontSize: 11, display: "flex", gap: 2 }}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <IoStar key={i} size={11} color={i < Math.floor(p.rating) ? "var(--gold)" : "var(--dim)"} />
-              ))}
-            </span>
-            <span style={{ fontSize: 11, color: "var(--dim)" }}>
-              ({p.reviews})
+            <IoStar size={12} color={ratingVal > 0 ? "var(--gold)" : "var(--dim)"} />
+            <span style={{ fontSize: 12, color: "var(--muted)" }}>
+              {ratingVal.toFixed(1)}
             </span>
           </div>
         </div>
-        
-        {/* Mobile quick action */}
-        <div className="mobile-only" style={{ marginBottom: 4 }}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              addToCart(p);
-              toast(`${p.name} added!`, "ok");
-            }}
+
+        {/* Mobile Add to cart (visible only on mobile) */}
+        <div className="show-mobile" style={{ marginTop: 16 }}>
+          <Btn 
+            v="outline" 
+            full 
+            onClick={handleAddToCart}
+            disabled={outOfStock || isAddingToCart}
+          >
+            {isAddingToCart ? "Adding..." : outOfStock ? "Out of Stock" : "Add to Cart"}
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* -- Quick View Modal -------------------------------- */
+export const QuickView = ({ product, onClose, addToCart }) => {
+  if (!product) return null;
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 2000,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 20, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)"
+    }}>
+      <div 
+        onClick={onClose}
+        style={{ position: "absolute", inset: 0 }}
+      />
+      
+      <div className="fu glass" style={{
+        position: "relative", width: "100%", maxWidth: 1000,
+        background: "var(--card)", border: "1px solid var(--border)",
+        borderRadius: 16, overflow: "hidden", display: "grid",
+        gridTemplateColumns: "1fr 1fr", animation: "slideUp .4s ease"
+      }}>
+        {/* Left: Image */}
+        <div style={{ height: 600, background: "var(--lift)" }}>
+          <img 
+            src={product.image?.url || product.image} 
+            alt={product.name} 
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+
+        {/* Right: Info */}
+        <div style={{ padding: 60, display: "flex", flexDirection: "column" }}>
+          <button 
+            onClick={onClose}
             style={{ 
-              width: "100%", 
-              padding: "10px 0", 
-              background: "transparent", 
-              border: "1px solid var(--border)", 
-              borderRadius: 4, 
-              color: "var(--text)", 
-              fontSize: 10, 
-              textTransform: "uppercase", 
-              fontWeight: 400, 
-              letterSpacing: ".1em",
-              transition: "all .2s"
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.borderColor = "var(--gold)";
-              e.target.style.color = "var(--gold)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.borderColor = "var(--border)";
-              e.target.style.color = "var(--text)";
+              position: "absolute", top: 30, right: 30, 
+              background: "none", border: "none", color: "var(--dim)", 
+              cursor: "pointer", padding: 10 
             }}
           >
-            Add to Bag
+            <IoClose size={24} />
           </button>
+
+          <p style={{ fontSize: 12, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 16 }}>
+            {product.cat || "Collection"}
+          </p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 300, marginBottom: 20 }}>
+            {product.name}
+          </h2>
+          <p style={{ fontSize: 24, fontWeight: 300, marginBottom: 32, color: "var(--gold2)" }}>
+            ${product.price?.toFixed(2)}
+          </p>
+          
+          <p style={{ color: "var(--muted)", fontSize: 15, lineHeight: 1.8, marginBottom: 40 }}>
+            Elevate your wardrobe with this carefully crafted piece. Designed for the modern woman who values both style and comfort.
+          </p>
+
+          <div style={{ marginTop: "auto" }}>
+            <Btn v="primary" full size="lg" onClick={() => { addToCart(product); onClose(); }}>
+              Add to Bag - ${product.price?.toFixed(2)}
+            </Btn>
+          </div>
         </div>
       </div>
     </div>

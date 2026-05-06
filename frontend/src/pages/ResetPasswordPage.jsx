@@ -1,7 +1,7 @@
 // frontend/src/pages/ResetPasswordPage.jsx
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 //  FIXED: Using navigate + useParams
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";

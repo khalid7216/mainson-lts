@@ -21,7 +21,7 @@ export const ToastProvider = ({ children }) => {
       {children}
       <div className="toast-wrap">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast ${t.type}`}>
+          <div key={t.id} className={"toast " + t.type}>
             <span
               style={{
                 color:

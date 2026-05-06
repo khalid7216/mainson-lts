@@ -1,7 +1,7 @@
 // frontend/src/pages/AuthPages.jsx
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 //  UPDATED: Improved signup/login/forgot flows with loading
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,9 @@ import { Btn, Inp, Spinner } from "../components/UI";
 import { authAPI } from "../services/api";
 import { IoMailOutline, IoLockClosedOutline, IoCheckmarkOutline, IoArrowBack } from "react-icons/io5";
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    LOGIN PAGE (UPDATED: Welcome message with user name)
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const LoginPage = () => {
   const { login } = useAuth();
   const toast = useToast();
@@ -24,6 +24,11 @@ export const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+
+  // If already authenticated, redirect
+  if (useAuth().isAuthenticated) {
+    navigate("/");
+  }
 
   const validate = () => {
     const e = {};
@@ -37,24 +42,21 @@ export const LoginPage = () => {
     if (!validate()) return;
     setLoading(true);
 
-    const result = await login(form.email, form.pass);
+    const result = await login({ email: form.email, password: form.pass });
     setLoading(false);
 
     if (result.success) {
-      // ✅ NEW: Extract first name for welcome message
-      const firstName = result.user?.name?.split(" ")[0] || "there";
-      toast(`Welcome back, ${firstName}!`, "ok");
-      setTimeout(() => navigate("/"), 400);
+      navigate("/");
     } else {
-      toast(result.error || "Login failed", "err");
-      setErrors({ pass: result.error });
+      toast(result.message || "Login failed", "err");
+      setErrors({ pass: result.message });
     }
   };
 
   return (
     <AuthWrap
       title="Welcome Back"
-      subtitle="Sign in to your Maison Élite account"
+      subtitle="Sign in to your Maison Elite account"
     >
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <Inp
@@ -169,7 +171,7 @@ export const LoginPage = () => {
       </div>
 
       <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)" }}>
-        New to Maison Élite?{" "}
+        New to Maison Elite?{" "}
         <button
           onClick={() => navigate("/signup")}
           style={{
@@ -189,11 +191,11 @@ export const LoginPage = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    SIGNUP PAGE (UPDATED: Redirects to login after success)
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const SignupPage = () => {
-  const { signup } = useAuth();
+  const { register } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -243,24 +245,27 @@ export const SignupPage = () => {
     if (validateStep1()) setStep(2);
   };
 
+  // If already authenticated, redirect
+  if (useAuth().isAuthenticated) {
+    navigate("/");
+  }
+
   const handleSubmit = async () => {
     if (!validateStep2()) return;
     setLoading(true);
 
-    const result = await signup(
-      `${form.first} ${form.last}`,
-      form.email,
-      form.pass
-    );
+    const result = await register({
+      name: (form.first) + ' ' + (form.last),
+      email: form.email,
+      password: form.pass
+    });
     setLoading(false);
 
     if (result.success) {
-      // ✅ NEW: Show success message and redirect to login
-      toast("Account created successfully! Please login to continue", "ok");
-      setTimeout(() => navigate("/login"), 1500);
+      navigate("/");
     } else {
-      toast(result.error || "Signup failed", "err");
-      setErrors({ email: result.error });
+      toast(result.message || "Signup failed", "err");
+      setErrors({ email: result.message });
     }
   };
 
@@ -297,9 +302,7 @@ export const SignupPage = () => {
                       : step === i + 1
                       ? "rgba(201,168,76,.2)"
                       : "var(--lift)",
-                  border: `1px solid ${
-                    step >= i + 1 ? "var(--gold)" : "var(--border)"
-                  }`,
+                  border: '1px solid ' + (step >= i + 1 ? "var(--gold)" : "var(--border)"),
                   color: step >= i + 1 ? "var(--gold2)" : "var(--dim)",
                   fontSize: 12,
                   fontWeight: 600,
@@ -334,7 +337,7 @@ export const SignupPage = () => {
         ))}
       </div>
 
-      {/* Step 1 — Personal */}
+      {/* Step 1 - Personal */}
       {step === 1 && (
         <form className="fu" onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
           <div
@@ -371,7 +374,7 @@ export const SignupPage = () => {
         </form>
       )}
 
-      {/* Step 2 — Account */}
+      {/* Step 2 - Account */}
       {step === 2 && (
         <form className="fu" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <Inp
@@ -474,9 +477,7 @@ export const SignupPage = () => {
                 width: 18,
                 height: 18,
                 borderRadius: 4,
-                border: `1px solid ${
-                  form.agreed ? "var(--gold)" : "var(--border2)"
-                }`,
+                border: '1px solid ' + (form.agreed ? "var(--gold)" : "var(--border2)"),
                 background: form.agreed ? "rgba(201,168,76,.2)" : "none",
                 display: "flex",
                 alignItems: "center",
@@ -581,9 +582,9 @@ export const SignupPage = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    FORGOT PASSWORD PAGE (UPDATED: Loading state)
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const ForgotPage = () => {
   const toast = useToast();
   const navigate = useNavigate();

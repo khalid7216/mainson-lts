@@ -36,7 +36,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               justifyContent: "center",
               background: currentPage === page ? "var(--gold)" : "transparent",
               color: currentPage === page ? "var(--void)" : "var(--text)",
-              border: `1px solid ${currentPage === page ? "var(--gold)" : "var(--border2)"}`,
+              border: '1px solid ' + (currentPage === page ? "var(--gold)" : "var(--border2)"),
               cursor: "pointer",
               transition: "all 0.2s"
             }}

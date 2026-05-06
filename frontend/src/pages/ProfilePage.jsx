@@ -94,7 +94,7 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
     { id: "payment",   icon: <IoCardOutline size={18} />, label: "Payment" },
   ];
 
-  /* ── Full Screen Order Receipt Modal ───────────────── */
+  /* -- Full Screen Order Receipt Modal ----------------- */
   if (selectedOrder) {
     return (
       <div style={{ maxWidth: 700, margin: "0 auto", padding: "100px 32px 80px" }}>
@@ -113,7 +113,7 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
                     Order Receipt
                   </h1>
                   <p style={{ color: "var(--gold2)", fontWeight: 500, letterSpacing: "1px" }}>
-                    {selectedOrder.orderId || `#ME-${selectedOrder._id.slice(-6).toUpperCase()}`}
+                    {selectedOrder.orderId || '#ME-' + (selectedOrder._id.slice(-6).toUpperCase())}
                   </p>
                 </div>
                 <StatusTag status={selectedOrder.status} />
@@ -158,7 +158,7 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
                   <span>Tax (8%)</span><span>${selectedOrder.tax.toFixed(2)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "var(--muted)" }}>
-                  <span>Shipping</span><span>{selectedOrder.shippingCost === 0 ? "Free" : `$${selectedOrder.shippingCost.toFixed(2)}`}</span>
+                  <span>Shipping</span><span>{selectedOrder.shippingCost === 0 ? "Free" : '$' + (selectedOrder.shippingCost.toFixed(2))}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 18, fontWeight: 600, marginTop: 8, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
                   <span>Total</span><span style={{ color: "var(--gold2)" }}>${selectedOrder.totalAmount.toFixed(2)}</span>
@@ -166,7 +166,7 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
              </div>
 
              <div style={{ marginTop: 40, textAlign: "center", color: "var(--dim)", fontSize: 13, fontStyle: "italic" }}>
-               Thank you for shopping with Maison Élite.
+               Thank you for shopping with Maison Elite.
              </div>
 
               {/* Show Cancel Option if applicable */}
@@ -190,7 +190,7 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
     );
   }
 
-  /* ── Main Profile View ───────────────────────────── */
+  /* -- Main Profile View ----------------------------- */
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 32px 60px" }}>
       {qv && (
@@ -202,7 +202,7 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
       )}
       <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 48 }} className="grid-1-mobile">
 
-        {/* ── Sidebar ─────────────────────────────── */}
+        {/* -- Sidebar ------------------------------- */}
         <div>
           {/* Profile card */}
           <div style={{
@@ -249,15 +249,15 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
           </div>
         </div>
 
-        {/* ── Content ──────────────────────────────── */}
+        {/* -- Content -------------------------------- */}
         <div className="fu" style={{ minWidth: 0 }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 300, marginBottom: 8, textTransform: "capitalize" }}>
             {TABS.find((t) => t.id === tab)?.label}
           </h1>
           <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 32 }}>
             {tab === "orders"
-              ? `${orders.length} total orders`
-              : `Manage your ${tab}`}
+              ? (orders.length) + ' total orders'
+              : 'Manage your ' + (tab)}
           </p>
 
           {/* Orders list */}
@@ -283,15 +283,15 @@ const ProfilePage = ({ navigate, wishlist, toggleWishlist, addToCart }) => {
                     padding: 24, background: "var(--card)",
                     border: "1px solid var(--border)", borderRadius: 10,
                     marginBottom: 14,
-                    animationDelay: `${i * 0.06}s`,
+                    animationDelay: (i * 0.06) + 's',
                     animationFillMode: "both", opacity: 0,
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <p style={{ fontWeight: 700, fontSize: 14, color: "var(--gold2)" }}>{o.orderId || `#ME-${o._id.slice(-6).toUpperCase()}`}</p>
+                      <p style={{ fontWeight: 700, fontSize: 14, color: "var(--gold2)" }}>{o.orderId || '#ME-' + (o._id.slice(-6).toUpperCase())}</p>
                       <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 5 }}>
-                        {new Date(o.createdAt).toLocaleDateString()} · {o.items.reduce((sum, item) => sum + item.qty, 0)} items
+                        {new Date(o.createdAt).toLocaleDateString()}   {o.items.reduce((sum, item) => sum + item.qty, 0)} items
                       </p>
                     </div>
                     <div style={{ textAlign: "right" }}>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Btn, Inp, Spinner, StatusTag } from "../../components/UI";
 
-/* ══════════════════════════════════════════════════════
-   SCHEMA CONSTANTS — dropdown options
-══════════════════════════════════════════════════════ */
+/* ======================================================
+   SCHEMA CONSTANTS - dropdown options
+====================================================== */
 export const CATEGORIES = ["Men", "Women", "Kids", "Accessories"];
 
 export const SIZE_OPTIONS = {
@@ -31,7 +31,7 @@ export const BADGE_OPTIONS = ["", "New", "Bestseller", "Sale", "Limited", "Exclu
 
 export const STATUS_OPTIONS = ["draft", "active", "archived"];
 
-/* ── Empty product form state ───────────────────── */
+/* -- Empty product form state --------------------- */
 export const EMPTY_PRODUCT = {
   name: "",
   description: "",
@@ -49,13 +49,13 @@ export const EMPTY_PRODUCT = {
   madeIn: "",
   tags: "",
   image: "", // Product image URL
-  // sizes: array of { size, stock } — built by SizeStock component
+  // sizes: array of { size, stock } - built by SizeStock component
   sizes: [],
   // colors: array of selected color labels
   colors: [],
 };
 
-/* ── Validation ─────────────────────────────────── */
+/* -- Validation ----------------------------------- */
 export const validateProduct = (form) => {
   const errors = {};
   if (!form.name.trim()) errors.name = "Product name is required";
@@ -71,11 +71,11 @@ export const validateProduct = (form) => {
   return errors;
 };
 
-/* ══════════════════════════════════════════════════════
+/* ======================================================
    SUB-COMPONENTS
-══════════════════════════════════════════════════════ */
+====================================================== */
 
-/* ── Section wrapper ────────────────────────────── */
+/* -- Section wrapper ------------------------------ */
 const Section = ({ title, children }) => (
   <div style={{ marginBottom: 16, animation: "fadeIn .4s ease both" }}>
     <p style={{
@@ -91,7 +91,7 @@ const Section = ({ title, children }) => (
   </div>
 );
 
-/* ── Field row ──────────────────────────────────── */
+/* -- Field row ------------------------------------ */
 const Field = ({ label, required, error, children }) => (
   <div style={{ width: "100%" }}>
     <label style={{
@@ -108,14 +108,14 @@ const Field = ({ label, required, error, children }) => (
   </div>
 );
 
-/* ── Styled select ──────────────────────────────── */
+/* -- Styled select -------------------------------- */
 const Select = ({ value, onChange, children, error }) => (
   <select
     value={value}
     onChange={onChange}
     style={{
       width: "100%", padding: "12px 14px", borderRadius: 6,
-      border: `1px solid ${error ? "var(--rose)" : "var(--border2)"}`,
+      border: '1px solid ' + (error ? "var(--rose)" : "var(--border2)"),
       background: "rgba(255,255,255,.04)", color: value ? "var(--text)" : "var(--dim)",
       fontSize: 13, cursor: "pointer", outline: "none",
       transition: "border-color .2s",
@@ -125,7 +125,7 @@ const Select = ({ value, onChange, children, error }) => (
   </select>
 );
 
-/* ── Styled textarea ────────────────────────────── */
+/* -- Styled textarea ------------------------------ */
 const Textarea = ({ value, onChange, placeholder, rows = 4, error }) => (
   <textarea
     value={value}
@@ -134,7 +134,7 @@ const Textarea = ({ value, onChange, placeholder, rows = 4, error }) => (
     rows={rows}
     style={{
       width: "100%", padding: "12px 14px", borderRadius: 6,
-      border: `1px solid ${error ? "var(--rose)" : "var(--border2)"}`,
+      border: '1px solid ' + (error ? "var(--rose)" : "var(--border2)"),
       background: "rgba(255,255,255,.04)", color: "var(--text)",
       fontSize: 13, resize: "vertical", outline: "none",
       fontFamily: "'Jost', sans-serif", lineHeight: 1.6,
@@ -145,7 +145,7 @@ const Textarea = ({ value, onChange, placeholder, rows = 4, error }) => (
   />
 );
 
-/* ── Toggle switch ──────────────────────────────── */
+/* -- Toggle switch -------------------------------- */
 const Toggle = ({ checked, onChange, label }) => (
   <label style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
     <div
@@ -153,7 +153,7 @@ const Toggle = ({ checked, onChange, label }) => (
       style={{
         width: 44, height: 24, borderRadius: 12,
         background: checked ? "var(--gold)" : "var(--lift)",
-        border: `1px solid ${checked ? "var(--gold)" : "var(--border2)"}`,
+        border: '1px solid ' + (checked ? "var(--gold)" : "var(--border2)"),
         position: "relative", transition: "all .3s", flexShrink: 0,
       }}
     >
@@ -169,7 +169,7 @@ const Toggle = ({ checked, onChange, label }) => (
   </label>
 );
 
-/* ── Size + Stock table ─────────────────────────── */
+/* -- Size + Stock table --------------------------- */
 const SizeStock = ({ category, sizes, onChange, error }) => {
   const available = SIZE_OPTIONS[category] || SIZE_OPTIONS["Tops"];
 
@@ -199,7 +199,7 @@ const SizeStock = ({ category, sizes, onChange, error }) => {
               onClick={() => toggle(s)}
               style={{
                 padding: "8px 16px", borderRadius: 6,
-                border: `1px solid ${active ? "var(--gold)" : "var(--border2)"}`,
+                border: '1px solid ' + (active ? "var(--gold)" : "var(--border2)"),
                 background: active ? "rgba(201,168,76,.12)" : "none",
                 color: active ? "var(--gold2)" : "var(--muted)",
                 fontSize: 12, cursor: "pointer",
@@ -253,7 +253,7 @@ const SizeStock = ({ category, sizes, onChange, error }) => {
   );
 };
 
-/* ── Color picker ───────────────────────────────── */
+/* -- Color picker --------------------------------- */
 const ColorPicker = ({ selected, onChange, error }) => (
   <div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -270,7 +270,7 @@ const ColorPicker = ({ selected, onChange, error }) => (
             style={{
               width: 36, height: 36, borderRadius: "50%",
               background: c.hex, cursor: "pointer",
-              border: `2px solid ${active ? "var(--gold)" : "transparent"}`,
+              border: '2px solid ' + (active ? "var(--gold)" : "transparent"),
               outline: active ? "2px solid var(--gold)" : "2px solid transparent",
               outlineOffset: 2,
               transition: "all .2s", flexShrink: 0,
@@ -288,9 +288,9 @@ const ColorPicker = ({ selected, onChange, error }) => (
   </div>
 );
 
-/* ══════════════════════════════════════════════════════
+/* ======================================================
    MAIN PRODUCT FORM MODAL
-══════════════════════════════════════════════════════ */
+====================================================== */
 const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) => {
   /* If product is passed → Edit mode, else → Add mode */
   const isEdit = Boolean(product);
@@ -391,7 +391,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
         className="modal-box"
         style={{ width: "95%", maxWidth: 1000, display: "flex", flexDirection: "column", height: "auto", overflow: "visible", background: "var(--surface)", margin: "40px auto", padding: 0, maxHeight: "none" }}
       >
-        {/* ── Header ──────────────────────────────── */}
+        {/* -- Header -------------------------------- */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "16px 24px", borderBottom: "1px solid var(--border)", flexShrink: 0,
@@ -402,7 +402,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
               {isEdit ? "Edit Product" : "Add New Product"}
             </h2>
             <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>
-              {isEdit ? `Editing: ${product.name}` : "Fill in the product details below"}
+              {isEdit ? 'Editing: ' + (product.name) : "Fill in the product details below"}
             </p>
           </div>
           <button
@@ -415,7 +415,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           </button>
         </div>
 
-        {/* ── Tab bar ─────────────────────────────── */}
+        {/* -- Tab bar ------------------------------- */}
         <div className="modal-tabs" style={{ padding: "0 32px", marginBottom: 0 }}>
           {TABS.map((t) => (
             <button
@@ -423,7 +423,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
               onClick={() => setTab(t.id)}
               style={{
                 padding: "8px 16px", background: "none",
-                border: "none", borderBottom: `2px solid ${tab === t.id ? "var(--gold)" : "transparent"}`,
+                border: "none", borderBottom: '2px solid ' + (tab === t.id ? "var(--gold)" : "transparent"),
                 color: tab === t.id ? "var(--gold2)" : "var(--muted)",
                 fontSize: 12, letterSpacing: ".1em", textTransform: "uppercase",
                 cursor: "pointer", fontFamily: "'Jost', sans-serif",
@@ -444,10 +444,10 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           ))}
         </div>
 
-        {/* ── Scrollable body ──────────────────────── */}
+        {/* -- Scrollable body ------------------------ */}
         <div className="modal-body-scroll" style={{ flex: 1, overflow: "visible", padding: "16px 24px", minHeight: 0, height: "auto" }}>
 
-          {/* ════ TAB: BASIC INFO ════ */}
+          {/* ==== TAB: BASIC INFO ==== */}
           {tab === "basic" && (
             <div className="grid-2-col" style={{ gap: "32px" }}>
               {/* Left Column */}
@@ -460,7 +460,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                       placeholder="e.g. Obsidian Slip Dress"
                       style={{
                         width: "100%", padding: "12px 14px", borderRadius: 6,
-                        border: `1px solid ${errors.name ? "var(--rose)" : "var(--border2)"}`,
+                        border: '1px solid ' + (errors.name ? "var(--rose)" : "var(--border2)"),
                         background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
                       }}
                     />
@@ -479,7 +479,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                     <Textarea
                       value={form.description}
                       onChange={(e) => set("description", e.target.value)}
-                      placeholder="Describe the product, fabric, fit, and design details…"
+                      placeholder="Describe the product, fabric, fit, and design details..."
                       rows={2}
                       error={errors.description}
                     />
@@ -501,7 +501,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                       }}
                       style={{
                         width: "100%", padding: "8px", borderRadius: 6,
-                        border: `1px solid ${errors.image ? "var(--rose)" : "var(--border2)"}`,
+                        border: '1px solid ' + (errors.image ? "var(--rose)" : "var(--border2)"),
                         background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
                       }}
                     />
@@ -548,7 +548,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                         }}
                         error={errors.category}
                       >
-                        <option value="">— Select category —</option>
+                        <option value="">- Select category -</option>
                         {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
                       </Select>
                     </Field>
@@ -557,7 +557,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                       <input
                         value={form.subCategory}
                         onChange={(e) => set("subCategory", e.target.value)}
-                        placeholder="e.g. Midi Dresses, Blazers…"
+                        placeholder="e.g. Midi Dresses, Blazers..."
                         style={{ width: "100%", padding: "12px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 13 }}
                       />
                     </Field>
@@ -588,7 +588,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
             </div>
           )}
 
-          {/* ════ TAB: PRICING ════ */}
+          {/* ==== TAB: PRICING ==== */}
           {tab === "pricing" && (
             <div>
               <Section title="Pricing">
@@ -602,7 +602,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                         value={form.price}
                         onChange={(e) => set("price", e.target.value)}
                         placeholder="0.00"
-                        style={{ width: "100%", padding: "12px 14px 12px 30px", borderRadius: 6, border: `1px solid ${errors.price ? "var(--rose)" : "var(--border2)"}`, background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14 }}
+                        style={{ width: "100%", padding: "12px 14px 12px 30px", borderRadius: 6, border: '1px solid ' + (errors.price ? "var(--rose)" : "var(--border2)"), background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14 }}
                       />
                     </div>
                   </Field>
@@ -616,7 +616,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
                         value={form.compareAtPrice}
                         onChange={(e) => set("compareAtPrice", e.target.value)}
                         placeholder="0.00 (optional)"
-                        style={{ width: "100%", padding: "12px 14px 12px 30px", borderRadius: 6, border: `1px solid ${errors.compareAtPrice ? "var(--rose)" : "var(--border2)"}`, background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14 }}
+                        style={{ width: "100%", padding: "12px 14px 12px 30px", borderRadius: 6, border: '1px solid ' + (errors.compareAtPrice ? "var(--rose)" : "var(--border2)"), background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14 }}
                       />
                     </div>
                   </Field>
@@ -644,10 +644,10 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
             </div>
           )}
 
-          {/* ════ TAB: SIZES & COLORS ════ */}
+          {/* ==== TAB: SIZES & COLORS ==== */}
           {tab === "variants" && (
             <div>
-              <Section title={`Sizes ${form.category ? `— ${categories.find(c => c._id === form.category)?.name || form.category}` : "(select category first)"}`}>
+              <Section title={"Sizes " + (form.category ? '- ' + (categories.find(c => c._id === form.category)?.name || form.category) : "(select category first)")}>
                 {!form.category ? (
                   <p style={{ fontSize: 13, color: "var(--dim)", padding: "16px 0" }}>
                     ← Go to Basic Info tab and select a category first
@@ -672,7 +672,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
             </div>
           )}
 
-          {/* ════ TAB: DETAILS ════ */}
+          {/* ==== TAB: DETAILS ==== */}
           {tab === "details" && (
             <div>
               <Section title="Material & Care">
@@ -725,7 +725,7 @@ const ProductFormModal = ({ product = null, categories = [], onClose, onSave }) 
           )}
         </div>
 
-        {/* ── Footer actions ───────────────────────── */}
+        {/* -- Footer actions ------------------------- */}
         <div className="modal-footer" style={{ padding: "12px 24px", borderTop: "1px solid var(--border)", flexShrink: 0, background: "var(--surface)", marginTop: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: "auto" }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: form.status === "active" ? "var(--emerald)" : form.status === "draft" ? "var(--gold)" : "var(--dim)" }} />

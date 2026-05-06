@@ -1,18 +1,18 @@
 import React from "react";
 
-/* ── Button ─────────────────────────────────────────── */
+/* -- Button ------------------------------------------- */
 export const Btn = ({ children, onClick, v = "primary", size = "md", disabled, full, style }) => (
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`btn btn-${v} btn-${size}${full ? " btn-fl" : ""}`}
+    className={"btn btn-" + v + " btn-" + size + (full ? " btn-fl" : "")}
     style={style}
   >
     {children}
   </button>
 );
 
-/* ── Input ──────────────────────────────────────────── */
+/* -- Input -------------------------------------------- */
 export const Inp = ({ label, type = "text", value, onChange, placeholder, error, icon }) => (
   <div className="inp-wrap">
     {label && <label className="inp-label">{label}</label>}
@@ -33,7 +33,7 @@ export const Inp = ({ label, type = "text", value, onChange, placeholder, error,
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`inp${icon ? " inp-icon" : ""}`}
+        className={"inp" + (icon ? " inp-icon" : "")}
         style={{ borderColor: error ? "var(--rose)" : "" }}
       />
     </div>
@@ -41,12 +41,12 @@ export const Inp = ({ label, type = "text", value, onChange, placeholder, error,
   </div>
 );
 
-/* ── Loading spinner ────────────────────────────────── */
+/* -- Loading spinner ---------------------------------- */
 export const Spinner = ({ size = 16 }) => (
   <span
     style={{
       width: size, height: size,
-      border: `2px solid rgba(0,0,0,.2)`,
+      border: '2px solid rgba(0,0,0,.2)',
       borderTopColor: "#0d0b0a",
       borderRadius: "50%",
       display: "inline-block",
@@ -56,7 +56,7 @@ export const Spinner = ({ size = 16 }) => (
   />
 );
 
-/* ── Colour tag badge ───────────────────────────────── */
+/* -- Colour tag badge --------------------------------- */
 export const Tag = ({ children, color = "gold" }) => {
   const map = {
     gold:    ["rgba(201,168,76,.15)",  "var(--gold2)"],
@@ -73,7 +73,7 @@ export const Tag = ({ children, color = "gold" }) => {
   );
 };
 
-/* ── Avatar initials ────────────────────────────────── */
+/* -- Avatar initials ---------------------------------- */
 export const Avatar = ({ name, size = 36 }) => (
   <div
     style={{
@@ -87,7 +87,7 @@ export const Avatar = ({ name, size = 36 }) => (
   </div>
 );
 
-/* ── Order / customer status tag ───────────────────── */
+/* -- Order / customer status tag --------------------- */
 export const StatusTag = ({ status }) => {
   const map = {
     Delivered:  ["var(--emerald)",  "rgba(26,122,74,.15)"],

@@ -58,98 +58,7 @@ const DynamicPage = () => {
 
   return (
     <div style={{ paddingTop: 72 }}>
-      <style>{`
-        .dynamic-content {
-          text-align: left;
-        }
-        .dynamic-content h1,
-        .dynamic-content h2,
-        .dynamic-content h3,
-        .dynamic-content h4,
-        .dynamic-content h5,
-        .dynamic-content h6 {
-          font-family: 'Playfair Display', serif;
-          font-weight: 400;
-          margin: 2em 0 0.8em;
-          color: var(--text);
-          line-height: 1.3;
-        }
-        .dynamic-content h1 { font-size: clamp(28px, 4vw, 42px); }
-        .dynamic-content h2 { font-size: clamp(22px, 3vw, 32px); color: var(--gold2); }
-        .dynamic-content h3 { font-size: clamp(18px, 2.5vw, 24px); }
-        .dynamic-content h4 { font-size: 18px; }
-        .dynamic-content p {
-          margin-bottom: 1.2em;
-          color: var(--muted);
-          max-width: 700px;
-          line-height: 1.6;
-        }
-        .dynamic-content ul, .dynamic-content ol {
-          text-align: left;
-          max-width: 700px;
-          margin: 1em 0 1.5em;
-          padding-left: 1.5em;
-        }
-        .dynamic-content li {
-          margin-bottom: 0.6em;
-          color: var(--muted);
-        }
-        .dynamic-content a {
-          color: var(--gold);
-          text-decoration: underline;
-          text-underline-offset: 3px;
-          transition: color .2s;
-        }
-        .dynamic-content a:hover {
-          color: var(--gold2);
-        }
-        .dynamic-content strong, .dynamic-content b {
-          color: var(--text);
-          font-weight: 600;
-        }
-        .dynamic-content blockquote {
-          border-left: 3px solid var(--gold);
-          padding: 16px 24px;
-          margin: 2em 0;
-          max-width: 600px;
-          background: rgba(201,168,76,.04);
-          border-radius: 0 8px 8px 0;
-          font-style: italic;
-          color: var(--muted);
-          text-align: left;
-        }
-        .dynamic-content img {
-          max-width: 100%;
-          border-radius: 12px;
-          margin: 2em 0;
-          display: block;
-        }
-        .dynamic-content hr {
-          border: none;
-          height: 1px;
-          background: var(--border);
-          margin: 3em 0;
-          max-width: 200px;
-        }
-        .dynamic-content table {
-          width: 100%;
-          max-width: 700px;
-          margin: 2em 0;
-          border-collapse: collapse;
-          text-align: left;
-        }
-        .dynamic-content th, .dynamic-content td {
-          padding: 12px 16px;
-          border-bottom: 1px solid var(--border);
-        }
-        .dynamic-content th {
-          color: var(--gold);
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: .1em;
-        }
-      `}</style>
-
+      <style>{"\n        .dynamic-content {\n          text-align: left;\n        }\n        .dynamic-content h1,\n        .dynamic-content h2,\n        .dynamic-content h3,\n        .dynamic-content h4,\n        .dynamic-content h5,\n        .dynamic-content h6 {\n          font-family: 'Playfair Display', serif;\n          font-weight: 400;\n          margin: 2em 0 0.8em;\n          color: var(--text);\n          line-height: 1.3;\n        }\n        .dynamic-content h1 { font-size: clamp(28px, 4vw, 42px); }\n        .dynamic-content h2 { font-size: clamp(22px, 3vw, 32px); color: var(--gold2); }\n        .dynamic-content h3 { font-size: clamp(18px, 2.5vw, 24px); }\n        .dynamic-content h4 { font-size: 18px; }\n        .dynamic-content p {\n          margin-bottom: 1.2em;\n          color: var(--muted);\n          max-width: 700px;\n          line-height: 1.6;\n        }\n        .dynamic-content ul, .dynamic-content ol {\n          text-align: left;\n          max-width: 700px;\n          margin: 1em 0 1.5em;\n          padding-left: 1.5em;\n        }\n        .dynamic-content li {\n          margin-bottom: 0.6em;\n          color: var(--muted);\n        }\n        .dynamic-content a {\n          color: var(--gold);\n          text-decoration: underline;\n          text-underline-offset: 3px;\n          transition: color .2s;\n        }\n        .dynamic-content a:hover {\n          color: var(--gold2);\n        }\n        .dynamic-content strong, .dynamic-content b {\n          color: var(--text);\n          font-weight: 600;\n        }\n        .dynamic-content blockquote {\n          border-left: 3px solid var(--gold);\n          padding: 16px 24px;\n          margin: 2em 0;\n          max-width: 600px;\n          background: rgba(201,168,76,.04);\n          border-radius: 0 8px 8px 0;\n          font-style: italic;\n          color: var(--muted);\n          text-align: left;\n        }\n        .dynamic-content img {\n          max-width: 100%;\n          border-radius: 12px;\n          margin: 2em 0;\n          display: block;\n        }\n        .dynamic-content hr {\n          border: none;\n          height: 1px;\n          background: var(--border);\n          margin: 3em 0;\n          max-width: 200px;\n        }\n        .dynamic-content table {\n          width: 100%;\n          max-width: 700px;\n          margin: 2em 0;\n          border-collapse: collapse;\n          text-align: left;\n        }\n        .dynamic-content th, .dynamic-content td {\n          padding: 12px 16px;\n          border-bottom: 1px solid var(--border);\n        }\n        .dynamic-content th {\n          color: var(--gold);\n          font-size: 11px;\n          text-transform: uppercase;\n          letter-spacing: .1em;\n        }\n      "}</style>
       {/* Page Header */}
       <section
         style={{
@@ -170,7 +79,7 @@ const DynamicPage = () => {
           fontSize: 10, letterSpacing: ".4em", textTransform: "uppercase",
           color: "var(--gold)", marginBottom: 20, position: "relative",
         }}>
-          Maison Élite
+          Maison Elite
         </p>
         <h1
           className="fu"
@@ -189,7 +98,6 @@ const DynamicPage = () => {
           margin: "24px 0 0", opacity: 0.5,
         }} />
       </section>
-
       {/* Page Content */}
       <div
         className="fu dynamic-content"
@@ -206,7 +114,6 @@ const DynamicPage = () => {
           dangerouslySetInnerHTML={{ __html: processContent(page.content) }}
         />
       </div>
-
       {/* Footer */}
       <footer
         className="app-footer"
@@ -228,7 +135,7 @@ const DynamicPage = () => {
           >
             <div>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, marginBottom: 16 }}>
-                MAISON<span className="gold-text">·ÉLITE</span>
+                MAISON<span className="gold-text"> ELITE</span>
               </h3>
               <p style={{ color: "var(--muted)", fontSize: 13, lineHeight: 1.85, maxWidth: 260, marginBottom: 24 }}>
                 A curated fashion house for the discerning woman. Where luxury meets purpose.
@@ -302,8 +209,8 @@ const DynamicPage = () => {
             display: "flex", justifyContent: "space-between",
             fontSize: 12, color: "var(--dim)", flexWrap: "wrap", gap: 12,
           }}>
-            <span>© 2026 Maison Élite. All rights reserved.</span>
-            <span>Privacy · Terms · Accessibility</span>
+            <span>© 2026 Maison Elite. All rights reserved.</span>
+            <span>Privacy   Terms   Accessibility</span>
           </div>
         </div>
       </footer>

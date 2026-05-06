@@ -1,7 +1,7 @@
 // frontend/src/pages/ProductDetailPage.jsx
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 //  UPDATED: Changed from id to slug
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -59,7 +59,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
           materials: p.materials || "100% Premium Material",
           care: p.careInstructions || "Follow label instructions",
           madeIn: p.madeIn || "Unknown",
-          sku: `ME-${p._id.substring(p._id.length - 4)}`
+          sku: 'ME-' + (p._id.substring(p._id.length - 4))
         });
         
         // Default to first available variant if none selected
@@ -78,7 +78,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
     window.scrollTo(0, 0);
   }, [slug]);  // ✅ CHANGED: id → slug
 
-  /* ── SEO: Inject JSON-LD structured data ──────── */
+  /* -- SEO: Inject JSON-LD structured data -------- */
   useEffect(() => {
     if (!product) return;
     
@@ -88,8 +88,8 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
       "@type": "Product",
       name: product.name,
       image: product.image,
-      description: `Crafted from the finest materials, ${product.name} embodies timeless elegance.`,
-      brand: { "@type": "Brand", name: "Maison Élite" },
+      description: 'Crafted from the finest materials, ' + (product.name) + ' embodies timeless elegance.',
+      brand: { "@type": "Brand", name: "Maison Elite" },
       offers: {
         "@type": "Offer",
         priceCurrency: "USD",
@@ -200,7 +200,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
       return;
     }
     addToCart({ ...product, selectedColor, selectedSize, price: Math.max(0, currentPrice - (discountValue || 0)) });
-    toast(`${product.name} added to cart`, "ok");
+    toast((product.name) + ' added to cart', "ok");
   };
 
   const applyPromoCode = async () => {
@@ -218,7 +218,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
         if (res.data.maxDiscount && discount > res.data.maxDiscount) discount = res.data.maxDiscount;
         
         setDiscountValue(discount);
-        setPromoMessage({text: `Promo code applied! Saves $${discount.toFixed(2)}`, type: "ok"});
+        setPromoMessage({text: 'Promo code applied! Saves $' + (discount.toFixed(2)), type: "ok"});
       }
     } catch (err) {
       setDiscountValue(0);
@@ -232,8 +232,8 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
     <div style={{ padding: "clamp(80px, 12vh, 100px) 0 80px" }}>
       <SEO
         pageName="product"
-        title={`${product.name} — Maison Élite`}
-        description={product.description?.substring(0, 160) || `Shop ${product.name} at Maison Élite. Luxury fashion crafted from the finest materials.`}
+        title={product.name + " - Maison Elite"}
+        description={product.description?.substring(0, 160) || 'Shop ' + (product.name) + ' at Maison Elite. Luxury fashion crafted from the finest materials.'}
         ogImage={product.image}
       />
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 clamp(16px, 5vw, 32px)" }}>
@@ -302,9 +302,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                     borderRadius: 8,
                     overflow: "hidden",
                     background: "var(--lift)",
-                    border: `2px solid ${
-                      activeImage === i ? "var(--gold)" : "var(--border)"
-                    }`,
+                    border: '2px solid ' + (activeImage === i ? "var(--gold)" : "var(--border)"),
                     cursor: "pointer",
                     transition: "all .2s",
                   }}
@@ -419,7 +417,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                       style={{
                         padding: "8px 16px",
                         borderRadius: 8,
-                        border: `2px solid ${selectedColor === color ? "var(--gold)" : "var(--border2)"}`,
+                        border: '2px solid ' + (selectedColor === color ? "var(--gold)" : "var(--border2)"),
                         background: selectedColor === color ? "rgba(201,168,76,.1)" : "none",
                         color: selectedColor === color ? "var(--gold2)" : "var(--text)",
                         fontSize: 13,
@@ -455,7 +453,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                           width: 56,
                           height: 56,
                           borderRadius: 8,
-                          border: `2px solid ${selectedSize === size ? "var(--gold)" : "var(--border2)"}`,
+                          border: '2px solid ' + (selectedSize === size ? "var(--gold)" : "var(--border2)"),
                           background: selectedSize === size ? "rgba(201,168,76,.1)" : "none",
                           color: selectedSize === size ? "var(--gold2)" : "var(--text)",
                           fontSize: 13,
@@ -547,7 +545,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
                   width: 56,
                   height: 56,
                   borderRadius: 8,
-                  border: `1px solid ${isWished ? "var(--rose)" : "var(--border2)"}`,
+                  border: '1px solid ' + (isWished ? "var(--rose)" : "var(--border2)"),
                   background: isWished ? "rgba(192,57,43,.1)" : "none",
                   color: isWished ? "var(--rose)" : "var(--text)",
                   cursor: "pointer",

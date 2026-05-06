@@ -1,16 +1,18 @@
 // frontend/src/components/Navbar.jsx
-// ═════════════════════════════════════════════════════════════
+// =================================================================
 //  FIXED: Using navigate instead of setPage
-// ═════════════════════════════════════════════════════════════
+// =================================================================
 
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { Avatar } from "./UI";
 import { IoHomeOutline, IoBagOutline, IoPersonOutline, IoSettingsOutline, IoFlashOutline, IoLogOutOutline, IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 
-const Navbar = ({ navigate, cartCount = 0 }) => {
+const Navbar = ({ navigate }) => {
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [scrolled, setScrolled] = useState(false);
@@ -111,7 +113,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
               margin: 0,
             }}
           >
-            Maison·Élite
+            Maison Elite
           </h1>
         </button>
 
@@ -181,7 +183,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
             onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
           >
             <IoBagOutline size={16} /> Cart
-            {cartCount > 0 && (
+            {totalItems > 0 && (
               <span
                 style={{
                   position: "absolute",
@@ -199,7 +201,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                   fontWeight: 600,
                 }}
               >
-                {cartCount}
+                {totalItems}
               </span>
             )}
           </button>
@@ -239,7 +241,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                       inset: 0,
                       zIndex: 99,
                     }}
-                  />
+                  ></div>
                   <div
                     style={{
                       position: "absolute",
@@ -343,7 +345,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
                         background: "var(--border)",
                         margin: "8px 0",
                       }}
-                    />
+                    ></div>
 
                     <button
                       onClick={() => {
@@ -415,7 +417,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
           style={{ background: "none", border: "none", padding: 0 }}
         >
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 300, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--text)", margin: 0 }}>
-            Maison·Élite
+            Maison Elite
           </h1>
         </button>
       </div>
@@ -453,7 +455,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
     {/* Mobile Bottom Navigation - Moved Outside to fix scroll positioning */}
     <div className="mobile-only mobile-bottom-nav">
       <button 
-        className={`mobile-nav-item ${location.pathname === "/" ? "active" : ""}`}
+        className={'mobile-nav-item ' + (location.pathname === "/" ? "active" : "")}
         onClick={() => { setShowSearch(false); navigate("/"); }}
       >
         <IoHomeOutline size={22} />
@@ -461,7 +463,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
       </button>
       
       <button 
-        className={`mobile-nav-item ${location.pathname === "/shop" || showSearch ? "active" : ""}`}
+        className={'mobile-nav-item ' + (location.pathname === "/shop" || showSearch ? "active" : "")}
         onClick={() => { setShowSearch(true); if(location.pathname !== "/shop") navigate("/shop"); }}
       >
         <IoSearchOutline size={22} />
@@ -469,21 +471,21 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
       </button>
 
       <button 
-        className={`mobile-nav-item ${location.pathname === "/cart" || location.pathname === "/checkout" ? "active" : ""}`}
+        className={'mobile-nav-item ' + (location.pathname === "/cart" || location.pathname === "/checkout" ? "active" : "")}
         onClick={() => { setShowSearch(false); navigate("/cart"); }}
         style={{ position: "relative" }}
       >
         <IoBagOutline size={22} />
         <span>Cart</span>
-        {cartCount > 0 && (
+        {totalItems > 0 && (
           <span style={{ position: "absolute", top: 4, right: 18, background: "var(--gold)", color: "#0a0908", width: 16, height: 16, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600 }}>
-            {cartCount}
+            {totalItems}
           </span>
         )}
       </button>
 
       <button 
-        className={`mobile-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
+        className={'mobile-nav-item ' + (location.pathname === "/profile" ? "active" : "")}
         onClick={() => { setShowSearch(false); navigate(user ? "/profile" : "/login"); }}
       >
         <IoPersonOutline size={22} />
@@ -492,7 +494,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
 
       {user ? (
         <button 
-          className={`mobile-nav-item ${location.pathname === "/settings" ? "active" : ""}`}
+          className={'mobile-nav-item ' + (location.pathname === "/settings" ? "active" : "")}
           onClick={() => { setShowSearch(false); navigate("/settings"); }}
         >
           <IoSettingsOutline size={22} />
@@ -500,7 +502,7 @@ const Navbar = ({ navigate, cartCount = 0 }) => {
         </button>
       ) : (
         <button 
-          className={`mobile-nav-item ${location.pathname === "/login" ? "active" : ""}`}
+          className={'mobile-nav-item ' + (location.pathname === "/login" ? "active" : "")}
           onClick={() => { setShowSearch(false); navigate("/login"); }}
         >
           <IoLogOutOutline size={22} style={{ transform: "rotate(180deg)" }}/>

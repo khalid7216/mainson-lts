@@ -108,7 +108,7 @@ const AdminPanel = ({ navigate }) => {
         position: "relative",
       }}
     >
-      {/* ── Mobile Header ──────────────────────────── */}
+      {/* -- Mobile Header ---------------------------- */}
       <div className="admin-mobile-header" style={{
         position: "fixed", top: 0, left: 0, right: 0, height: 60,
         background: "var(--surface)", borderBottom: "1px solid var(--border)",
@@ -121,11 +121,10 @@ const AdminPanel = ({ navigate }) => {
         >
           <IoMenuOutline size={28} />
         </button>
-        <span style={{ fontFamily: "Playfair Display", fontSize: 18, color: "var(--gold)" }}>Maison Élite</span>
+        <span style={{ fontFamily: "Playfair Display", fontSize: 18, color: "var(--gold)" }}>Maison Elite</span>
         <div style={{ width: 28 }} /> {/* spacer */}
       </div>
-
-      {/* ── Overlay for Mobile Sidebar ─────────────── */}
+      {/* -- Overlay for Mobile Sidebar --------------- */}
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)}
@@ -135,9 +134,9 @@ const AdminPanel = ({ navigate }) => {
           }}
         />
       )}
-      {/* ── Sidebar ────────────────────────────────── */}
+      {/* -- Sidebar ---------------------------------- */}
       <aside
-        className={`admin-sidebar${isSidebarOpen ? " open" : ""}`}
+        className={"admin-sidebar" + (isSidebarOpen ? " open" : "")}
         style={{
           width: 240,
           background: "var(--surface)",
@@ -189,7 +188,7 @@ const AdminPanel = ({ navigate }) => {
           {NAV_ITEMS.map((n) => (
             <button
               key={n.id}
-              className={`side-btn${section === n.id ? " active" : ""}`}
+              className={"side-btn" + (section === n.id ? " active" : "")}
               onClick={() => setSection(n.id)}
             >
               <span style={{ fontSize: 14, width: 18, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -246,8 +245,7 @@ const AdminPanel = ({ navigate }) => {
           </button>
         </div>
       </aside>
-
-      {/* ── Main content ─────────────────────────── */}
+      {/* -- Main content --------------------------- */}
       <main
         style={{
           flex: 1,

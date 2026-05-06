@@ -44,7 +44,7 @@ const Textarea = ({ value, onChange, placeholder, rows = 4, error }) => (
     rows={rows}
     style={{
       width: "100%", padding: "12px 14px", borderRadius: 6,
-      border: `1px solid ${error ? "var(--rose)" : "var(--border2)"}`,
+      border: '1px solid ' + (error ? "var(--rose)" : "var(--border2)"),
       background: "rgba(255,255,255,.04)", color: "var(--text)",
       fontSize: 13, resize: "vertical", outline: "none",
       fontFamily: "'Jost', sans-serif", lineHeight: 1.6,
@@ -79,7 +79,7 @@ const CategoryFormModal = ({ category = null, onClose, onSave }) => {
     try {
       // Send as JSON since backend usually takes JSON unless file is included via Multer
       // For Categories, if we add Image upload later it would be FormData. 
-      // Current categoryController takes JSON body (`req.body`).
+      // Current categoryController takes JSON body ('req.body').
       await onSave?.(form);
       onClose();
     } catch (err) {
@@ -126,7 +126,7 @@ const CategoryFormModal = ({ category = null, onClose, onSave }) => {
                 placeholder="e.g. Outerwear"
                 style={{
                   width: "100%", padding: "12px 14px", borderRadius: 6,
-                  border: `1px solid ${errors.name ? "var(--rose)" : "var(--border2)"}`,
+                  border: '1px solid ' + (errors.name ? "var(--rose)" : "var(--border2)"),
                   background: "rgba(255,255,255,.04)", color: "var(--text)", fontSize: 14,
                 }}
               />

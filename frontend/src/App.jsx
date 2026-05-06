@@ -6,6 +6,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider, useToast } from "./context/ToastContext";
+import { CartProvider } from "./context/CartContext";
 import { wishlistAPI } from "./services/api";
 import GlobalStyles from "./styles/GlobalStyles";
 import Navbar from "./components/Navbar";
@@ -13,8 +14,15 @@ import HomePage from "./pages/HomePage";
 import ShopPage from "./pages/ShopPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import AdminLayout from "./components/admin/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import ProductsManager from "./pages/admin/ProductsManager";
+import OrdersManager from "./pages/admin/OrdersManager";
+import UsersManager from "./pages/admin/UsersManager";
+import CouponsManager from "./pages/admin/CouponsManager";
 import AdminPanel from "./pages/admin/AdminPanel";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -23,16 +31,15 @@ import TrackOrderPage from "./pages/TrackOrderPage";
 import { LoginPage, SignupPage, ForgotPage } from "./pages/AuthPages";
 import ChatWidget from "./components/ChatWidget";
 
-/* ── Stripe setup ──────────────────────────────── */
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
+/* -- Stripe setup -------------------------------- */
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-/* ── App Content (inside Router) ────────────────── */
+/* -- App Content (inside Router) ------------------ */
 const AppContent = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const toast = useToast();
-  const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
 
   // Fetch wishlist when user connects
@@ -48,15 +55,6 @@ const AppContent = () => {
       setWishlist([]);
     }
   }, [user]);
-
-  /* Cart helpers */
-  const addToCart = (product) =>
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
-      return existing
-        ? prev.map((i) => (i.id === product.id ? { ...i, qty: i.qty + 1 } : i))
-        : [...prev, { ...product, qty: 1 }];
-    });
 
   const toggleWishlist = async (id) => {
     if (!user) {
@@ -81,8 +79,6 @@ const AppContent = () => {
       );
     }
   };
-
-  const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
   /* Loading state while checking auth */
   if (authLoading) {
@@ -126,6 +122,28 @@ const AppContent = () => {
         <Route path="/forgot-password" element={<ForgotPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
+        {/* Admin Routes with nested Layout */}
+        <Route
+          path="/admin"
+          element={<AdminLayout><Dashboard /></AdminLayout>}
+        />
+        <Route
+          path="/admin/products"
+          element={<AdminLayout><ProductsManager /></AdminLayout>}
+        />
+        <Route
+          path="/admin/orders"
+          element={<AdminLayout><OrdersManager /></AdminLayout>}
+        />
+        <Route
+          path="/admin/users"
+          element={<AdminLayout><UsersManager /></AdminLayout>}
+        />
+        <Route
+          path="/admin/coupons"
+          element={<AdminLayout><CouponsManager /></AdminLayout>}
+        />
+
         {/* Main routes (with navbar) */}
         <Route
           path="/*"
@@ -133,7 +151,7 @@ const AppContent = () => {
             <>
               {/* Hide public Navbar on admin panel */}
               {!location.pathname.startsWith("/admin") && (
-                <Navbar navigate={navigate} cartCount={cartCount} />
+                <Navbar navigate={navigate} />
               )}
               <Routes>
                 <Route
@@ -141,7 +159,6 @@ const AppContent = () => {
                   element={
                     <HomePage
                       navigate={navigate}
-                      addToCart={addToCart}
                       wishlist={wishlist}
                       toggleWishlist={toggleWishlist}
                     />
@@ -152,7 +169,6 @@ const AppContent = () => {
                   element={
                     <ShopPage
                       navigate={navigate}
-                      addToCart={addToCart}
                       wishlist={wishlist}
                       toggleWishlist={toggleWishlist}
                     />
@@ -165,11 +181,7 @@ const AppContent = () => {
                 <Route
                   path="/cart"
                   element={
-                    <CartPage
-                      cart={cart}
-                      setCart={setCart}
-                      navigate={navigate}
-                    />
+                    <CartPage />
                   }
                 />
                 <Route
@@ -177,8 +189,6 @@ const AppContent = () => {
                   element={
                     user ? (
                       <CheckoutPage
-                        cart={cart}
-                        setCart={setCart}
                         navigate={navigate}
                       />
                     ) : (
@@ -191,7 +201,6 @@ const AppContent = () => {
                   element={
                     <ProductDetailPage
                       navigate={navigate}
-                      addToCart={addToCart}
                       wishlist={wishlist}
                       toggleWishlist={toggleWishlist}
                     />
@@ -211,8 +220,17 @@ const AppContent = () => {
                         navigate={navigate} 
                         wishlist={wishlist}
                         toggleWishlist={toggleWishlist}
-                        addToCart={addToCart}
                       />
+                    ) : (
+                      <Navigate to="/login" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="/profile/orders"
+                  element={
+                    user ? (
+                      <OrderHistoryPage />
                     ) : (
                       <Navigate to="/login" replace />
                     )
@@ -252,16 +270,18 @@ const AppContent = () => {
   );
 };
 
-/* ── Root App Component ─────────────────────────── */
+/* -- Root App Component --------------------------- */
 const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <Elements stripe={stripePromise}>
-            <AppContent />
-          </Elements>
-        </ToastProvider>
+        <CartProvider>
+          <ToastProvider>
+            <Elements stripe={stripePromise}>
+              <AppContent />
+            </Elements>
+          </ToastProvider>
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   );

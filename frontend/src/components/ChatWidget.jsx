@@ -6,7 +6,7 @@ import { IoChatbubbleEllipsesOutline, IoCloseOutline, IoSend, IoSparkles } from 
 const ChatWidget = () => {
   const [isOpen, setIsOpen]           = useState(false);
   const [messages, setMessages]       = useState([
-    { role: "bot", text: "Welcome to Maison Élite. I am your Virtual Concierge. How may I assist you today?" }
+    { role: "bot", text: "Welcome to Maison Elite. I am your Virtual Concierge. How may I assist you today?" }
   ]);
   const [input, setInput]             = useState("");
   const [loading, setLoading]         = useState(false);
@@ -38,7 +38,7 @@ const ChatWidget = () => {
         setMessages(prev => [...prev, { role: "bot", text: res.reply }]);
       }
     } catch (err) {
-      setMessages(prev => [...prev, { role: "bot", text: `Concierge: ${err.message || "I apologize, but I'm having trouble connecting. Please try again later."}` }]);
+      setMessages(prev => [...prev, { role: "bot", text: 'Concierge: ' + (err.message || "I apologize, but I'm having trouble connecting. Please try again later.") }]);
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,6 @@ const ChatWidget = () => {
           <IoChatbubbleEllipsesOutline size={28} />
         </button>
       )}
-
       {/* Chat Window */}
       {isOpen && (
         <div style={{
@@ -90,7 +89,7 @@ const ChatWidget = () => {
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--emerald)", boxShadow: "0 0 10px var(--emerald)" }} />
               <div>
                 <h4 style={{ margin: 0, fontSize: 15, fontWeight: 500 }}>Virtual Concierge</h4>
-                <p style={{ margin: 0, fontSize: 11, color: "var(--dim)" }}>Maison Élite Boutique</p>
+                <p style={{ margin: 0, fontSize: 11, color: "var(--dim)" }}>Maison Elite Boutique</p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer" }}>
@@ -159,20 +158,7 @@ const ChatWidget = () => {
           </form>
         </div>
       )}
-
-      <style>{`
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(20px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .dot-pulse {
-          animation: pulse 1.5s infinite ease-in-out;
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.3; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.1); }
-        }
-      `}</style>
+      <style>{"\n        @keyframes slideIn {\n          from { opacity: 0; transform: translateY(20px) scale(0.95); }\n          to { opacity: 1; transform: translateY(0) scale(1); }\n        }\n        .dot-pulse {\n          animation: pulse 1.5s infinite ease-in-out;\n        }\n        @keyframes pulse {\n          0%, 100% { opacity: 0.3; transform: scale(0.8); }\n          50% { opacity: 1; transform: scale(1.1); }\n        }\n      "}</style>
     </div>
   );
 };

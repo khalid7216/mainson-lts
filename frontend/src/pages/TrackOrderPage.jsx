@@ -136,7 +136,7 @@ const TrackOrderPage = () => {
                         
                         {/* Dot */}
                         <div style={{ position: "relative", zIndex: 1, marginTop: 4 }}>
-                          <div style={{ width: 16, height: 16, borderRadius: "50%", background: idx === 0 ? "var(--gold)" : "var(--lift)", border: `2px solid ${idx === 0 ? "var(--gold2)" : "var(--border2)"}` }} />
+                          <div style={{ width: 16, height: 16, borderRadius: "50%", background: idx === 0 ? "var(--gold)" : "var(--lift)", border: '2px solid ' + (idx === 0 ? "var(--gold2)" : "var(--border2)") }} />
                         </div>
                         
                         {/* Content */}

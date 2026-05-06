@@ -206,7 +206,7 @@ exports.stripeWebhook = async (req, res) => {
 
       const order = await Order.findById(payment.order);
       if (order) {
-        order.status = "paid";
+        order.status = "processing";
         await order.save();
 
         await Notification.create({
@@ -229,8 +229,8 @@ exports.stripeWebhook = async (req, res) => {
       await payment.save();
 
       const order = await Order.findById(payment.order);
-      if (order && order.status !== "cancelled") {
-        order.status = "cancelled";
+      if (order && order.status !== "failed") {
+        order.status = "failed";
         await order.save();
 
         // Restore stock on payment failure

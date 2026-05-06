@@ -1,7 +1,7 @@
 // frontend/src/pages/HomePage.jsx
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 //  FIXED: Pass navigate to ProductCard
-// ═════════════════════════════════════════════════════════════
+// =============================================================
 
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
@@ -66,8 +66,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         />
       )}
       <Ticker />
-
-      {/* ── Hero ─────────────────────────────────────── */}
+      {/* -- Hero --------------------------------------- */}
       <section
         style={{
           height: "92vh",
@@ -118,10 +117,10 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           >
             {Array.from({ length: 12 }).map((_, i) => (
               <line
-                key={`v${i}`}
-                x1={`${(i + 1) * 8.33}%`}
+                key={"v" + i}
+                x1={(i + 1) * 8.33 + "%"}
                 y1="0"
-                x2={`${(i + 1) * 8.33}%`}
+                x2={(i + 1) * 8.33 + "%"}
                 y2="100%"
                 stroke="var(--gold)"
                 strokeWidth="1"
@@ -129,11 +128,11 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
             ))}
             {Array.from({ length: 8 }).map((_, i) => (
               <line
-                key={`h${i}`}
+                key={"h" + i}
                 x1="0"
-                y1={`${(i + 1) * 12.5}%`}
+                y1={(i + 1) * 12.5 + "%"}
                 x2="100%"
-                y2={`${(i + 1) * 12.5}%`}
+                y2={(i + 1) * 12.5 + "%"}
                 stroke="var(--gold)"
                 strokeWidth="1"
               />
@@ -297,8 +296,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           />
         </div>
       </section>
-
-      {/* ── Featured Section Title ───────────────────── */}
+      {/* -- Featured Section Title --------------------- */}
       <div className="container py-global">
         <h2 className="section-title" style={{ textAlign: "center" }}>
           Trending Latest Arrivals
@@ -307,8 +305,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           A curated selection of our most loved pieces.
         </p>
       </div>
-
-      {/* ── Product Grid ─────────────────────────────── */}
+      {/* -- Product Grid ------------------------------- */}
       <div className="container pb-global">
         <div
           className="prod-grid-mobile"
@@ -343,8 +340,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           </div>
         )}
       </div>
-
-      {/* ── Editorial Banner ─────────────────────────── */}
+      {/* -- Editorial Banner --------------------------- */}
       <div
         className="py-global"
         style={{
@@ -397,14 +393,13 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
             position: "relative",
           }}
         >
-          Complimentary returns · Ethical sourcing · Lifetime care
+          Complimentary returns   Ethical sourcing   Lifetime care
         </p>
         <Btn v="primary" size="lg">
           Our Story
         </Btn>
       </div>
-
-      {/* ── Footer ───────────────────────────────────── */}
+      {/* -- Footer ------------------------------------- */}
       <footer
         className="app-footer"
         style={{
@@ -431,7 +426,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
                   marginBottom: 16,
                 }}
               >
-                MAISON<span className="gold-text">·ÉLITE</span>
+                MAISON<span className="gold-text"> ELITE</span>
               </h3>
               <p
                 style={{
@@ -555,8 +550,8 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
               gap: 12,
             }}
           >
-            <span>© 2026 Maison Élite. All rights reserved.</span>
-            <span>Privacy · Terms · Accessibility</span>
+            <span>© 2026 Maison Elite. All rights reserved.</span>
+            <span>Privacy   Terms   Accessibility</span>
           </div>
         </div>
       </footer>

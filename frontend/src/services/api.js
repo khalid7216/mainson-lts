@@ -1,7 +1,7 @@
 // frontend/src/services/api.js
 const API_URL = import.meta.env.VITE_API_URL || "https://maison-backend.vercel.app/api";
 // const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-/* ── Helper: make API request with credentials ───── */
+/* -- Helper: make API request with credentials ----- */
 const request = async (endpoint, options = {}, isFormData = false) => {
   const config = {
     ...options,
@@ -31,9 +31,9 @@ const request = async (endpoint, options = {}, isFormData = false) => {
   return data;
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    AUTH APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const authAPI = {
   /* Sign up */
   signup: async (name, email, password) => {
@@ -88,11 +88,11 @@ export const authAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    ORDER APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const orderAPI = {
-  /* Create order — sends [{ productId, qty }], server fetches real prices */
+  /* Create order - sends [{ productId, qty }], server fetches real prices */
   createOrder: async ({ cartItems, shippingAddress, notes = "" }) => {
     return await request("/orders", {
       method: "POST",
@@ -115,7 +115,7 @@ export const orderAPI = {
     return await request(`/orders/${id}/cancel`, { method: "PUT" });
   },
 
-  /* Rollback order — cancel pending/processing order + restore stock */
+  /* Rollback order - cancel pending/processing order + restore stock */
   rollbackOrder: async (orderId) => {
     return await request(`/orders/${orderId}/rollback`, { method: "POST" });
   },
@@ -152,9 +152,9 @@ export const orderAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    PAYMENT APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const paymentAPI = {
   /* Create payment intent */
   createIntent: async (orderId) => {
@@ -172,17 +172,17 @@ export const paymentAPI = {
     });
   },
 
-  /* Verify payment from DB — authoritative success/failure check */
+  /* Verify payment from DB - authoritative success/failure check */
   verifyPayment: async (orderId) => {
     return await request(`/payments/verify/${orderId}`);
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    PRODUCT APIS
-   ────────────────────────────────────────────────
+   ------------------------------------------------
    Admin endpoints are protected by adminOnly on server.
-══════════════════════════════════════════════════ */
+================================================== */
 export const productAPI = {
   /* Get all products (supports search/filter) */
   getProducts: async (params = {}) => {
@@ -219,9 +219,9 @@ export const productAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    CATEGORY APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const categoryAPI = {
   /* Get all categories */
   getCategories: async () => {
@@ -237,9 +237,9 @@ export const categoryAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    WISHLIST APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const wishlistAPI = {
   getWishlist: async () => {
     return await request("/wishlist");
@@ -252,9 +252,9 @@ export const wishlistAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    MEDIA APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const mediaAPI = {
   // accepts a single File or an array of Files
   upload: async (files, categoryId = "") => {
@@ -280,9 +280,9 @@ export const mediaAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    BANNER APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const bannerAPI = {
   getBanners: async () => {
     return await request("/banners");
@@ -304,12 +304,12 @@ export const bannerAPI = {
   },
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    PAGE APIS
-══════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════
+================================================== */
+/* ==================================================
    SEO APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const seoAPI = {
   /* Fetch SEO config for a specific page (public) */
   getByPage: async (pageName) => {
@@ -362,9 +362,9 @@ export const couponAPI = {
   delete: (id) => request(`/coupons/${id}`, { method: "DELETE" })
 };
 
-/* ══════════════════════════════════════════════════
+/* ==================================================
    CHATBOT APIS
-══════════════════════════════════════════════════ */
+================================================== */
 export const chatbotAPI = {
   chat: async (message, history = []) => {
     return await request("/chatbot/message", {

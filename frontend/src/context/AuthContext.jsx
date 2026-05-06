@@ -1,10 +1,11 @@
-// frontend/src/context/AuthContext.jsx
-// ═════════════════════════════════════════════════════════════
-//  UPDATED: Signup no longer auto-logs in user
-// ═════════════════════════════════════════════════════════════
-
 import { createContext, useContext, useState, useEffect } from "react";
-import { authAPI } from "../services/api";
+import {
+  login as loginService,
+  register as registerService,
+  logout as logoutService,
+  getMe,
+  updateProfile as updateProfileService,
+} from "../services/authService";
 
 const AuthCtx = createContext(null);
 
@@ -12,68 +13,103 @@ export const useAuth = () => useContext(AuthCtx);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  /* ── Load user on mount if token exists ─────── */
   useEffect(() => {
-    const loadUser = async () => {
+    const initAuth = async () => {
       const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return;
+      if (token) {
+        try {
+          const res = await getMe();
+          setUser({ ...(res.user || res.data || res), isAdmin: (res.user?.role || res.data?.role) === "admin" });
+          setIsAuthenticated(true);
+        } catch (error) {
+          localStorage.removeItem("token");
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       }
-      try {
-        const data = await authAPI.getMe();
-        setUser({ ...data.user, isAdmin: data.user.role === "admin" });
-      } catch (error) {
-        localStorage.removeItem("token");
-      } finally {
-        setLoading(false);
-      }
+      setIsLoading(false);
     };
-    loadUser();
+
+    initAuth();
   }, []);
 
-  /* ── Login ──────────────────────────────────── */
-  const login = async (email, password) => {
+  const login = async (credentials) => {
     try {
-      const data = await authAPI.login(email, password);
-      setUser({ ...data.user, isAdmin: data.user.role === "admin" });
-      return { success: true, user: data.user };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
+      const data = await loginService(credentials);
+      localStorage.setItem("token", data.token);
 
-  /* ── Signup (UPDATED: no auto-login) ────────── */
-  const signup = async (name, email, password) => {
-    try {
-      await authAPI.signup(name, email, password);
-      // ✅ NEW: Just return success, don't set user
+      const userRes = await getMe();
+      const u = userRes.user || userRes.data || userRes;
+      setUser({ ...u, isAdmin: u.role === "admin" });
+      setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        message: error.response?.data?.message || "Login failed",
+      };
     }
   };
 
-  /* ── Logout ─────────────────────────────────── */
+  const register = async (userData) => {
+    try {
+      const data = await registerService(userData);
+      localStorage.setItem("token", data.token);
+
+      const userRes = await getMe();
+      const u = userRes.user || userRes.data || userRes;
+      setUser({ ...u, isAdmin: u.role === "admin" });
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Registration failed",
+      };
+    }
+  };
+
   const logout = async () => {
     try {
-      await authAPI.logout();
+      await logoutService();
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error", error);
     } finally {
+      localStorage.removeItem("token");
       setUser(null);
+      setIsAuthenticated(false);
     }
   };
 
-  /* ── Update User (for settings page) ────────── */
-  const updateUser = (updates) => {
-    setUser((prev) => ({ ...prev, ...updates }));
+  const updateProfile = async (userData) => {
+    try {
+      const data = await updateProfileService(userData);
+      const u = data.user || data.data || data;
+      setUser({ ...u, isAdmin: u.role === "admin" });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Update failed",
+      };
+    }
   };
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, signup, logout, updateUser }}>
+    <AuthCtx.Provider
+      value={{
+        user,
+        isAuthenticated,
+        isLoading,
+        login,
+        register,
+        logout,
+        updateProfile,
+      }}
+    >
       {children}
     </AuthCtx.Provider>
   );

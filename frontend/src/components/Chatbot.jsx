@@ -6,7 +6,7 @@ import { IoChatbubbleOutline, IoCloseOutline, IoSendOutline } from "react-icons/
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "bot", text: "Welcome to Maison Élite. I am your Virtual Concierge. How may I assist you today?" }
+    { role: "bot", text: "Welcome to Maison Elite. I am your Virtual Concierge. How may I assist you today?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -95,7 +95,7 @@ const Chatbot = () => {
           }}>
             <div>
               <h4 style={{ margin: 0, fontSize: 16, fontWeight: 600, letterSpacing: "1px" }}>VIRTUAL CONCIERGE</h4>
-              <p style={{ margin: 0, fontSize: 12, color: "#999" }}>Maison Élite</p>
+              <p style={{ margin: 0, fontSize: 12, color: "#999" }}>Maison Elite</p>
             </div>
             <button 
               onClick={() => setIsOpen(false)} 

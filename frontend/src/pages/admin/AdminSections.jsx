@@ -8,7 +8,7 @@ import CategoryFormModal from "./CategoryFormModal";
 import RichTextEditor from "./RichTextEditor";
 import { IoCashOutline, IoBagOutline, IoPeopleOutline, IoHeartOutline, IoPersonOutline, IoStar, IoImagesOutline, IoSearchOutline, IoGridOutline, IoListOutline, IoCloudUploadOutline, IoCheckmarkOutline, IoCloseOutline, IoDownloadOutline, IoFolderOutline } from "react-icons/io5";
 
-/* ── Reusable Stat card ─────────────────────────────── */
+/* -- Reusable Stat card ------------------------------- */
 export const StatCard = ({ icon, label, value, delta, sub }) => (
   <div className="stat-card">
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -31,9 +31,9 @@ export const StatCard = ({ icon, label, value, delta, sub }) => (
   </div>
 );
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    DASHBOARD
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
@@ -64,7 +64,7 @@ export const AdminDashboard = () => {
       <div style={{ marginBottom: 32 }}>
         <h1 className="section-title" style={{ fontSize: 36 }}>Dashboard</h1>
         <p className="section-sub">
-          {new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date())} · Live Overview
+          {new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date())}   Live Overview
         </p>
       </div>
 
@@ -130,7 +130,7 @@ export const AdminDashboard = () => {
                     {p.name}
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
-                    <div style={{ height: 3, width: `${(p.rating || 4) / 5 * 100}%`, maxWidth: "80%", background: "var(--gold)", borderRadius: 2, opacity: .6 }} />
+                    <div style={{ height: 3, width: ((p.rating || 4) / 5 * 100) + '%', maxWidth: "80%", background: "var(--gold)", borderRadius: 2, opacity: .6 }} />
                     <span style={{ fontSize: 10, color: "var(--dim)" }}>{p.reviews || Math.floor(Math.random() * 50) + i * 2} sold</span>
                   </div>
                 </div>
@@ -144,9 +144,9 @@ export const AdminDashboard = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    BANNERS
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminBanners = () => {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -292,9 +292,9 @@ export const AdminBanners = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    PAGES
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminPages = () => {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -377,7 +377,7 @@ export const AdminPages = () => {
                     <td style={{ color: "var(--muted)", fontSize: 12 }}>{new Date(p.updatedAt).toLocaleDateString()}</td>
                     <td>
                       <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => window.open(`/page/${p.slug}`, '_blank')} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--gold)", cursor: "pointer", fontSize: 11 }}>View</button>
+                        <button onClick={() => window.open('/page/' + (p.slug), '_blank')} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--gold)", cursor: "pointer", fontSize: 11 }}>View</button>
                         <button onClick={() => setModal(p)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: "pointer", fontSize: 11 }}>Edit</button>
                         <button onClick={() => handleDelete(p._id)} style={{ padding: "5px 12px", borderRadius: 5, border: "1px solid rgba(192,57,43,.3)", background: "none", color: "var(--rose)", cursor: "pointer", fontSize: 11 }}>Del</button>
                       </div>
@@ -446,9 +446,9 @@ export const AdminPages = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    PRODUCTS
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminProducts = () => {
   const [query, setQuery] = useState("");
   const [selectedCat, setSelectedCat] = useState("All Categories");
@@ -538,7 +538,7 @@ export const AdminProducts = () => {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search products…"
+            placeholder="Search products..."
             style={{ flex: 1, minWidth: 200, maxWidth: 320, padding: "10px 14px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 13 }}
           />
           <select
@@ -579,7 +579,7 @@ export const AdminProducts = () => {
                     <IoStar size={12} color="var(--gold)" style={{ verticalAlign: "middle", marginRight: 2 }} /> {p.rating}
                   </td>
                   <td>
-                    {p.badge ? <StatusTag status={p.badge} /> : <span style={{ color: "var(--dim)", fontSize: 12 }}>—</span>}
+                    {p.badge ? <StatusTag status={p.badge} /> : <span style={{ color: "var(--dim)", fontSize: 12 }}>-</span>}
                   </td>
                   <td>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -608,9 +608,9 @@ export const AdminProducts = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    CATEGORIES
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminCategories = () => {
   const [modal, setModal] = useState(null); // null | "add" | category object
   const [categories, setCategories] = useState([]);
@@ -693,10 +693,10 @@ export const AdminCategories = () => {
                         <div style={{ width: 44, height: 28, borderRadius: 4, overflow: "hidden", background: "var(--lift)" }}>
                           <img src={c.image} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         </div>
-                      ) : <span style={{ color: "var(--dim)" }}>—</span>}
+                      ) : <span style={{ color: "var(--dim)" }}>-</span>}
                     </td>
                     <td style={{ color: "var(--muted)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {c.description || "—"}
+                      {c.description || "-"}
                     </td>
                     <td>
                       <div style={{ display: "flex", gap: 6 }}>
@@ -719,9 +719,9 @@ export const AdminCategories = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    ORDERS
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminOrders = () => {
   const [filter, setFilter] = useState("All");
   const FILTERS = ["All", "Processing", "Shipped", "Delivered", "Cancelled"];
@@ -757,7 +757,7 @@ export const AdminOrders = () => {
 
       setUpdatingId(id);
       await orderAPI.updateOrderStatus(id, newStatus, trackingNumber || undefined, courierName || undefined, "Status updated to " + newStatus);
-      // Optimistic UI update — only update the changed order in state
+      // Optimistic UI update - only update the changed order in state
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
     } catch (err) {
       alert("Status update failed: " + err.message);
@@ -784,7 +784,7 @@ export const AdminOrders = () => {
             onClick={() => setFilter(f)}
             style={{
               padding: "8px 18px", borderRadius: 100,
-              border: `1px solid ${filter === f ? "var(--gold)" : "var(--border)"}`,
+              border: '1px solid ' + (filter === f ? "var(--gold)" : "var(--border)"),
               background: filter === f ? "rgba(201,168,76,.12)" : "none",
               color: filter === f ? "var(--gold2)" : "var(--muted)",
               cursor: "pointer", fontSize: 11, letterSpacing: ".08em",
@@ -798,7 +798,7 @@ export const AdminOrders = () => {
 
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28 }}>
         {loading ? (
-          <p style={{ color: "var(--dim)" }}>Loading orders…</p>
+          <p style={{ color: "var(--dim)" }}>Loading orders...</p>
         ) : orders.length === 0 ? (
           <div style={{ textAlign: "center", padding: "50px 0", color: "var(--muted)" }}>
             <p style={{ fontSize: 36, marginBottom: 14, display: "flex", justifyContent: "center" }}><IoBagOutline size={40} /></p>
@@ -851,9 +851,9 @@ export const AdminOrders = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    CUSTOMERS
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -913,9 +913,9 @@ export const AdminCustomers = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    ANALYTICS
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminAnalytics = () => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -943,22 +943,20 @@ export const AdminAnalytics = () => {
     <div className="fu">
       <div style={{ marginBottom: 28 }}>
         <h1 className="section-title">Analytics</h1>
-        <p className="section-sub">Performance overview · Last 6 months</p>
+        <p className="section-sub">Performance overview   Last 6 months</p>
       </div>
-
       {/* KPI row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, marginBottom: 28 }}>
-        <StatCard icon={<IoCashOutline size={26} />} label="Total Revenue" value={`$${analytics.totalRevenue.toLocaleString()}`} delta="Live" />
+        <StatCard icon={<IoCashOutline size={26} />} label="Total Revenue" value={"$" + analytics.totalRevenue.toLocaleString()} delta="Live" />
         <StatCard icon={<IoBagOutline size={26} />} label="Total Orders" value={analytics.totalOrders} delta="Live" />
-        <StatCard icon={<IoPersonOutline size={26} />} label="Avg. Order" value={`$${analytics.avgOrder}`} delta="Live" />
+        <StatCard icon={<IoPersonOutline size={26} />} label="Avg. Order" value={"$" + analytics.avgOrder} delta="Live" />
       </div>
-
       {/* Revenue bar chart */}
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 32, marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
           <div>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22 }}>Revenue Trend</h3>
-            <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 4 }}>Monthly gross · Live data</p>
+            <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 4 }}>Monthly gross   Live data</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {["6M"].map((p) => (
@@ -993,7 +991,7 @@ export const AdminAnalytics = () => {
               </span>
               <div style={{ width: "100%" }}>
                 <div
-                  className={`bar${i === analytics.chart.labels.length - 1 ? " active" : ""}`}
+                  className={"bar" + (i === analytics.chart.labels.length - 1 ? " active" : "")}
                   style={{ height: (analytics.chart.data[i] / maxRev) * 160, width: "100%", opacity: hoveredBar !== null && hoveredBar !== i ? .5 : 1, transition: "opacity .2s" }}
                 />
               </div>
@@ -1002,7 +1000,6 @@ export const AdminAnalytics = () => {
           ))}
         </div>
       </div>
-
       {/* Category + KPIs */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         {/* Category breakdown */}
@@ -1021,7 +1018,7 @@ export const AdminAnalytics = () => {
                 <span style={{ fontWeight: 600, color: "var(--gold2)" }}>{pct}%</span>
               </div>
               <div style={{ height: 5, background: "var(--lift)", borderRadius: 3, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 3, transition: "width .8s cubic-bezier(.16,1,.3,1)" }} />
+                <div style={{ height: "100%", width: (pct) + '%', background: color, borderRadius: 3, transition: "width .8s cubic-bezier(.16,1,.3,1)" }} />
               </div>
             </div>
           ))}
@@ -1052,12 +1049,12 @@ export const AdminAnalytics = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    SETTINGS
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminSettings = ({ toast }) => {
   const SECTIONS = [
-    { title: "Store Information", fields: [["Store Name", "Maison Élite"], ["Store Email", "hello@maisonelite.com"], ["Support Phone", "+33 1 42 86 98 00"], ["Currency", "USD"]] },
+    { title: "Store Information", fields: [["Store Name", "Maison Elite"], ["Store Email", "hello@maisonelite.com"], ["Support Phone", "+33 1 42 86 98 00"], ["Currency", "USD"]] },
     { title: "Shipping Policy", fields: [["Free Shipping Threshold", "$200"], ["Standard Rate", "$15"], ["Express Rate", "$35"], ["Delivery Window", "3-5 business days"]] },
     { title: "Notifications", fields: [["New Order Email", "Enabled"], ["Low Stock Alert", "Enabled"], ["Weekly Report", "Enabled"]] },
   ];
@@ -1090,9 +1087,9 @@ export const AdminSettings = ({ toast }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    MEDIA LIBRARY
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminMedia = () => {
   const [mediaList, setMediaList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1115,7 +1112,7 @@ export const AdminMedia = () => {
     categoryAPI.getCategories().then(res => setCategories(res.categories || [])).catch(() => { });
   }, []);
 
-  /* ── Fetch ─────────────────────────────────────── */
+  /* -- Fetch --------------------------------------- */
   const fetchMedia = async () => {
     try {
       setLoading(true);
@@ -1131,7 +1128,7 @@ export const AdminMedia = () => {
 
   useEffect(() => { fetchMedia(); }, [search, sort, filter, filterCat]);
 
-  /* ── Upload (single or multiple) ───────────────── */
+  /* -- Upload (single or multiple) ----------------- */
   const handleUpload = async (files) => {
     if (!files?.length) return;
     try {
@@ -1146,7 +1143,7 @@ export const AdminMedia = () => {
     }
   };
 
-  /* ── Delete (single) ───────────────────────────── */
+  /* -- Delete (single) ----------------------------- */
   const handleDelete = async (id) => {
     if (!window.confirm("Permanently delete this image from Library and Cloudinary?")) return;
     try {
@@ -1156,17 +1153,17 @@ export const AdminMedia = () => {
     } catch (err) { alert("Delete failed: " + err.message); }
   };
 
-  /* ── Bulk delete ───────────────────────────────── */
+  /* -- Bulk delete --------------------------------- */
   const handleBulkDelete = async () => {
     if (!selected.size) return;
-    if (!window.confirm(`Delete ${selected.size} selected image(s) permanently?`)) return;
+    if (!window.confirm('Delete ' + (selected.size) + ' selected image(s) permanently?')) return;
     try {
       await mediaAPI.bulkDelete([...selected]);
       fetchMedia();
     } catch (err) { alert("Bulk delete failed: " + err.message); }
   };
 
-  /* ── Select toggle ─────────────────────────────── */
+  /* -- Select toggle ------------------------------- */
   const toggleSelect = (id, source) => {
     if (source === "product") return; // product images not deletable
     setSelected((prev) => {
@@ -1176,14 +1173,14 @@ export const AdminMedia = () => {
     });
   };
 
-  /* ── Copy URL ──────────────────────────────────── */
+  /* -- Copy URL ------------------------------------ */
   const copyURL = (url, id) => {
     navigator.clipboard.writeText(url);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
   };
 
-  /* ── Drag & Drop handlers ──────────────────────── */
+  /* -- Drag & Drop handlers ------------------------ */
   const onDragOver = (e) => { e.preventDefault(); setDragging(true); };
   const onDragLeave = () => setDragging(false);
   const onDrop = (e) => { e.preventDefault(); setDragging(false); handleUpload(e.dataTransfer.files); };
@@ -1191,38 +1188,16 @@ export const AdminMedia = () => {
   const libraryCount = mediaList.filter((m) => m.source === "library").length;
   const productCount = mediaList.filter((m) => m.source === "product").length;
 
-  /* ─────────────── RENDER ─────────────── */
+  /* --------------- RENDER --------------- */
   return (
     <div className="fu" style={{ position: "relative" }}>
-
-      {/* ── Inline styles for cards & drawer ── */}
-      <style>{`
-        .mc .ov { opacity:0; transition:.18s; background:rgba(0,0,0,.65);
-          position:absolute; inset:0; display:flex; flex-direction:column;
-          align-items:center; justify-content:center; gap:9px; }
-        .mc:hover .ov { opacity:1; }
-        .mc .chk { position:absolute; top:8px; right:8px; z-index:6; width:20px; height:20px;
-          border-radius:50%; border:2px solid #fff; background:rgba(0,0,0,.4);
-          cursor:pointer; display:flex; align-items:center; justify-content:center;
-          font-size:11px; color:#fff; transition:.15s; }
-        .mc:hover .chk, .mc.sel .chk { opacity:1 !important; }
-        .mc .chk { opacity:0; }
-        .mc.sel .chk { background:var(--gold); border-color:var(--gold); color:#000; opacity:1 !important; }
-        .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; }
-        .drawer { position:fixed; top:0; right:0; height:100vh; width:340px; background:var(--surface);
-          border-left:1px solid var(--border); z-index:201; overflow-y:auto;
-          display:flex; flex-direction:column; box-shadow:-4px 0 24px rgba(0,0,0,.4); }
-        .bulk-bar { position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
-          background:var(--card); border:1px solid var(--border2); border-radius:100px;
-          padding:10px 20px; display:flex; align-items:center; gap:16px; z-index:199;
-          box-shadow:0 8px 32px rgba(0,0,0,.4); }
-      `}</style>
-
-      {/* ── Header ── */}
+      {/* -- Inline styles for cards & drawer -- */}
+      <style>{"\n        .mc .ov { opacity:0; transition:.18s; background:rgba(0,0,0,.65);\n          position:absolute; inset:0; display:flex; flex-direction:column;\n          align-items:center; justify-content:center; gap:9px; }\n        .mc:hover .ov { opacity:1; }\n        .mc .chk { position:absolute; top:8px; right:8px; z-index:6; width:20px; height:20px;\n          border-radius:50%; border:2px solid #fff; background:rgba(0,0,0,.4);\n          cursor:pointer; display:flex; align-items:center; justify-content:center;\n          font-size:11px; color:#fff; transition:.15s; }\n        .mc:hover .chk, .mc.sel .chk { opacity:1 !important; }\n        .mc .chk { opacity:0; }\n        .mc.sel .chk { background:var(--gold); border-color:var(--gold); color:#000; opacity:1 !important; }\n        .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; }\n        .drawer { position:fixed; top:0; right:0; height:100vh; width:340px; background:var(--surface);\n          border-left:1px solid var(--border); z-index:201; overflow-y:auto;\n          display:flex; flex-direction:column; box-shadow:-4px 0 24px rgba(0,0,0,.4); }\n        .bulk-bar { position:fixed; bottom:28px; left:50%; transform:translateX(-50%);\n          background:var(--card); border:1px solid var(--border2); border-radius:100px;\n          padding:10px 20px; display:flex; align-items:center; gap:16px; z-index:199;\n          box-shadow:0 8px 32px rgba(0,0,0,.4); }\n      "}</style>
+      {/* -- Header -- */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h1 className="section-title">Media Library</h1>
-          <p className="section-sub">{mediaList.length} total · {libraryCount} uploaded · {productCount} from products</p>
+          <p className="section-sub">{mediaList.length} total   {libraryCount} uploaded   {productCount} from products</p>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <select value={uploadCat} onChange={e => setUploadCat(e.target.value)} style={{ padding: "9px 12px", borderRadius: 6, border: "1px solid var(--border2)", background: "var(--lift)", color: "var(--text)", fontSize: 12, fontFamily: "'Jost',sans-serif" }}>
@@ -1238,12 +1213,11 @@ export const AdminMedia = () => {
               fontFamily: "'Jost',sans-serif", letterSpacing: ".08em", transition: "opacity .2s",
               opacity: uploading ? .6 : 1
             }}>
-            {uploading ? "Uploading…" : "+ Upload"}
+            {uploading ? "Uploading..." : "+ Upload"}
           </button>
         </div>
       </div>
-
-      {/* ── Toolbar (Search · Sort · View Toggle) ── */}
+      {/* -- Toolbar (Search   Sort   View Toggle) -- */}
       <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
         {/* Search */}
         <div style={{ position: "relative", flex: 1, minWidth: 180 }}>
@@ -1252,7 +1226,7 @@ export const AdminMedia = () => {
             color: "var(--muted)", fontSize: 13, pointerEvents: "none", display: "flex"
           }}><IoSearchOutline size={14} /></span>
           <input value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search images…"
+            placeholder="Search images..."
             style={{
               width: "100%", padding: "9px 12px 9px 32px", borderRadius: 6,
               border: "1px solid var(--border2)", background: "var(--lift)",
@@ -1301,7 +1275,7 @@ export const AdminMedia = () => {
           <button key={val} onClick={() => setFilter(val)}
             style={{
               padding: "8px 16px", borderRadius: 100, cursor: "pointer",
-              border: `1px solid ${filter === val ? "var(--gold)" : "var(--border)"}`,
+              border: '1px solid ' + (filter === val ? "var(--gold)" : "var(--border)"),
               background: filter === val ? "rgba(201,168,76,.12)" : "none",
               color: filter === val ? "var(--gold2)" : "var(--muted)",
               fontSize: 11, letterSpacing: ".08em", fontFamily: "'Jost',sans-serif", transition: "all .2s"
@@ -1310,12 +1284,11 @@ export const AdminMedia = () => {
           </button>
         ))}
       </div>
-
-      {/* ── Drag & Drop Zone ── */}
+      {/* -- Drag & Drop Zone -- */}
       <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
         style={{
-          border: `2px dashed ${dragging ? "var(--gold)" : "var(--border2)"}`,
+          border: '2px dashed ' + (dragging ? "var(--gold)" : "var(--border2)"),
           borderRadius: 10, padding: "22px 0", textAlign: "center", marginBottom: 20,
           background: dragging ? "rgba(201,168,76,.06)" : "var(--lift)",
           cursor: "pointer", transition: "all .2s",
@@ -1325,27 +1298,26 @@ export const AdminMedia = () => {
         <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>
           {dragging ? "Drop to upload!" : "Drag & drop images here, or click to browse"}
         </p>
-        <p style={{ fontSize: 10, color: "var(--dim)", marginTop: 4 }}>Supports JPG · PNG · WEBP · multiple files at once</p>
+        <p style={{ fontSize: 10, color: "var(--dim)", marginTop: 4 }}>Supports JPG   PNG   WEBP   multiple files at once</p>
       </div>
-
-      {/* ── GRID / LIST ── */}
+      {/* -- GRID / LIST -- */}
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 24, minHeight: 300 }}>
         {loading ? (
-          <p style={{ color: "var(--dim)" }}>Loading media…</p>
+          <p style={{ color: "var(--dim)" }}>Loading media...</p>
         ) : mediaList.length === 0 ? (
           <div style={{ textAlign: "center", padding: "50px 0", color: "var(--muted)" }}>
             <p style={{ fontSize: 36, marginBottom: 14, display: "flex", justifyContent: "center" }}><IoImagesOutline size={40} /></p>
             <p>No images found. Upload your first image to get started.</p>
           </div>
         ) : viewMode === "grid" ? (
-          /* ── Grid ── */
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px,1fr))", gap: 18 }}>
+          /* -- Grid -- */
+          (<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px,1fr))", gap: 18 }}>
             {mediaList.map((m) => {
               const isSelected = selected.has(String(m._id));
               return (
-                <div key={m._id + m.source} className={`mc${isSelected ? " sel" : ""}`}
+                <div key={m._id + m.source} className={"mc" + (isSelected ? " sel" : "")}
                   style={{
-                    border: `1px solid ${isSelected ? "var(--gold)" : "var(--border)"}`,
+                    border: '1px solid ' + (isSelected ? "var(--gold)" : "var(--border)"),
                     borderRadius: 8, overflow: "hidden", background: "var(--lift)", position: "relative",
                     cursor: "pointer", transition: "border-color .2s",
                     boxShadow: isSelected ? "0 0 0 2px rgba(201,168,76,.25)" : "none"
@@ -1400,16 +1372,16 @@ export const AdminMedia = () => {
                       {m.productName || (m.public_id ? m.public_id.split("/").pop() : "media")}
                     </p>
                     <p style={{ fontSize: 9, color: "var(--muted)", marginTop: 3 }}>
-                      {m.size ? (m.size / 1024).toFixed(1) + "KB · " : ""}{(m.format || "IMG").toUpperCase()}
+                      {m.size ? (m.size / 1024).toFixed(1) + "KB   " : ""}{(m.format || "IMG").toUpperCase()}
                     </p>
                   </div>
                 </div>
               );
             })}
-          </div>
+          </div>)
         ) : (
-          /* ── List ── */
-          <table className="tbl" style={{ width: "100%" }}>
+          /* -- List -- */
+          (<table className="tbl" style={{ width: "100%" }}>
             <thead>
               <tr>
                 <th style={{ width: 40 }}></th>
@@ -1466,7 +1438,7 @@ export const AdminMedia = () => {
                       </span>
                     </td>
                     <td style={{ fontSize: 11, color: "var(--muted)" }}>
-                      {m.size ? (m.size / 1024).toFixed(1) + " KB" : "—"}
+                      {m.size ? (m.size / 1024).toFixed(1) + " KB" : "-"}
                     </td>
                     <td style={{ fontSize: 11, color: "var(--muted)" }}>
                       {(m.format || "IMG").toUpperCase()}
@@ -1498,11 +1470,10 @@ export const AdminMedia = () => {
                 );
               })}
             </tbody>
-          </table>
+          </table>)
         )}
       </div>
-
-      {/* ── Bulk Action Bar ── */}
+      {/* -- Bulk Action Bar -- */}
       {selected.size > 0 && (
         <div className="bulk-bar">
           <span style={{ fontSize: 12, color: "var(--gold2)", fontWeight: 600 }}>
@@ -1525,8 +1496,7 @@ export const AdminMedia = () => {
           </button>
         </div>
       )}
-
-      {/* ── Detail Drawer ── */}
+      {/* -- Detail Drawer -- */}
       {drawer && (
         <>
           <div className="drawer-overlay" onClick={() => setDrawer(null)} />
@@ -1552,8 +1522,8 @@ export const AdminMedia = () => {
               {[
                 ["Source", drawer.source === "product" ? "Product Image" : "Library Upload"],
                 ["Format", (drawer.format || "Unknown").toUpperCase()],
-                ["Size", drawer.size ? (drawer.size / 1024).toFixed(1) + " KB" : "—"],
-                ["Uploaded", drawer.createdAt ? new Date(drawer.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"],
+                ["Size", drawer.size ? (drawer.size / 1024).toFixed(1) + " KB" : "-"],
+                ["Uploaded", drawer.createdAt ? new Date(drawer.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "-"],
                 ...(drawer.productName ? [["Product", drawer.productName]] : []),
               ].map(([k, v]) => (
                 <div key={k} style={{
@@ -1612,9 +1582,9 @@ export const AdminMedia = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
+/* ===================================================
    ADMIN SEO
-═══════════════════════════════════════════════════ */
+=================================================== */
 export const AdminSeo = () => {
   const PAGES = [
     { key: "home", label: "Home Page" },
@@ -1673,7 +1643,7 @@ export const AdminSeo = () => {
       setSaved(true);
       fetchAllConfigs();
       // Clear cache so SEO component re-fetches
-      sessionStorage.removeItem(`seo_${selectedPage}`);
+      sessionStorage.removeItem('seo_' + (selectedPage));
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       setError(err.message || "Failed to save. Check all fields.");
@@ -1700,13 +1670,13 @@ export const AdminSeo = () => {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
         <div>
           <h1 className="section-title">SEO Manager</h1>
-          <p className="section-sub">Control meta titles, descriptions, and Open Graph tags per page — database-driven.</p>
+          <p className="section-sub">Control meta titles, descriptions, and Open Graph tags per page - database-driven.</p>
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
 
-        {/* ── Left: Form ── */}
+        {/* -- Left: Form -- */}
         <form onSubmit={handleSave} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, padding: 28, display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* Page Selector */}
@@ -1737,7 +1707,7 @@ export const AdminSeo = () => {
                 style={{ ...inputStyle, borderColor: titleLen > 60 ? "var(--rose)" : "var(--border)" }}
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Maison Élite — Luxury Fashion House"
+                placeholder="e.g. Maison Elite - Luxury Fashion House"
                 maxLength={70}
                 required
               />
@@ -1758,7 +1728,7 @@ export const AdminSeo = () => {
                 style={{ ...inputStyle, resize: "vertical", minHeight: 80, borderColor: descLen > 160 ? "var(--rose)" : "var(--border)" }}
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="A brief, compelling description that appears in Google results…"
+                placeholder="A brief, compelling description that appears in Google results..."
                 rows={3}
                 maxLength={170}
                 required
@@ -1799,7 +1769,7 @@ export const AdminSeo = () => {
                 style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
               />
               <span style={{ fontSize: 13, color: "var(--muted)" }}>
-                <strong style={{ color: "var(--text)" }}>noindex</strong> — tell Google NOT to index this page
+                <strong style={{ color: "var(--text)" }}>noindex</strong> - tell Google NOT to index this page
               </span>
             </label>
 
@@ -1810,14 +1780,14 @@ export const AdminSeo = () => {
             {/* Submit */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <Btn v="primary" type="submit" disabled={saving}>
-                {saving ? "Saving…" : "Save SEO Config"}
+                {saving ? "Saving..." : "Save SEO Config"}
               </Btn>
             </div>
 
           </>)}
         </form>
 
-        {/* ── Right: Google Preview + Table ── */}
+        {/* -- Right: Google Preview + Table -- */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
           {/* Google Search Preview Card */}
@@ -1871,7 +1841,7 @@ export const AdminSeo = () => {
                   <span style={{ color: titleColor }}>{titleLen}/60</span>
                 </div>
                 <div style={{ height: 4, background: "var(--border)", borderRadius: 2 }}>
-                  <div style={{ height: "100%", width: `${Math.min(100, (titleLen / 60) * 100)}%`, background: titleColor, borderRadius: 2, transition: "all .3s" }} />
+                  <div style={{ height: "100%", width: (Math.min(100, (titleLen / 60) * 100)) + '%', background: titleColor, borderRadius: 2, transition: "all .3s" }} />
                 </div>
               </div>
               <div>
@@ -1880,7 +1850,7 @@ export const AdminSeo = () => {
                   <span style={{ color: descColor }}>{descLen}/160</span>
                 </div>
                 <div style={{ height: 4, background: "var(--border)", borderRadius: 2 }}>
-                  <div style={{ height: "100%", width: `${Math.min(100, (descLen / 160) * 100)}%`, background: descColor, borderRadius: 2, transition: "all .3s" }} />
+                  <div style={{ height: "100%", width: (Math.min(100, (descLen / 160) * 100)) + '%', background: descColor, borderRadius: 2, transition: "all .3s" }} />
                 </div>
               </div>
             </div>
@@ -2030,7 +2000,7 @@ export const AdminCoupons = () => {
               <tr key={c._id} style={{ borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.01)" }}>
                 <td style={{ padding: "16px 20px", fontWeight: 600 }}>{c.code}</td>
                 <td style={{ padding: "16px 20px", color: "var(--gold)", textTransform: "capitalize" }}>{c.type}</td>
-                <td style={{ padding: "16px 20px" }}>{c.type === "percentage" ? `${c.discountValue}%` : `$${c.discountValue}`}</td>
+                <td style={{ padding: "16px 20px" }}>{c.type === "percentage" ? (c.discountValue) + '%' : '$' + (c.discountValue)}</td>
                 <td style={{ padding: "16px 20px" }}>{new Date(c.expiryDate).toLocaleDateString()}</td>
                 <td style={{ padding: "16px 20px" }}><StatusTag status={c.isActive ? "ACTIVE" : "INACTIVE"} /></td>
                 <td style={{ padding: "16px 20px", display: "flex", gap: 12, justifyContent: "flex-end" }}>
