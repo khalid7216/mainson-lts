@@ -7,13 +7,9 @@ exports.protect = async (req, res, next) => {
   try {
     let token;
 
-    // Accept token from Authorization header OR cookie OR query string (sendBeacon fallback)
+    // Only accept token from Authorization header
     if (req.headers.authorization?.startsWith("Bearer ")) {
       token = req.headers.authorization.split(" ")[1];
-    } else if (req.cookies?.token) {
-      token = req.cookies.token;
-    } else if (req.query?.token) {
-      token = req.query.token;
     }
 
     if (!token) {
@@ -21,7 +17,7 @@ exports.protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select("-password");
+    req.user = await User.findById(decoded.id).select("-password -__v");
 
     if (!req.user) {
       return res.status(401).json({ success: false, message: "User no longer exists" });

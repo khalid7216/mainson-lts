@@ -328,6 +328,10 @@ exports.trackOrderPublic = async (req, res) => {
       return res.status(404).json({ message: "Order not found. Please double-check your tracking ID." });
     }
 
+    if (order.user._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
     // Basic security: if email is provided, ensure it matches user's email if possible
     if (email && order.user && order.user.email.toLowerCase() !== email.toLowerCase()) {
       return res.status(403).json({ message: "Email does not match our records for this order." });

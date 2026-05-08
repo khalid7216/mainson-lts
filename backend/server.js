@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express      = require("express");
+const helmet       = require("helmet");
 const cors         = require("cors");
 const cookieParser = require("cookie-parser");
 const path         = require("path");
@@ -26,40 +27,27 @@ const seoRoutes            = require("./routes/seoRoutes");
 const couponRoutes         = require("./routes/couponRoutes");
 const chatbotRoutes        = require("./routes/chatbotRoutes");
 const app  = express();
-const PORT = process.env.PORT || 5001;
+app.use(helmet());
+app.use(helmet.hidePoweredBy());
+app.use(helmet.noSniff());
+app.use(helmet.xssFilter());
+const PORT = process.env.PORT || 5000;
 
 /* ── Connect DB ─────────────────────────────────── */
 connectDB();
 
-/* ── CORS (manual – works on Vercel serverless) ── */
-const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:5173",
-  "https://www.khalidsanawer.online",
-  "http://localhost:5174",
-  "http://localhost:3000",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
-];
-
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  if (!origin || allowedOrigins.includes(origin) || (origin && origin.includes("mainson-frontend"))) {
-    res.setHeader("Access-Control-Allow-Origin", origin || "*");
-  }
-
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-
-  // Respond to preflight immediately
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
-
-  next();
-});
-
+/* — CORS */
+app.use(cors({
+  origin: function(origin, callback) {
+    const allowed = process.env.CLIENT_URL.split(',');
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
+  credentials: true
+}));
 /* ── Stripe webhook needs raw body (before JSON parser) ── */
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 

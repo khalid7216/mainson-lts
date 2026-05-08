@@ -3,7 +3,7 @@ const Order = require("../models/Order");
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password").sort("-createdAt");
+    const users = await User.find().select("-password -__v").sort("-createdAt");
     
     // Aggregate successful orders for total spent & count
     const orderStats = await Order.aggregate([

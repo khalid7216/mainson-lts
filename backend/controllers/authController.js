@@ -116,7 +116,7 @@ exports.login = async (req, res) => {
 ══════════════════════════════════════════════════ */
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select("-password -__v");
     res.status(200).json({
       success: true,
       user: {
@@ -254,7 +254,7 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, email } = req.body;
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select("-password -__v");
     if (!user) {
       return res
         .status(404)
