@@ -27,10 +27,23 @@ const seoRoutes            = require("./routes/seoRoutes");
 const couponRoutes         = require("./routes/couponRoutes");
 const chatbotRoutes        = require("./routes/chatbotRoutes");
 const app  = express();
-app.use(helmet());
-app.use(helmet.hidePoweredBy());
-app.use(helmet.noSniff());
-app.use(helmet.xssFilter());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: [
+        "'self'", 
+        "data:", 
+        "https://res.cloudinary.com",
+        "https://images.unsplash.com"
+      ],
+      scriptSrc: ["'self'", "https://js.stripe.com"],
+      styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+      connectSrc: ["'self'", "https://api.stripe.com"],
+      frameSrc: ["'self'", "https://js.stripe.com"],
+    },
+  },
+}));
 const PORT = process.env.PORT || 5000;
 
 /* ── Connect DB ─────────────────────────────────── */

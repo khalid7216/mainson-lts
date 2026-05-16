@@ -69,7 +69,7 @@ const ProductCard = ({ product, delay = 0, onQuickView }) => {
   return (
     <div
       className="prod-card lift"
-      onClick={() => navigate('/product/' + (product._id))}
+      onClick={() => navigate('/product/' + (product.slug))}
       style={{
         animationDelay: (delay) + 's',
         animationFillMode: "both",
@@ -82,8 +82,9 @@ const ProductCard = ({ product, delay = 0, onQuickView }) => {
       {/* Image box */}
       <div className="prod-img" style={{ height: 340, background: "var(--lift)", overflow: "hidden", position: "relative" }}>
         <img
-          src={imageUrl}
+          src={product.image?.url || product.images?.[0] || '/placeholder.jpg'}
           alt={product.name}
+          onError={(e) => (e.target.src = '/placeholder.jpg')}
           style={{
             width: "100%",
             height: "100%",

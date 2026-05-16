@@ -31,19 +31,8 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
           page: 1, 
           limit: 4 
         });
-        const formattedProducts = data.products.map((p) => ({
-          id: p._id,
-          name: p.name,
-          slug: p.slug,
-          price: p.price,
-          orig: p.compareAtPrice,
-          cat: p.parentCategory?.name || "Uncategorized",
-          badge: p.badge,
-          rating: p.ratings?.length ? p.ratings : Number((4 + Math.random()).toFixed(1)),
-          reviews: Math.floor(Math.random() * 150) + 10,
-          image: p.images?.[0] || p.image?.url || p.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
-        }));
-        setApiProducts(formattedProducts);
+        console.log('HomePage first product:', data.products[0]);
+        setApiProducts(data.products);
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
@@ -317,7 +306,7 @@ const HomePage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
         >
           {products.map((p, i) => (
             <ProductCard
-              key={p.id}
+              key={p._id}
               product={p}
               navigate={navigate} // ✅ ADDED: Pass navigate
               addToCart={addToCart}

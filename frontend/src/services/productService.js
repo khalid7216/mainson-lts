@@ -15,14 +15,14 @@ export const getProducts = async (filters) => {
 };
 
 /**
- * Get a single product by ID
- * @param {string} id - Product ID
+ * Get a single product by Slug
+ * @param {string} slug - Product Slug
  * @returns {Promise<any>}
  */
-export const getProductById = async (id) => {
+export const getProductBySlug = async (slug) => {
   try {
-    const response = await axiosInstance.get(`/products/${id}`);
-    return response.data;
+    const response = await axiosInstance.get(`/products/${slug}`);
+    return response.data.product || response.data;
   } catch (error) {
     throw error;
   }
