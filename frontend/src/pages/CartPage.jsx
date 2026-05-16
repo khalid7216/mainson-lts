@@ -76,14 +76,32 @@ const CartPage = () => {
           <div>
             {cartItems.map((item, i) => {
               const p = item.product || {};
-              const imageUrl = Array.isArray(p.images) && p.images.length > 0 
-                ? p.images[0] 
-                : "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80";
+              const itemPrice = Number(item.product?.price) || 0;
+              const itemQty = Number(item.qty) || 0;
+              const itemSubtotal = (itemPrice * itemQty).toFixed(2);
+
+              console.log('item:', item.qty, item.product?.price);
 
               return (
                 <div key={item._id || i} className="fu flex-wrap" style={{ display: "flex", gap: 22, padding: "24px 0", borderBottom: "1px solid var(--border)", alignItems: "center" }}>
-                  <div style={{ width: 96, height: 114, borderRadius: 8, flexShrink: 0, background: "var(--lift)", overflow: "hidden", border: "1px solid var(--border)" }}>
-                    <img src={imageUrl} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <div style={{ 
+                    width: '100px', 
+                    height: '100px', 
+                    minWidth: '100px',
+                    overflow: 'hidden',
+                    borderRadius: '8px'
+                  }}>
+                    <img
+                      src={item.product?.image?.url || `https://via.placeholder.com/80x80?text=${item.product?.name?.charAt(0) || 'P'}`}
+                      alt={item.product?.name}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        objectPosition: 'center'
+                      }}
+                      onError={(e) => e.target.src = `https://via.placeholder.com/80x80?text=${item.product?.name?.charAt(0) || 'P'}`}
+                    />
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -97,24 +115,24 @@ const CartPage = () => {
 
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <button 
-                      onClick={() => item.quantity === 1 ? handleRemove(p._id, p.name) : handleUpdateQty(p._id, item.quantity - 1)}
+                      onClick={() => item.qty === 1 ? removeItem(item._id) : updateItem(item._id, item.qty - 1)}
                       disabled={isLoading}
                       style={{ width: 32, height: 32, borderRadius: 6, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: isLoading ? "not-allowed" : "pointer" }}
                     >−</button>
                     
-                    <span style={{ fontSize: 14, minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
+                    <span style={{ fontSize: 14, minWidth: 20, textAlign: "center" }}>{item.qty}</span>
                     
                     <button 
-                      onClick={() => handleUpdateQty(p._id, item.quantity + 1)}
+                      onClick={() => updateItem(item._id, item.qty + 1)}
                       disabled={isLoading}
                       style={{ width: 32, height: 32, borderRadius: 6, border: "1px solid var(--border2)", background: "none", color: "var(--text)", cursor: isLoading ? "not-allowed" : "pointer" }}
                     >+</button>
                   </div>
 
                   <div style={{ textAlign: "right", minWidth: 80 }}>
-                    <p style={{ fontSize: 16, fontFamily: "'Jost', sans-serif" }}>${((p.price || 0) * item.quantity).toFixed(2)}</p>
+                    <p style={{ fontSize: 16, fontFamily: "'Jost', sans-serif" }}>${itemSubtotal}</p>
                     <button 
-                      onClick={() => handleRemove(p._id, p.name)}
+                      onClick={() => removeItem(item._id)}
                       disabled={isLoading}
                       style={{ background: "none", border: "none", color: "var(--dim)", cursor: isLoading ? "not-allowed" : "pointer", marginTop: 8 }}
                     >

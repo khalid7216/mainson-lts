@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
+import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { createPaymentIntent } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
 
 const CheckoutPage = ({ navigate }) => {
   const { user } = useAuth();
-  const { cartItems, totalPrice, clearCartItems } = useCart();
+  const { cartItems, totalPrice, clearCartItems } = useContext(CartContext);
   const toast = useToast();
   const stripe = useStripe();
   const elements = useElements();
@@ -83,7 +83,11 @@ const CheckoutPage = ({ navigate }) => {
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       try {
         const orderRes = await createOrder({
-          items: cartItems.map(i => ({ product: i.product._id, quantity: i.quantity })),
+          items: cartItems.map(item => ({
+            product: item.product._id,
+            quantity: item.qty,
+            price: item.product.price
+          })),
           shippingAddress: shippingData,
           paymentIntentId: paymentIntent.id,
           totalAmount: totalPrice
@@ -227,8 +231,8 @@ const CheckoutPage = ({ navigate }) => {
             <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20, maxHeight: 300, overflowY: "auto" }}>
               {cartItems.map((item, idx) => (
                 <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                  <span>{item.quantity}x {item.product?.name || "Product"}</span>
-                  <span>${((item.product?.price || item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                  <span>{item.qty}x {item.product?.name || "Product"}</span>
+                  <span>${((item.product?.price || item.price || 0) * (item.qty || 1)).toFixed(2)}</span>
                 </div>
               ))}
             </div>

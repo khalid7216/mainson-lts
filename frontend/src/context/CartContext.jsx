@@ -3,7 +3,7 @@ import { getCart, addToCart, updateCartItem, removeFromCart, clearCart as clearC
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 
-const CartContext = createContext(null);
+export const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -16,8 +16,9 @@ export const CartProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const data = await getCart();
-      // Adjust based on the actual response structure, expecting [{ _id, product: { ... }, quantity }] inside data.cart or data.items
-      setCartItems(data.cart?.items || data.items || data.cart || []);
+      console.log('Cart response:', data);
+      // Adjust based on the actual response structure
+      setCartItems(data.cart?.items || data.items || []);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
       if (toast && typeof toast === "function") {
@@ -25,7 +26,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -53,10 +54,10 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const updateItem = async (productId, quantity) => {
+  const updateItem = async (itemId, quantity) => {
     setIsLoading(true);
     try {
-      await updateCartItem(productId, quantity);
+      await updateCartItem(itemId, quantity);
       await fetchCart();
     } catch (error) {
       console.error(error);
@@ -68,10 +69,10 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeItem = async (productId) => {
+  const removeItem = async (itemId) => {
     setIsLoading(true);
     try {
-      await removeFromCart(productId);
+      await removeFromCart(itemId);
       await fetchCart();
     } catch (error) {
       console.error(error);
@@ -99,13 +100,13 @@ export const CartProvider = ({ children }) => {
   };
 
   const totalItems = useMemo(() => {
-    return cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
+    return cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
   }, [cartItems]);
 
   const totalPrice = useMemo(() => {
     return cartItems.reduce((acc, item) => {
       const price = item.product?.price || item.price || 0;
-      const qty = item.quantity || 1;
+      const qty = item.qty || 1;
       return acc + (price * qty);
     }, 0);
   }, [cartItems]);

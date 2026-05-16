@@ -18,7 +18,7 @@ if (process.env.STRIPE_SECRET_KEY) {
    POST /api/payments/create-intent
    ────────────────────────────────────────────────
    Creates Stripe PaymentIntent from server-side
-   order total. Amount comes from DB, NOT client.
+   order total or client amount.
 ══════════════════════════════════════════════════ */
 exports.createPaymentIntent = async (req, res) => {
   try {
@@ -26,21 +26,28 @@ exports.createPaymentIntent = async (req, res) => {
       return res.status(503).json({ message: "Stripe is not configured. Set STRIPE_SECRET_KEY in .env" });
     }
 
-    const { orderId } = req.body;
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ message: "Order not found" });
-    if (order.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-    if (order.status === "paid") {
-      return res.status(400).json({ message: "Order is already paid" });
-    }
-    if (order.status === "cancelled") {
-      return res.status(400).json({ message: "Cannot pay for a cancelled order" });
-    }
+    const { orderId, amount } = req.body;
+    let amountInCents = 0;
+    let order = null;
 
-    // ✅ Amount from DB order, NOT from client
-    const amountInCents = Math.round(order.totalAmount * 100);
+    if (orderId) {
+      order = await Order.findById(orderId);
+      if (!order) return res.status(404).json({ message: "Order not found" });
+      if (order.user.toString() !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized" });
+      }
+      if (order.status === "paid") {
+        return res.status(400).json({ message: "Order is already paid" });
+      }
+      if (order.status === "cancelled") {
+        return res.status(400).json({ message: "Cannot pay for a cancelled order" });
+      }
+      amountInCents = Math.round(order.totalAmount * 100);
+    } else if (amount) {
+      amountInCents = Math.round(amount * 100);
+    } else {
+      return res.status(400).json({ message: "Either orderId or amount is required" });
+    }
 
     if (amountInCents < 50) {
       return res.status(400).json({ message: "Order amount too small for payment processing" });
@@ -49,30 +56,32 @@ exports.createPaymentIntent = async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount:   amountInCents,
       currency: "usd",
-      metadata: { orderId: order._id.toString(), userId: req.user.id },
+      metadata: { userId: req.user.id, orderId: order ? order._id.toString() : "pending" },
     });
 
-    // Check if payment record already exists (re-attempt)
-    let payment = await Payment.findOne({ order: order._id });
-    if (payment) {
-      payment.stripePaymentIntentId = paymentIntent.id;
-      payment.amount = amountInCents;
-      payment.status = "pending";
-      await payment.save();
-    } else {
-      payment = await Payment.create({
-        order:                 order._id,
-        user:                  req.user.id,
-        stripePaymentIntentId: paymentIntent.id,
-        amount:                amountInCents,
-        status:                "pending",
-      });
+    if (order) {
+      // Check if payment record already exists (re-attempt)
+      let payment = await Payment.findOne({ order: order._id });
+      if (payment) {
+        payment.stripePaymentIntentId = paymentIntent.id;
+        payment.amount = amountInCents;
+        payment.status = "pending";
+        await payment.save();
+      } else {
+        await Payment.create({
+          order:                 order._id,
+          user:                  req.user.id,
+          stripePaymentIntentId: paymentIntent.id,
+          amount:                amountInCents,
+          status:                "pending",
+        });
+      }
+
+      order.status = "processing";
+      await order.save();
     }
 
-    order.status = "processing";
-    await order.save();
-
-    res.json({ clientSecret: paymentIntent.client_secret, orderId: order._id });
+    res.json({ clientSecret: paymentIntent.client_secret, orderId: order ? order._id : undefined });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -5,7 +5,7 @@ const Product = require("../models/Product");
 /* ── GET /api/cart ──────────────────────────────── */
 exports.getCart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ user: req.user.id }).populate("items.product", "name slug price images stock");
+    let cart = await Cart.findOne({ user: req.user.id }).populate("items.product", "name slug price images stock image");
     if (!cart) cart = { user: req.user.id, items: [] };
     res.json({ cart });
   } catch (err) {
@@ -41,17 +41,17 @@ exports.addToCart = async (req, res) => {
 /* ── PUT /api/cart/item/:itemId ─────────────────── */
 exports.updateCartItem = async (req, res) => {
   try {
-    const { qty } = req.body;
+    const { quantity } = req.body;
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
     const item = cart.items.id(req.params.itemId);
     if (!item) return res.status(404).json({ message: "Item not found in cart" });
 
-    if (qty <= 0) {
+    if (quantity <= 0) {
       item.deleteOne();
     } else {
-      item.qty = qty;
+      item.qty = quantity;
     }
     await cart.save();
     res.json({ cart });

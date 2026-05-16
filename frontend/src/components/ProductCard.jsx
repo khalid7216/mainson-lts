@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
-import { addToCart } from "../services/cartService";
+import { useCart } from "../context/CartContext";
 import { addToWishlist, removeFromWishlist } from "../services/wishlistService";
 import { Btn, StatusTag } from "./UI";
 import { IoStar, IoHeartOutline, IoHeart, IoClose, IoSearchOutline } from "react-icons/io5";
@@ -11,6 +11,7 @@ const ProductCard = ({ product, delay = 0, onQuickView }) => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isAuthenticated } = useAuth();
+  const { addItem } = useCart();
   
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -28,10 +29,7 @@ const ProductCard = ({ product, delay = 0, onQuickView }) => {
 
     setIsAddingToCart(true);
     try {
-      await addToCart(product._id, 1);
-      if (toast && typeof toast === "function") {
-        toast("Added to cart!", "ok");
-      }
+      await addItem(product._id, 1);
     } catch (err) {
       if (toast && typeof toast === "function") {
         toast(err.response?.data?.message || "Error adding to cart", "err");

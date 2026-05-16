@@ -21,7 +21,7 @@ export const getCart = async () => {
  */
 export const addToCart = async (productId, quantity) => {
   try {
-    const response = await axiosInstance.post('/cart', { productId, quantity });
+    const response = await axiosInstance.post('/cart/add', { productId, quantity });
     return response.data;
   } catch (error) {
     throw error;
@@ -30,13 +30,13 @@ export const addToCart = async (productId, quantity) => {
 
 /**
  * Update the quantity of a cart item
- * @param {string} productId - The ID of the product in the cart
+ * @param {string} itemId - The ID of the item in the cart
  * @param {number} quantity - The new quantity
  * @returns {Promise<any>}
  */
-export const updateCartItem = async (productId, quantity) => {
+export const updateCartItem = async (itemId, quantity) => {
   try {
-    const response = await axiosInstance.put(`/cart/${productId}`, { quantity });
+    const response = await axiosInstance.put(`/cart/item/${itemId}`, { quantity });
     return response.data;
   } catch (error) {
     throw error;
@@ -44,13 +44,13 @@ export const updateCartItem = async (productId, quantity) => {
 };
 
 /**
- * Remove a specific product from the cart
- * @param {string} productId - The ID of the product to remove
+ * Remove a specific item from the cart
+ * @param {string} itemId - The ID of the item to remove
  * @returns {Promise<any>}
  */
-export const removeFromCart = async (productId) => {
+export const removeFromCart = async (itemId) => {
   try {
-    const response = await axiosInstance.delete(`/cart/${productId}`);
+    const response = await axiosInstance.delete(`/cart/item/${itemId}`);
     return response.data;
   } catch (error) {
     throw error;
