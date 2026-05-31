@@ -14,7 +14,7 @@ const {
 } = require("../controllers/orderController");
 
 // Public Tracking Route (Must be before protect)
-router.get("/track", protect, trackOrderPublic);
+router.get("/track", trackOrderPublic);
 
 router.use(protect);
 

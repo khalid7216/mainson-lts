@@ -20,7 +20,7 @@ export const createOrder = async (orderData) => {
  */
 export const getMyOrders = async () => {
   try {
-    const response = await axiosInstance.get('/orders/my-orders');
+    const response = await axiosInstance.get('/orders');
     return response.data;
   } catch (error) {
     throw error;

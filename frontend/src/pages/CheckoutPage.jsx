@@ -1,22 +1,20 @@
-import { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { useAuth } from "../context/AuthContext";
-import { CartContext } from "../context/CartContext";
+import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { createPaymentIntent } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
 
 const CheckoutPage = ({ navigate }) => {
   const { user } = useAuth();
-  const { cartItems, totalPrice, clearCartItems } = useContext(CartContext);
+  const { cartItems, totalPrice, clearCartItems } = useCart();
   const toast = useToast();
   const stripe = useStripe();
   const elements = useElements();
 
   const [step, setStep] = useState(1);
-  
-  // Step 1: Shipping State
+
   const [shippingData, setShippingData] = useState({
     fullName: user?.name || user?.fullName || "",
     phone: "",
@@ -26,28 +24,11 @@ const CheckoutPage = ({ navigate }) => {
     postalCode: ""
   });
 
-  // Step 2: Payment State
   const [clientSecret, setClientSecret] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-
-  // Step 3: Confirmation State
   const [orderResult, setOrderResult] = useState(null);
-
-  // Fetch payment intent when step 2 mounts
-  useEffect(() => {
-    if (step === 2 && totalPrice > 0) {
-      const getClientSecret = async () => {
-        try {
-          const res = await createPaymentIntent(totalPrice);
-          setClientSecret(res.clientSecret || res.data?.clientSecret || res.client_secret);
-        } catch (error) {
-          toast(error.response?.data?.message || "Failed to initialize payment", "err");
-        }
-      };
-      getClientSecret();
-    }
-  }, [step, totalPrice, toast]);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
 
   const handleShippingSubmit = (e) => {
     e.preventDefault();
@@ -60,54 +41,72 @@ const CheckoutPage = ({ navigate }) => {
 
   const handlePayment = async () => {
     if (!stripe || !elements) return;
-
-    if (!clientSecret) {
-      toast("Payment not initialized yet.", "err");
-      return;
-    }
-
     setIsProcessing(true);
     setPaymentError(null);
 
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: { name: shippingData.fullName }
+    try {
+      // Step 1: Create order on backend
+      const orderPayload = {
+        cartItems: cartItems.map(item => ({
+          productId: item.product?._id || item.product,
+          qty: item.qty
+        })),
+        shippingAddress: {
+          fullName: shippingData.fullName,
+          line1: shippingData.address,
+          line2: "",
+          city: shippingData.city,
+          state: "",
+          postalCode: shippingData.postalCode,
+          country: shippingData.country,
+          phone: shippingData.phone
+        },
+        notes: ""
+      };
+
+      const orderRes = await createOrder(orderPayload);
+      const orderData = orderRes.order || orderRes;
+      const orderId = orderData._id || orderData.id;
+      setCurrentOrderId(orderId);
+
+      // Step 2: Create payment intent for this order
+      const paymentRes = await createPaymentIntent({ orderId });
+      const secret = paymentRes.clientSecret || paymentRes.client_secret;
+      setClientSecret(secret);
+
+      if (!secret) {
+        throw new Error("Failed to get payment client secret");
       }
-    });
 
-    if (error) {
-      setPaymentError(error.message);
-      setIsProcessing(false);
-      toast(error.message, "err");
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      try {
-        const orderRes = await createOrder({
-          items: cartItems.map(item => ({
-            product: item.product._id,
-            quantity: item.qty,
-            price: item.product.price
-          })),
-          shippingAddress: shippingData,
-          paymentIntentId: paymentIntent.id,
-          totalAmount: totalPrice
-        });
+      // Step 3: Confirm payment with Stripe
+      const { error, paymentIntent } = await stripe.confirmCardPayment(secret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: { name: shippingData.fullName }
+        }
+      });
 
-        // Backend response format may vary (e.g. orderRes.data.order or orderRes.order)
-        const orderData = orderRes.order || orderRes.data || orderRes;
-        
+      if (error) {
+        setPaymentError(error.message);
+        toast(error.message, "err");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
         await clearCartItems();
         setOrderResult({
-          orderId: orderData._id || orderData.id,
-          itemsCount: cartItems.reduce((acc, curr) => acc + curr.quantity, 0),
+          orderId: orderData.orderId || orderId,
+          itemsCount: cartItems.reduce((acc, curr) => acc + curr.qty, 0),
           totalAmount: totalPrice
         });
         setStep(3);
         toast("Order placed successfully!", "ok");
-      } catch (err) {
-        toast(err.response?.data?.message || "Failed to create order", "err");
-        setIsProcessing(false);
       }
+    } catch (err) {
+      toast(err.response?.data?.message || err.message || "Failed to process order", "err");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -198,7 +197,7 @@ const CheckoutPage = ({ navigate }) => {
                 <button onClick={goBackToShipping} disabled={isProcessing} style={{ padding: 16, flex: 1, background: "transparent", color: "var(--gold)", border: "1px solid var(--gold)", cursor: isProcessing ? "not-allowed" : "pointer" }}>
                   Back
                 </button>
-                <button onClick={handlePayment} disabled={isProcessing || !clientSecret} style={{ padding: 16, flex: 2, background: "var(--gold)", color: "#000", border: "none", cursor: (isProcessing || !clientSecret) ? "not-allowed" : "pointer", fontWeight: 600 }}>
+                <button onClick={handlePayment} disabled={isProcessing || cartItems.length === 0} style={{ padding: 16, flex: 2, background: "var(--gold)", color: "#000", border: "none", cursor: (isProcessing || cartItems.length === 0) ? "not-allowed" : "pointer", fontWeight: 600 }}>
                   {isProcessing ? "Processing..." : 'Pay $' + (totalPrice.toFixed(2))}
                 </button>
               </div>

@@ -5,9 +5,9 @@ import axiosInstance from './axiosInstance';
  * @param {number} amount - Amount to charge
  * @returns {Promise<any>}
  */
-export const createPaymentIntent = async (amount) => {
+export const createPaymentIntent = async (payload) => {
   try {
-    const response = await axiosInstance.post('/payments/create-intent', { amount });
+    const response = await axiosInstance.post('/payments/create-intent', payload);
     return response.data;
   } catch (error) {
     throw error;

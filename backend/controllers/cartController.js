@@ -16,7 +16,8 @@ exports.getCart = async (req, res) => {
 /* ── POST /api/cart/add ─────────────────────────── */
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, qty = 1 } = req.body;
+    const { productId, qty, quantity } = req.body;
+    const itemQty = qty || quantity || 1;
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
@@ -25,10 +26,10 @@ exports.addToCart = async (req, res) => {
 
     const existingIdx = cart.items.findIndex((i) => i.product.toString() === productId);
     if (existingIdx > -1) {
-      cart.items[existingIdx].qty += qty;
+      cart.items[existingIdx].qty += itemQty;
       cart.items[existingIdx].priceSnapshot = product.price;
     } else {
-      cart.items.push({ product: productId, qty, priceSnapshot: product.price });
+      cart.items.push({ product: productId, qty: itemQty, priceSnapshot: product.price });
     }
 
     await cart.save();

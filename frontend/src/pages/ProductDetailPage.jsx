@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
+import { useCart } from "../context/CartContext";
 import { Btn, StatusTag } from "../components/UI";
 import { productAPI, couponAPI } from "../services/api";
 import { HiStar, HiHeart, HiShoppingBag, HiCheck } from "react-icons/hi";
@@ -13,7 +14,8 @@ import { IoArrowBack } from "react-icons/io5";
 import Breadcrumbs from "../components/Breadcrumbs";
 import SEO from "../components/SEO";
 
-const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) => {
+const ProductDetailPage = ({ navigate, wishlist, toggleWishlist }) => {
+  const { addItem } = useCart();
   const { slug } = useParams();  // ✅ CHANGED: id → slug
   const toast = useToast();
   
@@ -186,7 +188,7 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
     ? product.images 
     : [product.image?.url || product.image, product.image?.url || product.image, product.image?.url || product.image];
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (uniqueSizes.length > 0 && !selectedSize) {
       toast("Please select a size", "err");
       return;
@@ -199,8 +201,12 @@ const ProductDetailPage = ({ navigate, addToCart, wishlist, toggleWishlist }) =>
       toast("This variant is currently out of stock", "err");
       return;
     }
-    addToCart({ ...product, selectedColor, selectedSize, price: Math.max(0, currentPrice - (discountValue || 0)) });
-    toast((product.name) + ' added to cart', "ok");
+    try {
+      await addItem(product.id, quantity);
+      toast(product.name + ' added to cart', "ok");
+    } catch (err) {
+      toast(err.response?.data?.message || "Failed to add to cart", "err");
+    }
   };
 
   const applyPromoCode = async () => {

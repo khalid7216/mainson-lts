@@ -4,7 +4,7 @@
 // =============================================================
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { AuthWrap } from "../components/Layout";
@@ -27,7 +27,7 @@ export const LoginPage = () => {
 
   // If already authenticated, redirect
   if (useAuth().isAuthenticated) {
-    navigate("/");
+    return <Navigate to="/" replace />;
   }
 
   const validate = () => {
@@ -247,7 +247,7 @@ export const SignupPage = () => {
 
   // If already authenticated, redirect
   if (useAuth().isAuthenticated) {
-    navigate("/");
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async () => {

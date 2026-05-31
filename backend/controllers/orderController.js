@@ -149,8 +149,17 @@ exports.createOrder = async (req, res) => {
 
     /* ── 5. Deduct stock (within session) ──────── */
     for (const su of stockUpdates) {
-      // NOTE: Stock is now handled inside variants. We skip root deduction to prevent crash.
-      // If needed in future, deduct from specific variant ID.
+      const product = productMap[su.id.toString()];
+      if (product?.variants?.length > 0) {
+        const variant = product.variants.find(v => v.stock > 0);
+        if (variant) {
+          await Product.updateOne(
+            { _id: su.id, "variants._id": variant._id },
+            { $inc: { "variants.$.stock": -su.deduct } },
+            { session }
+          );
+        }
+      }
     }
 
     /* ── 6. Clear cart (within session) ────────── */
@@ -226,11 +235,17 @@ exports.cancelOrder = async (req, res) => {
 
     /* ── Restore stock ─────────────────────────── */
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(
-        item.product, 
-        { $inc: { stock: item.qty } },
-        { session }
-      );
+      const product = await Product.findById(item.product).session(session);
+      if (product?.variants?.length > 0) {
+        const variant = product.variants.find(v => v._id);
+        if (variant) {
+          await Product.updateOne(
+            { _id: item.product, "variants._id": variant._id },
+            { $inc: { "variants.$.stock": item.qty } },
+            { session }
+          );
+        }
+      }
     }
 
     await session.commitTransaction();
@@ -328,13 +343,14 @@ exports.trackOrderPublic = async (req, res) => {
       return res.status(404).json({ message: "Order not found. Please double-check your tracking ID." });
     }
 
-    if (order.user._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    // Basic security: if email is provided, ensure it matches user's email if possible
+    // Verify email matches if provided (public tracking auth)
     if (email && order.user && order.user.email.toLowerCase() !== email.toLowerCase()) {
       return res.status(403).json({ message: "Email does not match our records for this order." });
+    }
+
+    // If user is logged in, also verify they own the order
+    if (req.user && order.user._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     res.json({
@@ -391,11 +407,17 @@ exports.rollbackOrder = async (req, res) => {
 
     // Restore stock
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(
-        item.product, 
-        { $inc: { stock: item.qty } },
-        { session }
-      );
+      const product = await Product.findById(item.product).session(session);
+      if (product?.variants?.length > 0) {
+        const variant = product.variants.find(v => v._id);
+        if (variant) {
+          await Product.updateOne(
+            { _id: item.product, "variants._id": variant._id },
+            { $inc: { "variants.$.stock": item.qty } },
+            { session }
+          );
+        }
+      }
     }
 
     // Cancel payment link
