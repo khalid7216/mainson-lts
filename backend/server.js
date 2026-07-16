@@ -52,8 +52,15 @@ connectDB();
 /* — CORS */
 app.use(cors({
   origin: function(origin, callback) {
-    const allowed = process.env.CLIENT_URL.split(',');
-    if (!origin || allowed.includes(origin)) {
+    if (!origin) return callback(null, true);
+    const allowed = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(url => url.trim()) : [];
+    const isAllowed = allowed.includes(origin) || 
+                      origin === "https://store.khalidsanawer.online" ||
+                      origin === "https://www.khalidsanawer.online" ||
+                      origin.endsWith(".khalidsanawer.online") ||
+                      origin.endsWith(".vercel.app") ||
+                      origin.includes("localhost");
+    if (isAllowed) {
       callback(null, true);
     } else {
       callback(new Error('CORS not allowed'));
